@@ -1,8 +1,6 @@
 options(repos="http://cloud.r-project.org")
 for(p in c("penaltyLearning","future.apply","maps","lars","LambertW","kernlab","data.table","quarto"))if(!requireNamespace(p))install.packages(p)
 remotes::install_github("animint/animint2")
-unlink("chapters/Ch09/Ch09-Montreal-bikes_cache/",recursive=TRUE)
-quarto::quarto_render("chapters/Ch09/Ch09-Montreal-bikes.qmd")
 quarto::quarto_render("chapters")
 if(interactive())servr::httd("chapters/_book/")
 animint_js_vec <- Sys.glob("chapters/*/*/animint.js")
