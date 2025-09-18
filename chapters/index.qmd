@@ -1,7 +1,5 @@
 ---
 title: Preface and motivation
-layout: default
-output: bookdown::html_chapter
 ---
 
 Welcome to the animint2 manual web site!
@@ -16,12 +14,9 @@ The first seven chapters should be read sequentially, since they give
 a step by step guide to interactive data visualization using
 animint2.
 
-[Chapter 1](Ch01-motivation.html) gives an overview of data analysis
-and visualization. It provides motivation and a theoretical foundation
-for the other chapters, and should be especially useful for readers
-who are completely new to data analysis. It introduces the method of
-data visualization prototyping using sketches, without introducing R
-code.
+This chapter gives an overview of data analysis and visualization.
+It provides motivation and a theoretical foundation for the other chapters, and should be especially useful for readers who are completely new to data analysis.
+It introduces the method of data visualization prototyping using sketches, without introducing R code.
 
 Starting with [chapter 2](Ch02-ggplot2.html), we will show how plot
 sketches can be translated into R code. Chapter 2 explains the basics
@@ -123,7 +118,7 @@ This introductory chapter uses the following outline:
 * Medium data -- static data visualization is sufficient.
 * Large data -- interactive data visualization is useful.
 
-## What is data? {#data}
+## What is data analysis? {#data}
 
 Data are any pieces of information that are systematically recorded,
 either on paper or on a computer. Anybody can create data, just by
@@ -200,11 +195,11 @@ data:
 
 ```{r, echo=FALSE}
 TeaTasting <- matrix(c(
-    3, 1, 1, 3),
-    nrow = 2,
-    dimnames = list(
-        Guess = c("Milk", "Tea"),
-        Truth = c("Milk", "Tea")))
+  3, 1, 1, 3),
+  nrow = 2,
+  dimnames = list(
+    Guess = c("Milk", "Tea"),
+    Truth = c("Milk", "Tea")))
 print(TeaTasting)
 ```
 
