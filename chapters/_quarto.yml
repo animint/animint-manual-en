@@ -3,21 +3,7 @@ project:
 license: CC BY-SA
 latex-auto-install: true
 
-lang: fr
-language:
-  toc-title-document: "Table des matières"
-  title-block-author-plural: "Auteurs"
-  repo-action-links-issue: "Signaler un problème ou<br>formuler une suggestion"
-crossref:
-  lof-title: "Liste des figures"
-  lot-title: "Listes des tableaux"
-  fig-prefix: figure
-  tbl-prefix: tableau
-  sec-prefix: section
-  eq-prefix: équation
-  fig-title: Figure
-  tbl-title: Tableau
-  eq-title: Équation
+lang: en
 book:
   title: "Animated interactive data visualization using animint2 in R"
   repo-url: https://github.com/animint/animint-manual-en
