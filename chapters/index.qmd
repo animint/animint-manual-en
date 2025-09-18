@@ -1,8 +1,4 @@
----
-title: Preface and motivation
----
-
-Welcome to the animint2 manual web site!
+# Contents and motivation
 
 This manual explains how to design and create interactive data
 visualizations using the R package `animint2`. The chapters of this
