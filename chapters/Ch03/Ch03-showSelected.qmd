@@ -20,7 +20,7 @@ this chapter, you will be able to
   option and key aesthetic.
 * Create animated data visualizations using the time option.
 
-## Sketching with showSelected {#sketching}
+## Sketching with showSelected {#sketching-with-showSelected}
 
 In this section, we will explain how the showSelected keyword can be
 used in plot sketches. The showSelected keyword specifies a variable
