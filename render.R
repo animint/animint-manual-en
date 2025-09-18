@@ -11,5 +11,6 @@ for(to_dir in names(from_to_list)){
   from_dir <- from_to_list[[to_dir]]
   file.copy(from_dir, to_dir, recursive=TRUE)
 }
+file.copy("chapters/Ch01-viz-Keeling", "chapters/_book", recursive=TRUE)
 ## preview site.
 if(interactive())servr::httd("chapters/_book")
