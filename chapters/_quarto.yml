@@ -1,0 +1,130 @@
+project:
+  type: book
+license: CC BY-SA
+latex-auto-install: true
+
+lang: fr
+language:
+  toc-title-document: "Table des matières"
+  title-block-author-plural: "Auteurs"
+  repo-action-links-issue: "Signaler un problème ou<br>formuler une suggestion"
+crossref:
+  lof-title: "Liste des figures"
+  lot-title: "Listes des tableaux"
+  fig-prefix: figure
+  tbl-prefix: tableau
+  sec-prefix: section
+  eq-prefix: équation
+  fig-title: Figure
+  tbl-title: Tableau
+  eq-title: Équation
+book:
+  title: "Animated interactive data visualization using animint2 in R"
+  repo-url: https://github.com/animint/animint-manual-en
+  repo-actions: [edit, issue, source]
+  repo-subdir: chapters
+  favicon: Figures/favicon.ico
+  cover-image: Figures/logo.png
+  downloads: [pdf]
+  sidebar:
+    style: "floating"
+    collapse-level: 1
+    border: true
+    search: true
+  page-footer:
+    left: |
+      All content licensed under [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) <br> &copy; [Toby Dylan Hocking](https://tdhock.github.io).
+    center: "[GitHub](https://github.com/animint/animint2) | [Gallery](https://animint.github.io/gallery)"
+    right: Built with [Quarto](https://quarto.org/).
+    background: "#f8f9fa"
+  chapters:
+    - index.qmd
+    - part: "animint2 basics"
+      chapters:
+        - Ch02/Ch02-ggplot2.qmd
+        - Ch03/Ch03-showSelected.qmd
+        - Ch04/Ch04-clickSelects.qmd
+        - Ch05/Ch05-sharing.qmd
+        - Ch06/Ch06-other.qmd
+        - Ch07/Ch07-limitations.qmd
+    - part: "Advanced examples"
+      chapters:
+        - Ch08/Ch08-WorldBank-facets.qmd
+        - Ch09/Ch09-Montreal-bikes.qmd
+        - Ch10/Ch10-nearest-neighbors.qmd
+        - Ch11/Ch11-lasso.qmd
+        - Ch12/Ch12-SVM.qmd
+        - Ch13/Ch13-poisson-regression.qmd
+        - Ch14/Ch14-PeakSegJoint.qmd
+        - Ch15/Ch15-Newton.qmd
+        - Ch16/Ch16-change-point.qmd
+        - Ch17/Ch17-k-means-clustering.qmd
+        - Ch18/Ch18-neural-networks.qmd
+  appendices:
+    - Ch99/Ch99-appendix.qmd
+    - contribute.qmd
+
+bibliography: refs.bib
+
+format:
+  html:
+    theme:
+      light: [default]
+    page-layout: full
+    fontsize: "15px"
+    linestretch: 1.6
+    smooth-scroll: true
+    toc-depth: 3
+    code-link: true
+    code-tools:
+      toggle: true
+    code-fold: false
+    highlight-style: printing
+    code-block-bg: true
+    code-overflow: wrap
+    reference-location: margin
+    mermaid:
+      theme: neutral
+
+  # see https://pandoc.org/MANUAL.html for all options
+  pdf:
+    documentclass: style/krantz
+    classoption: krantz2
+    lof: false
+    lot: false
+    toc: false
+    toc-depth: 2
+    fig-cap-location: bottom
+    tbl-cap-location: top
+    urlcolor: "blue"
+    linkcolor: "black"
+    biblio-style: apalike
+    keep-tex: true
+    code-block-bg: "#f2f2f2"
+    code-block-border-left: "#f2f2f2"
+    code-overflow: wrap
+    mermaid:
+      theme: neutral
+    include-in-header:
+      text: |
+        \usepackage{makeidx}
+        \makeindex
+    include-after-body:
+      text: |
+        \printindex
+
+knitr:
+  opts_chunk:
+    cache: true
+    cache.lazy: false
+    dpi: 600
+    fig.width: 5.5
+    fig.height: 3
+    out.width: "100%"
+    split: true
+    R.options:
+      knitr.graphics.auto_pdf: true
+      datatable.print.nrows: 10
+      datatable.print.class: false
+      datatable.print.keys: false
+      datatable.print.trunc.cols: TRUE
