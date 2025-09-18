@@ -1,8 +1,5 @@
 ---
-title: Montreal bikes data viz
-format:
-  html:
-    page-layout: full
+title: Montreal bikes
 ---
 
 

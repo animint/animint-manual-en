@@ -1,7 +1,5 @@
 ---
-title: K-Nearest-Neighbors example
-layout: default
-output: bookdown::html_chapter
+title: K-Nearest-Neighbors
 ---
 
 

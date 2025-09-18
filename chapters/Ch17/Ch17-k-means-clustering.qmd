@@ -1,7 +1,5 @@
 ---
-title: Clustering and k-means
-author: Toby Dylan Hocking
-output: bookdown::html_chapter
+title: K-means clustering
 ---
 
 

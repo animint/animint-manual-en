@@ -1,9 +1,6 @@
 ---
 title: Options
-layout: default
-output: bookdown::html_chapter
 ---
-
 
 ```{r setup, echo=FALSE}
 knitr::opts_chunk$set(fig.path="Ch06-figures/")
@@ -186,6 +183,38 @@ repetition in the definition of the data viz, but also because they
 are more computationally efficient. For a detailed example with
 timings and disk space measurements, see
 [Chapter 14](../Ch14/Ch14-PeakSegJoint.html).
+
+## New geoms {#new-geoms}
+
+There are several new geoms in `animint2`, with respect to the geoms that are provided in `ggplot2`.
+
+### Tall and wide rectangles for selection {#tall-wide-rect}
+
+Tall and wide rectangles are special cases of `geom_rect` which by default cover the entire Y/X range.
+
+* `geom_tallrect()` covers the entire Y range, and was first introduced in [Chapter 4](../Ch04/Ch04-clickSelects.html).
+* `geom_widerect()` covers the entire X range, and is discussed in [Chapter 8](../Ch08/Ch08-WorldBank-facets.html).
+
+Both are useful in combination with `clickSelects`, so we also provide helper functions for this common use case:
+
+* `make_tallrect(data, "x_variable")` creates a rectangle for each unique value of the column with name `x_variable` in `data`.
+* `make_widerect(data, "y_variable")` creates a rectangle for each unique value of the column with name `y_variable` in `data`.
+
+Both of these are capable of showing smooth transitions for the selected rectangle, as in the [WorldBank data visualization with two time series facets](https://tdhock.github.io/2025-01-WorldBank-facets-map/).
+
+* a expanded data set with `N^2` rows is computed for `N` unique values to select.
+* there are `N` sets of rows, each with a different `showSelected` value.
+* in each `showSelected` subset, the selected value has a special `aes(key)` value.
+* so the result is a smooth transition: when we change the selection, we see the selected/special row moving to its new position (and all of the others are invisible).
+
+For more discussion about this technique, see [Chapter 11](../Ch11/Ch11-lasso.html).
+
+### Aligned labels for avoiding overlapping text {#geom-text-aligned}
+
+When using multiple selection, it is often useful to display text labels to indicate the items in the selection set.
+When labels are aligned (with the same X or Y value), then `geom_label_aligned()` can be used to adjust positions, to avoid overlapping labels.
+For example, the [WorldBank data visualization](https://tdhock.github.io/2025-01-WorldBank-facets-map/) shows a text label before the first year of each selected country's time series.
+For more discussion about this technique, see [Chapter 8](../Ch08/Ch08-WorldBank-facets.html).
 
 ## Geom options {#geom-options}
 

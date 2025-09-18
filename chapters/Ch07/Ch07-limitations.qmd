@@ -1,7 +1,5 @@
 ---
 title: Limitations
-layout: default
-output: bookdown::html_chapter
 ---
 
 
@@ -131,14 +129,14 @@ multiple selection set. Use the
 [selector.types](../Ch04/Ch04-clickSelects.html#selector-types-option) option
 to declare a multiple selection variable.
 
-## Adjust y instead of using vjust {#vjust}
+## Adjust y instead of using vjust with `geom_text` {#vjust}
 
 For horizontal text alignment, animint supports using `hjust` in R
 with the most common values: 0 for left alignment, 0.5 for middle
 alignment, and 1 for right alignment. Animint translates these three
 `hjust` values to the `text-anchor` property in the rendered data viz.
 
-However, animint does not support vertical text alignment using
+However, animint `geom_text` does not support vertical text alignment using
 `vjust` in R, because there is no property that can be used for
 vertical text alignment in SVG. 
 
@@ -179,10 +177,13 @@ The workaround in animint is shown in the right panel above. You can
 adjust the vertical position `y` values of the text elements for which
 you would have used `vjust`.
 
-It is possible to implement `vjust` support in animint, but we haven't
+It is possible to implement `vjust` support for `geom_text` in animint, but we haven't
 yet had time to work on it. If you would like to implement it, we
 would be more than happy to accept a Pull Request. We already have an
 [issue explaining how to implement it](https://github.com/tdhock/animint/issues/148).
+
+Another work-around is to use the new `geom_label_aligned`, which does support `vjust`.
+For an example, please read [Chapter 8](../Ch08/Ch08-WorldBank-facets.html).
 
 ## Order the plots on the page {#order-plots}
 

@@ -1,7 +1,5 @@
 ---
 title: Neural networks
-author: Toby Dylan Hocking
-output: bookdown::html_chapter
 ---
 
 

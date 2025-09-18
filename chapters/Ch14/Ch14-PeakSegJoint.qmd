@@ -1,7 +1,5 @@
 ---
 title: Named clickSelects/showSelected
-layout: default
-output: bookdown::html_chapter
 ---
 
 
@@ -16,7 +14,7 @@ write animint code, and makes it faster to compile.
 
 Chapter outline:
 
-* We begin by downloading the PSJ data set and computing the data to
+* We begin by downloading the `PSJ` data set and computing the data to
   plot.
 * We show one method of defining an animint with many selectors, using
   for loops. This method is technically correct, but computationally

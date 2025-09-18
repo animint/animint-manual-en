@@ -1,7 +1,5 @@
 ---
-title: clickSelects
-layout: default
-output: bookdown::html_chapter
+title: The `clickSelects` keyword
 ---
 
 

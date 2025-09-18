@@ -1,7 +1,5 @@
 ---
-title: Change-point detection
-layout: default
-output: bookdown::html_chapter
+title: Supervised change-point detection
 ---
 
 

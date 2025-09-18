@@ -1,7 +1,5 @@
 ---
 title: Grammar of graphics
-layout: default
-output: bookdown::html_chapter
 ---
 
 

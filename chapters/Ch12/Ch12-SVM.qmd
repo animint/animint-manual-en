@@ -1,7 +1,5 @@
 ---
 title: Support Vector Machines
-layout: default
-output: bookdown::html_chapter
 ---
 
 
