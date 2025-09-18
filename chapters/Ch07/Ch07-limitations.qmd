@@ -1,13 +1,10 @@
----
-title: Limitations
----
-
+# Limitations
 
 ```{r setup, echo=FALSE}
 knitr::opts_chunk$set(fig.path="Ch07-figures/")
 ```
 
-This chapter explains several known limitations of animint2 for some
+This chapter explains several known limitations of `animint2` for some
 interactive data visualization tasks. It also explains some
 workarounds that you can use in these situations. After reading this
 chapter, you will understand how to 
@@ -26,13 +23,13 @@ chapter, you will understand how to
   aesthetic mapping of an animint, or to perform computations based on
   selected values.
 
-If you have an idea for improving animint2 so that it overcomes one of
-these limitations, the animint2 developers would be more than happy to
-accept your [Pull Request](https://github.com/tdhock/animint2/compare).
+If you have an idea for improving `animint2` so that it overcomes one of
+these limitations, the `animint2` developers would be more than happy to
+review your [Pull Request](https://github.com/tdhock/animint2/compare).
 
 ## Use normalized variables to work with fixed scales {#normalized-variables}
 
-We implement axes and legends in the same way ggplot2 does, by
+We implement axes and legends in the same way `ggplot2` does, by
 computing them once when the plot is first rendered. As a consequence,
 the axes and legends in each animint plot are not interactive. For
 most
@@ -51,7 +48,7 @@ for details.
 
 ## Compute statistics for each showSeleted subset {#stats}
 
-Animint does not support ggplot2 statistics with `showSelected`. For
+Animints do not support `ggplot2` statistics with `showSelected`. For
 example, consider the facetted ggplot below.
 
 ```{r}
@@ -338,7 +335,7 @@ case, it would be better to use shiny.
 
 ## Chapter summary and exercises {#Ch07-exercises}
 
-We discussed limitations of the current implementation of animint2, and
+We discussed limitations of the current implementation of `animint2`, and
 explained several workarounds.
 
 Exercises:

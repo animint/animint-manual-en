@@ -1,7 +1,4 @@
----
-title: Neural networks
----
-
+# Neural networks
 
 ```{r setup, echo=FALSE}
 knitr::opts_chunk$set(fig.path="Ch18-figures/")

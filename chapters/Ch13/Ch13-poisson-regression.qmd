@@ -1,7 +1,4 @@
----
-title: Poisson regression
----
-
+# Poisson regression
 
 ```{r setup, echo=FALSE}
 knitr::opts_chunk$set(fig.path="Ch13-figures/")

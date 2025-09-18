@@ -1,7 +1,4 @@
----
-title: Named clickSelects/showSelected
----
-
+# Named clickSelects/showSelected
 
 ```{r setup, echo=FALSE}
 knitr::opts_chunk$set(fig.path="Ch14-figures/")

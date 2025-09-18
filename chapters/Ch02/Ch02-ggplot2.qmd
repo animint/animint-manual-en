@@ -1,7 +1,4 @@
----
-title: Grammar of graphics
----
-
+# Grammar of graphics
 
 ```{r setup, echo=FALSE}
 knitr::opts_chunk$set(fig.path="Ch02-figures/")
@@ -13,9 +10,9 @@ reading this chapter, you will be able to
 
 * State the advantages of the grammar of graphics relative to previous
   plotting systems
-* Install the animint2 R package 
+* Install the `animint2` R package 
 * Translate plot sketches into ggplot code in R
-* Render ggplots on web pages using animint2
+* Render ggplots on web pages using `animint2`
 * Create multi-layer ggplots
 * Create multi-panel ggplots
 
@@ -77,19 +74,19 @@ extension/fork of `ggplot2`. In this chapter we will introduce the main
 features of `ggplot2` which will also be useful for interactive plot
 design in later chapters.
 
-In 2013, we created the animint package, which depends on the ggplot2
-package. However during 2014-2017, the ggplot2 package introduced many
+In 2013, we created the `animint` package, which depends on the `ggplot2`
+package. However during 2014-2017, the `ggplot2` package introduced many
 changes that were incompatible with the interactive grammar of
-animint. Therefore in 2018 we created the animint2 package which
-copies/forks the relevant parts of the ggplot2 package. Now animint2
-can be used without having ggplot2 installed. In fact, it is
-recommended to use animint2 without attaching (via library) 
-ggplot2. However it is fine to use animint2 along with packages that
-import/load ggplot2. For an example, see
-[Chapter 16](../Ch16/Ch16-change-point.html), which uses the penaltyLearning
-package (which imports ggplot2).
+`animint`. Therefore in 2018 we created the `animint2` package which
+copies/forks the relevant parts of the `ggplot2` package. Now `animint2`
+can be used without having `ggplot2` installed. In fact, it is
+recommended to use `library(animint2)` without attaching 
+`ggplot2`. However it is fine to use `animint2` along with packages that
+import/load `ggplot2`. For an example, see
+[Chapter 16](../Ch16/Ch16-change-point.html), which uses the `penaltyLearning`
+package (which imports `ggplot2`).
 
-## Installing and attaching animint2 {#installing}
+## Installing and attaching `animint2` {#installing}
 
 To install the most recent release of `animint2` from CRAN,
 
@@ -106,7 +103,7 @@ if(!requireNamespace("animint2")){
 }
 ```
 
-Once you have installed animint2, you can load and attach all of its
+Once you have installed `animint2`, you can load and attach all of its
 exported functions via:
 
 ```{r attach}
@@ -181,7 +178,7 @@ have a `region` color legend.
 
 This section explains how the `animint2` package can be used to render
 ggplots on web pages. The ggplot from the previous section can be
-rendered with animint2, by using the `animint` function.
+rendered with `animint2`, by using the `animint` function.
 
 ```{r Ch02-scatter}
 animint(scatter)

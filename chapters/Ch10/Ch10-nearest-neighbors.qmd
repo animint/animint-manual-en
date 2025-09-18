@@ -1,7 +1,4 @@
----
-title: K-Nearest-Neighbors
----
-
+# K-Nearest-Neighbors
 
 ```{r setup, echo=FALSE}
 knitr::opts_chunk$set(fig.path="Ch10-figures/")
@@ -792,7 +789,7 @@ Exercises:
   probability of class 1. How would you re-design the visualization to
   show the predicted probability rather than the predicted class at
   each grid point? The main challenge is that probability is a numeric
-  variable, but ggplot2 enforces that each scale must be either
+  variable, but ggplot scales must be either
   continuous or discrete (not both). You could use a continuous fill
   scale, but then you would have to use a different scale to show the
   prediction variable.

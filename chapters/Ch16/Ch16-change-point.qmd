@@ -1,7 +1,4 @@
----
-title: Supervised change-point detection
----
-
+# Supervised change-point detection
 
 ```{r setup, echo=FALSE}
 knitr::opts_chunk$set(fig.path="Ch16-figures/")

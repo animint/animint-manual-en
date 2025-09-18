@@ -1,7 +1,4 @@
----
-title: Support Vector Machines
----
-
+# Support Vector Machines
 
 ```{r setup, echo=FALSE}
 knitr::opts_chunk$set(fig.path="Ch12-figures/")
@@ -781,7 +778,7 @@ Exercises:
 
 * Use `rbfdot` as the kernel function. Compute train and test error,
   then add a new panel to the "select hyper parameters" plot.
-* By default ggplot2 uses the same two colors for the **y** and
+* Default scales use the same two colors for the **y** and
   **set** legends, which could be confusing. Change the colors in one
   of the two legends so that they are different.
 * Use `color` and `color_off` parameters to change the appearance of

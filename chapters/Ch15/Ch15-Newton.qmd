@@ -1,7 +1,4 @@
----
-title: Newton's root-finding method
----
-
+# Newton's root-finding method
 
 ```{r setup, echo=FALSE}
 knitr::opts_chunk$set(fig.path="Ch15-figures/")

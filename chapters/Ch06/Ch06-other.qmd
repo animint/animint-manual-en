@@ -1,6 +1,4 @@
----
-title: Options
----
+# New features
 
 ```{r setup, echo=FALSE}
 knitr::opts_chunk$set(fig.path="Ch06-figures/")
@@ -14,13 +12,14 @@ will understand how to customize your animint graphics via
   characteristics;
 * named elements of `clickSelects` and `showSelected` for specifying
   several selection variables at once;
+* new geoms: `tallrect`, `widerect`, `label_aligned`;
 * the `chunk_vars` geom-specific option;
 * the `color_off`, `fill_off`, and `alpha_off` geom parameters for
   specifying how selection state is displayed;
 * the `help` and `title` geom-specific parameters, which can be set to
-  text strings that will be shown in the guided tour.
-* plot-specific legends and height/width options; and
-* global data viz options.
+  text strings that will be shown in the guided tour;
+* plot-specific options for legends, HTML table layout, and height/width;
+* global options such as `duration`, `title`, and `source`.
 
 ## Observation-specific options (new aesthetics) {#new-aesthetics}
 
@@ -543,6 +542,35 @@ Also note that `theme` was used to specify several blank
 elements. This has the effect of removing the axes and background, and
 is generally useful for rendering maps.
 
+### HTML table layout {#html-table-layout}
+
+Since summer 2025, `animint2` supports plot layout in an HTML table.
+A typical example is when you want to display three linked plots, with one plot to the right of two other plots, as in [this visualization of cross-validation for change-point model selection](https://tdhock.github.io/figure-binseg-cv-most-frequently-selected-fr/).
+To specify the HTML table layout, we use three new arguments in `theme_animint()`:
+
+* `rowspan=2` means the plot takes up two rows in the table (default 1).
+* `colspan=2` means the plot takes up two columns in the table (default 1).
+* `last_in_row=TRUE` means the plot is last in the current row, so the next plot will appear on the next row.
+* if none of these are specified in any plots, then we use the classic layout (no HTML table, each plot appears one after the other, and is wrapped to the next row if there is not enough horizontal space).
+
+For example, consider the demo below:
+
+```{r Ch06-viz-html-table}
+df <- data.frame(x="foo")
+animint(
+  left=ggplot()+
+    theme_animint(width=200, rowspan=2)+
+    geom_point(aes(x, x, color=x), data=df),
+  topRight=ggplot()+
+    theme_animint(width=200, height=200, last_in_row=TRUE)+
+    geom_point(aes(x, x, color=x), data=df),
+  bottomRight=ggplot()+
+    theme_animint(width=200, height=200)+
+    geom_point(aes(x, x, color=x), data=df))
+```
+
+The visualization above shows one plot on the left, with two plots on the right, as expected.
+
 ### Size scale in pixels {#scale-size-animint}
 
 The `scale_size_animint` scale should be used in all ggplots where you
@@ -581,7 +609,7 @@ specify the radius of the largest and smallest circles.
 ### Axes and legend text size {#axes-legend-text-size}
 
 The syntax of defining axes and legend text size(in pixels) is almost
-the same as ggplot2. Inside `theme`, you can use numbers directly to
+the same as `ggplot2`. Inside `theme`, you can use numbers directly to
 change the font size, or you can use `rel()` to define the relative
 size.
 
@@ -723,7 +751,7 @@ with two exceptions:
 These defaults should work well for the vast majority of animints. For
 those who are interested to see an example of how the `selectize`
 option works, please see the
-[PredictedPeaks test in the animint2 source code](https://github.com/tdhock/animint2/blob/master/tests/testthat/test-renderer2-PredictedPeaks.R).
+[PredictedPeaks test in the `animint2` source code](https://github.com/tdhock/animint2/blob/master/tests/testthat/test-renderer2-PredictedPeaks.R).
   
 ## Chapter summary and exercises {#Ch06-exercises}
 
@@ -738,4 +766,4 @@ Exercises:
   The disk space? The loading time?
 
 Next, [Chapter 7](../Ch07/Ch07-limitations.html) explains the limitations of
-the current implementation of animint2.
+the current implementation of `animint2`.

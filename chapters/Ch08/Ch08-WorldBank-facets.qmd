@@ -1,7 +1,4 @@
----
-title: World Bank
----
-
+# World Bank
 
 ```{r setup, echo=FALSE}
 knitr::opts_chunk$set(fig.path="Ch08-figures/")

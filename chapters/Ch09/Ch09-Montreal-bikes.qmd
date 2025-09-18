@@ -1,7 +1,4 @@
----
-title: Montreal bikes
----
-
+# Montreal bikes
 
 ```{r setup, echo=FALSE}
 knitr::opts_chunk$set(fig.path="Ch09-figures/")
@@ -21,7 +18,7 @@ Chapter outline:
 ## Static figures {#static-bikes}
 
 We begin by loading the `montreal.bikes` data set, which is not
-available in the CRAN release of animint2, in order to save space on
+available in the CRAN release of `animint2`, in order to save space on
 CRAN. Therefore to access this data set, you will need to install
 animint2 from GitHub:
 

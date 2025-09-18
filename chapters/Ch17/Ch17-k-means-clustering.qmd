@@ -1,7 +1,4 @@
----
-title: K-means clustering
----
-
+# K-means clustering
 
 ```{r setup, echo=FALSE}
 knitr::opts_chunk$set(fig.path="Ch17-figures/")

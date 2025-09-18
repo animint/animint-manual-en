@@ -1,7 +1,4 @@
----
-title: Lasso
----
-
+# Lasso
  
 ```{r setup, echo=FALSE}
 knitr::opts_chunk$set(fig.path="Ch11-figures/")
