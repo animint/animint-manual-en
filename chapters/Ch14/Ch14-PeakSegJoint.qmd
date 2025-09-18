@@ -35,12 +35,8 @@ code below downloads the data set.
 if(!file.exists("PSJ.RData")){
   u <- paste0(
     "http://github.com/tdhock/animint-examples",
-    "/blob/master/data/PSJ.RData?raw=true"
-    )
-  library(httr)
-  request <- GET(u)
-  stop_for_status(request)
-  writeBin(content(request), "PSJ.RData")
+    "/blob/master/data/PSJ.RData?raw=true")
+  download.file(u, "PSJ.RData", mode="wb")
 }
 load("PSJ.RData")
 ```
