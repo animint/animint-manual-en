@@ -540,7 +540,7 @@ animation, and reveal more details of this data set.
 ## Chapter summary and exercises {#Ch02-exercises}
 
 This chapter presented the basics of static data visualization using
-ggplot2. We showed how animint can be used to render a list of ggplots
+`ggplot2`. We showed how animint can be used to render a list of ggplots
 in a web browser. We explained two features of ggplot2 that make it
 ideal for data visualization: multi-layer and multi-panel graphics.
 
@@ -585,7 +585,7 @@ Exercises:
 * Create `viz.aligned` using a plotting system that is not based on
   the grammar of graphics. For example, you can use functions from the
   `graphics` package in R (`plot`, `points`, `lines`, etc), or
-  matplotlib in Python. What are some advantages of ggplot2 and
+  `matplotlib` in Python. What are some advantages of `ggplot2` and
   animint?
 
 Next, [Chapter 3](../Ch03/Ch03-showSelected.html) explains the `showSelected`
