@@ -15,7 +15,7 @@ manual even better:
 * If you spot a typo, feel free to edit the underlying page and send a pull 
   request. If you've never done this before, the process is very easy: 
   
-    * Click "edit this page" on the right sidebar.
+    * Click "<i class="bi bi-github"></i>Edit this page" on the right sidebar.
   
     * Make the changes using github's in-page editor and save.
     
