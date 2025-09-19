@@ -13,7 +13,7 @@ Chapter outline:
 
 * We begin with several static data visualizations of the lasso path.
 * We then create an interactive version with a facet and plot showing
-  train/validation error and residuals.
+  subtrain/validation error and residuals.
 * Finally we re-design the interactive data visualization with
   simplified legends and moving tallrects.
 
@@ -25,20 +25,32 @@ We begin by loading the prostate cancer data set.
 if(!requireNamespace("animint2data"))
   remotes::install_github("animint/animint2data")
 data(prostate, package="animint2data")
-head(prostate)
+library(data.table)
+print(prostate, topn=1)
 ```
 
-We construct a train inputs `x` and outputs `y` using the code below.
+The output above shows the first and last row of the data table.
+The `train` column indicates a pre-defined split in the data.
+In this visualization, we will study the regularization path of the Lasso, for which we need a hold-out set to learn the optimal degree of regularization.
+We will use the split set name  `subtrain` for the data used to compute linear model coefficients, and `validation` for the data used for selecting the regularization parameter (by minimizing prediction error on this set).
+
+```{r}
+prostate[
+, set := ifelse(train, "subtrain", "validation")
+][, table(set)]
+```
+
+We construct subtrain inputs `x` and outputs `y` using the code below.
 
 ```{r}
 input.cols <- c(
-  "lcavol", "lweight", "age", "lbph", "svi", "lcp", "gleason", 
-  "pgg45")
+  "lcavol", "lweight", "age", "lbph",
+  "svi", "lcp", "gleason", "pgg45")
 prostate.inputs <- prostate[, ..input.cols]
-is.train <- prostate$train == "T"
-x <- as.matrix(prostate.inputs[is.train])
+is.subtrain <- prostate$set == "subtrain"
+x <- as.matrix(prostate.inputs[is.subtrain])
 head(x)
-y <- prostate[is.train, lpsa]
+y <- prostate[is.subtrain, lpsa]
 head(y)
 ```
 
@@ -153,8 +165,8 @@ of grid points).
 
 ## Interactive visualization of the regularization path {#interactive-path-viz}
 
-The plot below combines the lasso weight path with the train/test
-error plot.
+In this section, we combine the lasso weight path with the subtrain/validation error plot.
+First, we compute a data table with one row per model size and set.
 
 ```{r}
 pred.list <- predict(
@@ -162,16 +174,18 @@ pred.list <- predict(
   mode="fraction", s=fraction)
 residual.mat <- pred.list$fit - prostate$lpsa
 squares.mat <- residual.mat * residual.mat
-mean.error.list <- list()
-for(set in c("train", "validation")){
-  val <- if(set=="train")TRUE else FALSE
-  is.set <- is.train == val
-  mse <- colMeans(squares.mat[is.set, ])
-  mean.error.list[[paste(set)]] <- data.table::data.table(
-    set, mse, fraction,
-    arclength=rowSums(abs(coef.grid.mat)))
-}
-mean.error <- do.call(rbind, mean.error.list)
+mean.error <- prostate[, data.table(
+  fraction,
+  mse=colMeans(squares.mat[.I, ]),
+  arclength=rowSums(abs(coef.grid.mat))
+), by=set]
+print(mean.error, topn=2)
+```
+
+Note in the code above that we used the data table special symbol `.I`, which is set to the indices corresponding to the current value of `by=set`, used to compute the `mse` for each set.
+The table in the output above is used to plot the error curves below.
+
+```{r}
 rect.width <- diff(mean.error$arclength[1:2])/2
 addY <- function(dt, y){
   data.table::data.table(dt, y.var=factor(y, c("error", "weights")))
@@ -209,7 +223,7 @@ for(fraction.i in seq_along(fraction)){
     residual=residual.mat[, fraction.i],
     response=prostate$lpsa,
     arclength=sum(abs(coef.grid.mat[fraction.i,])),
-    set=ifelse(prostate$train, "train","validation"))
+    set=prostate$set)
 }
 lasso.res <- do.call(rbind, lasso.res.list)
 hline.dt <- data.table::data.table(residual=0)
@@ -320,17 +334,12 @@ animint(
       showSelected="arclength",
       data=tallrect.dt)+
     geom_text(aes(
-      0, -2, label=sprintf("train error = %.3f", mse),
+      0, ifelse(set=="subtrain", -2, -2.5),
+      label=sprintf("%s error = %.3f", set, mse),
       key=1),
       showSelected=c("set", "arclength"),
       hjust=0,
-      data=mean.error[set=="train"])+
-    geom_text(aes(
-      0, -2.5, label=sprintf("validation error = %.3f", mse),
-      key=1),
-      showSelected=c("set", "arclength"),
-      hjust=0,
-      data=mean.error[set=="validation"])+
+      data=mean.error[set=="subtrain"])+
     geom_segment(aes(
       response, residual,
       xend=response, yend=0,

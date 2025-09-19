@@ -25,10 +25,12 @@ which has both non-missing values for both `life.expectancy` and
 ```{r}
 library(animint2)
 data(WorldBank)
-WorldBank$Region <- sub(" (all income levels)", "", WorldBank$region, fixed=TRUE)
+WorldBank$Region <- sub(
+  " (all income levels)", "", WorldBank$region, fixed=TRUE)
 library(data.table)
-not.na <- data.table(
-  WorldBank)[!(is.na(life.expectancy) | is.na(fertility.rate))]
+not.na <- data.table(WorldBank)[
+  !(is.na(life.expectancy) | is.na(fertility.rate))
+]
 ```
 
 We will also be plotting the population variable using a size
@@ -45,7 +47,9 @@ for the population variable. They are for the country Kuwait during
 from the neighboring years, 1991-1995.
 
 ```{r}
-not.na[country == "Kuwait" & 1991 <= year & year <= 1995]
+not.na[
+  country == "Kuwait" & 1991 <= year & year <= 1995,
+  .(country, year, population)]
 ```
 
 The table above shows that the population of Kuwait decreased over the
@@ -54,7 +58,9 @@ fill in those missing values below.
 
 ```{r}
 not.na[is.na(population), population := 1700000]
-not.na[country == "Kuwait" & 1991 <= year & year <= 1995]
+not.na[
+  country == "Kuwait" & 1991 <= year & year <= 1995,
+  .(country, year, population)]
 ```
 
 Next, we define the following helper function, which will be used to
