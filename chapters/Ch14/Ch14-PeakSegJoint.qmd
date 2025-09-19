@@ -27,13 +27,9 @@ The example data come from the
 code below downloads the data set.
 
 ```{r download-PSJ}
-if(!file.exists("PSJ.RData")){
-  u <- paste0(
-    "http://github.com/tdhock/animint-examples",
-    "/blob/master/data/PSJ.RData?raw=true")
-  download.file(u, "PSJ.RData", mode="wb")
-}
-load("PSJ.RData")
+if(!requireNamespace("animint2data"))
+  remotes::install_github("animint/animint2data")
+data(PSJ, package="animint2data")
 ```
 
 ## Compute data to plot {#compute-data-to-plot}

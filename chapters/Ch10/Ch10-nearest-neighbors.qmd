@@ -50,12 +50,9 @@ feature space.
 We begin by loading the data set.
 
 ```{r}
-if(!file.exists("ESL.mixture.rda")){
-  download.file(
-    "https://web.stanford.edu/~hastie/ElemStatLearn/datasets/ESL.mixture.rda",
-    "ESL.mixture.rda")
-}
-load("ESL.mixture.rda")
+if(!requireNamespace("animint2data"))
+  remotes::install_github("animint/animint2data")
+data(ESL.mixture, package="animint2data")
 str(ESL.mixture)
 ```
 

@@ -11,7 +11,7 @@ Your feedback on what is confusing or hard to understand is valuable.
 * For most issues, please [report an issue](https://github.com/animint/animint-manual-en/issues/new) in public to animint developers in this GitHub repo. The link also appears on the right sidebar of each web page.
 * For issues which you would prefer to discuss privately, please [write me an email](mailto:Toby.Hocking@R-Project.org).
 
-## Submitting edits
+## Submitting edits {#submitting-edits}
 
 If you spot a typo, or you know how to fix another issue, then feel free to edit the underlying page, and send a pull request:
   

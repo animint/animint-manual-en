@@ -22,12 +22,9 @@ Chapter outline:
 We begin by loading the prostate cancer data set.
 
 ```{r}
-if(!file.exists("prostate.data")){
-  download.file(
-    "https://web.stanford.edu/~hastie/ElemStatLearn/datasets/prostate.data",
-    "prostate.data")
-}
-prostate <- data.table::fread("prostate.data")
+if(!requireNamespace("animint2data"))
+  remotes::install_github("animint/animint2data")
+data(prostate, package="animint2data")
 head(prostate)
 ```
 
