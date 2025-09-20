@@ -57,20 +57,22 @@ library(data.table)
 random.counts <- data.table(
   letter = c(replicate(4, LETTERS[1:5])),
   count = c(replicate(4, rbinom(5, 50, 0.5))),
-  stack = rep(rep(1:2, each = 5), 2),
+  stack = rep(rep(factor(c("lower","upper"), c("upper","lower")), each = 5), 2),
   facet = rep(1:2, each = 10))
 library(animint2)
 ggstat <- ggplot() +
   theme_bw()+
   theme(panel.margin=grid::unit(0, "lines"))+
-  geom_bar(
-      aes(letter, count, fill = stack),
-      showSelected="facet",
+  geom_bar(aes(
+    letter, count,
+    key=paste(letter, stack),
+    fill = stack),
+    showSelected="facet",
     data = random.counts,
     stat = "identity",
     position="stack"
   )
-ggstat+facet_grid(facet ~ .)
+ggstat+facet_grid(facet ~ ., labeller=label_both)
 ```
 
 Using `showSelected` instead of facets does not result in what you
@@ -79,32 +81,34 @@ may expect.
 ```{r Ch07-viz-stat}
 animint(
   plot = ggstat,
-  time = list(variable = "facet", ms = 1000),
   duration = list(facet = 1000))
 ```
 
-A workaround is to compute what you want to display, and use
-position=identity.
+**Try** changing the selection from facet 1 to 2.
+The data viz above shows bars moving from top to bottom, indicating that `position=stack` has only been computed globally (not for each `showSelected` subset).
+
+A workaround is to compute what you want to display, and use `position=identity`, which is demonstrated in the code below.
 
 ```{r}
-random.cumsums <- random.counts[, list(
+random.cumsums <- random.counts[, data.table(
   cumsum=cumsum(count),
-  count=count,
-  stack=stack),
-  by=.(letter, facet)]
+  count,
+  stack
+), by=.(letter, facet)]
 ggidentity <- ggplot() +
   theme_bw()+
   theme(panel.margin=grid::unit(0, "lines"))+
   geom_segment(aes(
     x=letter, xend=letter,
     y=cumsum, yend=cumsum-count,
+    key=paste(letter, stack),
     color=stack),
     showSelected="facet",
     data = random.cumsums,
     size=10,
     stat = "identity",
     position="identity")
-ggidentity+facet_grid(facet ~ .)
+ggidentity+facet_grid(facet ~ ., labeller=label_both)
 ```
 
 Note how we used `geom_segment` instead of `geom_bar`, but their

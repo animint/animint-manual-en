@@ -406,7 +406,7 @@ The defaults explained above are illustrated in the first plot
 below. Those defaults may be customized by using the `alpha_off`,
 `fill_off`, and `color_off` geom parameters as in the code below,
 
-```{r}
+```{r Ch06-viz-off}
 N <- 3
 set.seed(1)
 demo_df <- data.frame(i=1:N, num=rnorm(N,2))
