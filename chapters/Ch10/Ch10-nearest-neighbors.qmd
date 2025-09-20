@@ -1,9 +1,4 @@
----
-title: K-Nearest-Neighbors example
-layout: default
-output: bookdown::html_chapter
----
-
+# K-Nearest-Neighbors
 
 ```{r setup, echo=FALSE}
 knitr::opts_chunk$set(fig.path="Ch10-figures/")
@@ -55,12 +50,9 @@ feature space.
 We begin by loading the data set.
 
 ```{r}
-if(!file.exists("ESL.mixture.rda")){
-  download.file(
-    "https://web.stanford.edu/~hastie/ElemStatLearn/datasets/ESL.mixture.rda",
-    "ESL.mixture.rda")
-}
-load("ESL.mixture.rda")
+if(!requireNamespace("animint2data"))
+  remotes::install_github("animint/animint2data")
+data(ESL.mixture, package="animint2data")
 str(ESL.mixture)
 ```
 
@@ -794,7 +786,7 @@ Exercises:
   probability of class 1. How would you re-design the visualization to
   show the predicted probability rather than the predicted class at
   each grid point? The main challenge is that probability is a numeric
-  variable, but ggplot2 enforces that each scale must be either
+  variable, but ggplot scales must be either
   continuous or discrete (not both). You could use a continuous fill
   scale, but then you would have to use a different scale to show the
   prediction variable.

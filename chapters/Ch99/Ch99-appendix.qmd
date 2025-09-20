@@ -1,16 +1,11 @@
----
-title: Appendix, useful idioms
-layout: default
-output: bookdown::html_chapter
----
-
+# Useful R programming idioms
 
 ```{r setup, echo=FALSE}
 knitr::opts_chunk$set(fig.path="Ch99-figures/")
 ```
 
-This appendix describes several idioms which are useful for creating
-animints.
+This appendix describes several R programming idioms which are useful
+for creating animints.
 
 ## Space saving facets {#space-saving-facets}
 

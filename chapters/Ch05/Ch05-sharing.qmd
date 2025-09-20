@@ -1,9 +1,4 @@
----
-title: Sharing
-layout: default
-output: bookdown::html_chapter
----
-
+# Sharing
 
 ```{r setup, echo=FALSE}
 knitr::opts_chunk$set(fig.path="Ch05-figures/")

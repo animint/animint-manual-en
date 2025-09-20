@@ -1,9 +1,4 @@
----
-title: Change-point detection
-layout: default
-output: bookdown::html_chapter
----
-
+# Supervised change-point detection
 
 ```{r setup, echo=FALSE}
 knitr::opts_chunk$set(fig.path="Ch16-figures/")

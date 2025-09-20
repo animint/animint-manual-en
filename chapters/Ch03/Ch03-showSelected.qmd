@@ -1,9 +1,4 @@
----
-title: showSelected
-layout: default
-output: bookdown::html_chapter
----
-
+# The `showSelected` keyword
 
 ```{r setup, echo=FALSE}
 knitr::opts_chunk$set(fig.path="Ch03-figures/")
@@ -101,7 +96,7 @@ scatter
 ```
 
 Note that the ggplot above contains the `showSelected` argument, one
-of the two main features introduced in animint2. The `showSelected`
+of the two main features introduced in `animint2`. The `showSelected`
 keyword is ignored when rendering the plot using the usual R graphics
 devices, which produce a scatterplot with one point for every country
 and year. Note that since `color=region` was specified, animint also
@@ -220,11 +215,9 @@ scatter.key <- ggplot()+
 
 The `key` aesthetic in the ggplot above is only meaningful for
 interactive data visualization, so it ignored when rendering with the
-usual R graphics devices. However, if we
-render this ggplot using animint2, the `country` variable will be used
-to make sure transtion durations are meaningful. To specify a default
-transition duration for the `year` variable, we use the `duration`
-option in the data viz below.
+usual R graphics devices. 
+However, if we render this ggplot using `animint2`, the `country` variable will be used to make sure transtion durations are meaningful. 
+To specify a default transition duration for the `year` variable, we use the `duration` option in the data viz below.
 
 ```{r Ch03-viz-duration}
 (viz.duration <- animint(scatter.key, duration=list(year=2000)))

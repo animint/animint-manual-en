@@ -13,8 +13,8 @@ book:
   cover-image: Figures/logo.png
   downloads: [pdf]
   sidebar:
-    style: "floating"
-    collapse-level: 1
+    style: "docked"
+    collapse-level: 2
     border: true
     search: true
   page-footer:
@@ -103,9 +103,9 @@ knitr:
   opts_chunk:
     cache: true
     cache.lazy: false
-    dpi: 600
-    fig.width: 5.5
-    fig.height: 3
+    dpi: 100
+    fig.width: 8
+    fig.height: 5
     out.width: "100%"
     split: true
     R.options:
