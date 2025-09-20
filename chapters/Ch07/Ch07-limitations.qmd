@@ -251,6 +251,11 @@ gg.two.lines
 animint(gg.two.lines)
 ```
 
+Also note in these examples that the text size is not consistent between static and interactive rendering, which [is an issue](https://github.com/animint/animint2/issues/230)
+
+* in interactive plots, we want `size` to be the number of pixels, and
+* in static plots, `size` interpretation is consistent with legacy `ggplot2` interpretation of size (could be changed for consistency with interactive rendering).
+
 ## Avoid some ggplot theme options {#theme-options}
 
 One goal of animint is to support
