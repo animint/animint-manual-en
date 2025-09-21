@@ -103,12 +103,12 @@ Since animints are just directories with HTML, TSV, and JavaScript
 files, you can publish them on any web server by simply copying the
 directory to that server.
 
-For example I executed the code in
-https://github.com/animint/animint2/blob/master/inst/examples/WorldBank-facets.R
-to create the `WorldBank-facets` directory on my personal computer. I
-copied that directory to my lab web server using `rsync -r
-WorldBank-facets/ monsoon.hpc.nau.edu:genomic-ml/WorldBank-facets/` and so
-I can view it on https://rcdata.nau.edu/genomic-ml/WorldBank-facets/
+For example I executed the World Bank data viz example code to create the `WorldBank-facets` directory on my personal computer.[^1]
+I copied that directory to my lab web server using `rsync -r WorldBank-facets/ monsoon.hpc.nau.edu:genomic-ml/WorldBank-facets/` and so I can view it on my university web server.[^2]
+
+[^1] <https://github.com/animint/animint2/blob/master/inst/examples/WorldBank-facets.R>
+
+[^2] <https://rcdata.nau.edu/genomic-ml/WorldBank-facets/>
 
 If you don't have access to a personal/lab web server, try using
 one of the methods described below, which are free for anyone.

@@ -118,7 +118,8 @@ begin by loading and looking at a subset these data.
 
 ```{r data}
 data(WorldBank, package="animint2")
-WorldBank$Region <- sub(" (all income levels)", "", WorldBank$region, fixed=TRUE)
+WorldBank$Region <- sub(
+  " (all income levels)", "", WorldBank$region, fixed=TRUE)
 head(WorldBank)
 tail(WorldBank)
 dim(WorldBank)
@@ -489,7 +490,8 @@ for(show.year in c(1975, 1985, 1995)){
   show.point.list[[paste(show.year)]] <- data.frame(
     show.year, subset(WorldBank, year==show.year))
   show.path.list[[paste(show.year)]] <- data.frame(
-    show.year, subset(WorldBank, show.year - 5 <= year & year <= show.year))
+    show.year, subset(
+      WorldBank, show.year - 5 <= year & year <= show.year))
 }
 show.point <- do.call(rbind, show.point.list)
 show.path <- do.call(rbind, show.path.list)
