@@ -194,6 +194,7 @@ tallrect.dt <- coef.grid[variable==variable[1],]
 gg.path <- ggplot()+
   theme_bw()+
   theme(panel.margin=grid::unit(0, "lines"))+
+  theme_animint(width=300, rowspan=1)+
   facet_grid(y.var ~ ., scales="free")+
   ylab("")+
   scale_color_manual(values=variable.colors)+
@@ -331,12 +332,14 @@ animint(
     geom_text(aes(
       3, 2.5, label=sprintf("L1 arclength = %.1f", arclength),
       key=1),
+      size=15,
       showSelected="arclength",
       data=tallrect.dt)+
     geom_text(aes(
       0, ifelse(set=="subtrain", -2, -2.5),
       label=sprintf("%s error = %.3f", set, mse),
       key=1),
+      size=15,
       showSelected=c("set", "arclength"),
       hjust=0,
       data=mean.error[set=="subtrain"])+

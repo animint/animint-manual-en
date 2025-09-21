@@ -596,6 +596,8 @@ MonthFacet
 counter.title <- "cyclists per day"
 DaysFacet <- ggplot()+
   ggtitle("Selected month (weekends in grey)")+
+  theme_bw()+
+  theme_animint(colspan=2, last_in_row=TRUE)+
   geom_tallrect(aes(
     xmin=day.of.the.month-0.5, xmax=day.of.the.month+0.5,
     key=paste(day.POSIXct)),
@@ -604,8 +606,6 @@ DaysFacet <- ggplot()+
     color="white",
     data=weekend.dt)+
   guides(color="none")+
-  theme_bw()+
-  theme_animint(colspan=2, last_in_row=TRUE)+
   facet_grid(facet ~ ., scales="free")+
   geom_line(aes(
     day.of.the.month, count, group=location,
