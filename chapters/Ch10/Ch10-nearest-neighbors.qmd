@@ -234,6 +234,7 @@ original Figure.
 library(animint2)
 errorPlotStatic <- ggplot()+
   theme_bw()+
+  theme_animint(width=300, rowspan=1)+
   geom_hline(aes(
     yintercept=error.prop, color=set, linetype=set),
     data=Bayes.error)+
@@ -450,7 +451,7 @@ set.colors <- c(
 errorPlot <- ggplot()+
   ggtitle("Select number of neighbors")+
   theme_bw()+
-  theme_animint(height=500)+
+  theme_animint(width=300)+
   geom_text(aes(
     min.neighbors, error.prop,
     color=set, label="Bayes"),
@@ -471,7 +472,7 @@ errorPlot <- ggplot()+
   ylab("Misclassification Errors")+
   scale_x_continuous(
     "Number of Neighbors",
-    limits=c(-1, 30),
+    limits=c(-3, 30),
     breaks=c(1, 10, 20, 29))+
   geom_ribbon(aes(
     neighbors, ymin=mean-sd, ymax=mean+sd,
@@ -560,10 +561,11 @@ variable in the point, path, and text geoms.
 scatterPlot <- ggplot()+
   ggtitle("Mis-classification errors in train set")+
   theme_bw()+
-  theme_animint(width=500, height=500)+
-  xlab("Input feature 1")+
+  theme_animint(width=450, colspan=1)+
+  scale_x_continuous(
+    "Input feature 1",
+    breaks=seq(-2, 4))+
   ylab("Input feature 2")+
-  coord_equal()+
   scale_color_manual(values=label.colors)+
   scale_linetype_manual(values=classifier.linetypes)+
   geom_point(aes(
@@ -662,7 +664,7 @@ for(n.folds in c(3, 5, 15)){
     1:n.folds, function(validation.fold){
       one.fold <- OneFold(validation.fold)
       data.table(validation.fold, one.fold[set=="validation"])
-    })
+    }, future.seed=NULL)
   only.validation <- do.call(rbind, only.validation.list)
   only.validation.error <- only.validation[, list(
     error.prop=mean(is.error)
@@ -691,9 +693,9 @@ facets <- function(df, facet){
   data.frame(df, facet=factor(facet, c("n.folds", "Misclassification Errors")))
 }
 errorPlotNew <- ggplot()+
-  ggtitle("Select number of folds and neighbors")+
+  ggtitle("Select # of folds and neighbors")+
   theme_bw()+
-  theme_animint(height=500)+
+  theme_animint(width=325)+
   theme(panel.margin=grid::unit(0, "cm"))+
   facet_grid(facet ~ ., scales="free")+
   geom_text(aes(
@@ -716,7 +718,7 @@ errorPlotNew <- ggplot()+
   ylab("")+
   scale_x_continuous(
     "Number of Neighbors",
-    limits=c(-1, 30),
+    limits=c(-3, 30),
     breaks=c(1, 10, 20, 29))+
   geom_ribbon(aes(
     neighbors, ymin=mean-sd, ymax=mean+sd,
