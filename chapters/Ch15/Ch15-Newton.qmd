@@ -187,6 +187,7 @@ following is an animated interactive version of the same data viz.
 animint(
   time=list(variable="iteration", ms=2000),
   iterations=gg.it+
+    theme_animint(width=300, colspan=1)+
     geom_tallrect(aes(
       xmin=iteration-0.5,
       xmax=iteration+0.5),
@@ -273,6 +274,8 @@ method for finding roots of smooth functions.
 
 Exercises:
 
+* Add a title to each plot.
+* Add a size legend to the first plot (black points larger than red), so that we can see when red and black have the same value.
 * Add a `geom_hline` to emphasize the loss=0 value in the second plot.
 * Add a `geom_hline` to emphasize the stopping threshold in the first
   plot.
