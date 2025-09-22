@@ -113,15 +113,16 @@ ggidentity <- ggplot() +
 ggidentity+facet_grid(facet ~ ., labeller=label_both)
 ```
 
-Note how we used `geom_segment` instead of `geom_bar`, but their
-appearance is similar.
+Note how we used `geom_segment` instead of `geom_bar`, but their appearance is similar.
 
 ```{r Ch07-viz-identity}
 animint(
   plot = ggidentity,
-  time = list(variable = "facet", ms = 1000),
   duration = list(facet = 1000))
 ```
+
+**Try** changing the selection from facet 1 to 2.
+The data viz above shows bars adjusting their size, indicating that using `position=identity` is a valid work-around.
 
 ## Add values to a multiple selection set one at a time {#multiple-selection}
 
