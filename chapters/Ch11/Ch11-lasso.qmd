@@ -26,7 +26,7 @@ if(!requireNamespace("animint2data"))
   remotes::install_github("animint/animint2data")
 data(prostate, package="animint2data")
 library(data.table)
-print(prostate, topn=1)
+print(prostate, topn=1, trunc.cols = TRUE)
 ```
 
 The output above shows the first and last row of the data table.
@@ -90,8 +90,7 @@ gg.lambda <- ggplot()+
   scale_color_manual(values=variable.colors)+
   geom_line(aes(
     lambda, standardized.coef, color=variable, group=variable),
-    data=path)+
-  ggtitle("LASSO path for prostate cancer data calculated using the LARS")
+    data=path)
 gg.lambda
 ```
 
@@ -137,7 +136,6 @@ for(fraction.i in seq_along(fraction)){
 }
 coef.grid <- do.call(rbind, coef.grid.list)
 ggplot()+
-  ggtitle("LASSO path for prostate cancer data calculated using the LARS")+
   theme_bw()+
   theme(panel.margin=grid::unit(0, "lines"))+
   scale_color_manual(values=variable.colors)+
@@ -210,7 +208,7 @@ gg.path <- ggplot()+
     clickSelects="arclength",
     alpha=0.5,
     data=tallrect.dt)
-print(gg.path)
+gg.path
 ```
 
 Finally, we add a plot of residuals versus actual values.
@@ -240,7 +238,7 @@ gg.res <- ggplot()+
     showSelected="arclength",
     shape=21,
     data=lasso.res)
-print(gg.res)
+gg.res
 ```
 
 Below, we combine the ggplots above in a single animint

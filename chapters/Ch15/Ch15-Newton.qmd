@@ -125,14 +125,16 @@ gg.it <- ggplot()+
     data=data.table(solution, y="fun.value", fun="function"))+
   geom_point(aes(
     iteration, log10(abs(fun.value)), color=fun),
-    data=data.table(solution, y="log10(abs(fun.value))", fun="function"))+
+    data=data.table(
+      solution, y="log10(abs(fun.value))", fun="function"))+
   scale_color_manual(values=c("function"="black", approximation="red"))+
   geom_point(aes(
     iteration, new.value, color=fun),
     data=data.table(solution, y="fun.value", fun="approximation"))+
   geom_point(aes(
     iteration, log10(abs(new.value)), color=fun),
-    data=data.table(solution, y="log10(abs(fun.value))", fun="approximation"))+
+    data=data.table(
+      solution, y="log10(abs(fun.value))", fun="approximation"))+
   theme_bw()+
   theme(panel.margin=grid::unit(0, "lines"))+
   facet_grid(y ~ ., scales="free")+
@@ -196,7 +198,9 @@ animint(
       data=solution),
   loss=ggplot()+
     theme_bw()+
-    scale_color_manual(values=c("function"="black", approximation="red"))+
+    scale_color_manual(values=c(
+      "function"="black",
+      approximation="red"))+
     geom_abline(aes(
       slope=deriv.value, intercept=fun.value-possible.root*deriv.value,
       color=fun),
@@ -232,8 +236,12 @@ compares its solution to the one we computed using Newton's method.
 
 ```{r compare-lambert}
 inside <- Linear*exp(-Constant/Log)/Log
-root.vec <- c(LambertW::W(inside, 0), LambertW::W(inside, -1))*Log/Linear
-loss.fun(c(Newton=root.dt$possible.root, Lambert=root.vec[2]))
+root.vec <- Log/Linear*c(
+  LambertW::W(inside, 0),
+  LambertW::W(inside, -1))
+loss.fun(c(
+  Newton=root.dt$possible.root,
+  Lambert=root.vec[2]))
 ```
 
 For these data, the Lambert W function yields a root which is slightly
@@ -252,8 +260,10 @@ well. Instead, we equivalently perform root finding in the log space:
 log.loss.fun <- function(log.mean){
   Linear*exp(log.mean) + Log*log.mean + Constant
 }
-log.loss.dt <- data.table(log.mean=seq(-1, 3, l=400))
-log.loss.dt[, loss := log.loss.fun(log.mean)]
+log.loss.dt <- data.table(
+  log.mean=seq(-1, 3, l=400)
+)[
+, loss := log.loss.fun(log.mean)]
 ggplot()+
   geom_line(aes(
     log.mean, loss),
@@ -296,6 +306,7 @@ Exercises:
 * Derive the loss function for
   [Binomial regression](https://en.wikipedia.org/wiki/Binomial_regression),
   and visualize the corresponding Newton root finding method.
+* Refactor `gg.it` code to use only one `geom_point`, instead of the four geoms in the current code. Hint: use `rbind()` to create a single table with all of the data.
 
 Next, [Chapter 16](../Ch16/Ch16-change-point.html) explains how to visualize
 change-point detection models.

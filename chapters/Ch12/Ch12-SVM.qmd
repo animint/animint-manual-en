@@ -95,11 +95,17 @@ scores <- data.table(x1=seq(-1, 1, l=101))[
 , x1.sq := x1^2
 ][
 , f := x1.sq ]
-x1.boundaries <- data.table(boundary=c(1, -1)*sqrt(true.decision.boundary))
+x1.boundaries <- data.table(
+  boundary=c(1, -1)*sqrt(true.decision.boundary))
 ggplot()+
   scale_y_continuous(breaks=seq(0, 1, by=0.2))+
-  geom_vline(aes(xintercept=boundary), color="grey50", data=x1.boundaries)+
-  geom_line(aes(x1, f), data=scores)+
+  geom_vline(aes(
+    xintercept=boundary),
+    color="grey50",
+    data=x1.boundaries)+
+  geom_line(aes(
+    x1, f),
+    data=scores)+
   geom_point(aes(
     x1, f.noise, color=y),
     shape=21,

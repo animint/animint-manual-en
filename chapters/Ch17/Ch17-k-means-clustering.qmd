@@ -148,7 +148,8 @@ Exercises for this section:
 Next we compute the closest cluster center for each data point,
 
 ```{r}
-pairs.dt[, error := rowSums((data.mat[data.i,]-centers.mat[centers.i,])^2)]
+pairs.dt[, error := rowSums(
+(data.mat[data.i,]-centers.mat[centers.i,])^2)]
 (closest.dt <- pairs.dt[, .SD[which.min(error)], by=data.i])
 (closest.data <- closest.dt[, .(
   data.dt[data.i],
@@ -234,7 +235,6 @@ gg.err <- ggplot()+
     iteration, error),
     data=iteration.error)+
   make_tallrect(iteration.error, "iteration", alpha=0.3)
-gg.err
 ```
 
 We also make a plot which will show the current iteration,

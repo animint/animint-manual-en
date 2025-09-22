@@ -25,7 +25,7 @@ We begin by loading the `intreg` data set.
 ```{r intreg}
 library(animint2)
 data(intreg)
-str(intreg)
+lapply(intreg, function(df)data.table(df)[1:2])
 ```
 
 As shown above, it is a named list of 7 related data.frames. We begin
@@ -42,7 +42,7 @@ gg.signals <- ggplot()+
     showSelected="signal"),
     color=data.color,
     data=intreg$signals)
-print(gg.signals)
+gg.signals
 ```
 
 Each data point plotted above shows an approximate measurement of DNA
@@ -70,7 +70,7 @@ gg.ann <- gg.signals+
     color="grey",
     alpha=0.5,
     data=intreg$annotations)
-print(gg.ann)
+gg.ann
 ```
 
 The plot above shows yellow regions where the doctors have determined
@@ -104,7 +104,7 @@ gg.one <- ggplot()+
     color=data.color,
     data=subset(intreg$signals, signal==sig.name))+
   scale_fill_manual(values=breakpoint.colors)
-print(gg.one)
+gg.one
 ```
 
 We plot some of these models for one of the signals below:
@@ -128,7 +128,7 @@ gg.models <- gg.one+
     color=model.color,
     linetype="dashed",
     data=sig.breaks)
-print(gg.models)
+gg.models
 ```
 
 The plot above shows the maximum likelihood segmentation models in
@@ -188,7 +188,7 @@ gg.selection <- ggplot()+
     xend=max.L, yend=segments),
     data=sig.selection)+
   xlab("log(lambda)")
-print(gg.selection)
+gg.selection
 ```
 
 It is clear from the plot above that the model selection function is
@@ -210,7 +210,7 @@ interactive.selection <- gg.selection+
     color=NA,
     fill="black",
     alpha=0.5)
-print(interactive.selection)
+interactive.selection
 ```
 
 We will combine that with the non-facetted version of the data/models
@@ -245,7 +245,7 @@ interactive.models <- gg.one+
       correct=0,
       "false negative"=3,
       "false positive"=1))
-print(interactive.models)
+interactive.models
 ```
 
 Of course the plot above is not very informative because it is not
@@ -290,7 +290,7 @@ gg.intervals <- ggplot()+
   scale_color_identity()+
   ylab("output log(lambda)")+
   xlab("input feature x")
-print(gg.intervals)
+gg.intervals
 ```
 
 The target intervals in the plot above denote the region of
@@ -317,7 +317,7 @@ gg.mm <- gg.intervals+
       regression="solid",
       margin="dotted",
       limit="dashed"))
-print(gg.mm)    
+gg.mm
 ```
 
 The plot above shows the linear max margin regression function f(x) as

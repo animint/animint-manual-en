@@ -437,7 +437,7 @@ In this section we compute the disk usage of both methods.
 viz.dirs.vec <- c("Ch14-for", "Ch14-named")
 viz.dirs.text <- paste(viz.dirs.vec, collapse=" ")
 (cmd <- paste("du -ks", viz.dirs.text))
-kb.dt <- fread(cmd)
+kb.dt <- fread(cmd=cmd)
 setnames(kb.dt, c("kilobytes", "path"))
 kb.dt
 ```

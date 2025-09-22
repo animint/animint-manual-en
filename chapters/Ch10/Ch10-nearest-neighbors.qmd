@@ -691,15 +691,16 @@ The code below computes the minimum of the error curve for each value
 of `n.folds`.
 
 ```{r}
-min.validation <- validation.error.several[, .SD[which.min(mean),], by=n.folds]
+min.validation <- validation.error.several[
+, .SD[which.min(mean)]
+, by=n.folds]
 ```
 
 The code below creates a new error curve plot with two facets.
 
 ```{r}
-facets <- function(df, facet){
-  data.frame(df, facet=factor(facet, c("n.folds", "Misclassification Errors")))
-}
+facets <- function(df, facet)data.frame(df, facet=factor(
+  facet, c("n.folds", "Misclassification Errors")))
 errorPlotNew <- ggplot()+
   ggtitle("Select # of folds and neighbors")+
   theme_bw()+

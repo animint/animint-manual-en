@@ -110,7 +110,9 @@ knitr:
     split: true
     R.options:
       knitr.graphics.auto_pdf: true
+      width: 80
       datatable.print.nrows: 10
+      datatable.print.topn: 2
       datatable.print.class: false
       datatable.print.keys: false
       datatable.print.trunc.cols: false

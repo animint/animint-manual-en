@@ -200,7 +200,8 @@ for(label in label.vec){
   loss <- PoissonLoss(label, mean.vec)
   loss.fun.list[[paste(label)]] <- data.table(
     label, poisson.mean=mean.vec, loss)
-  loss.min.list[[paste(label)]] <- data.table(label, loss=0)
+  loss.min.list[[paste(label)]] <- data.table(
+    label, loss=0)
 }
 loss.fun <- do.call(rbind, loss.fun.list)
 loss.min <- do.call(rbind, loss.min.list)
@@ -287,12 +288,11 @@ loss on the right.
 
 ```{r Ch13-viz-log-loss}
 viz.log.loss <- viz.loss
-addX <- function(dt, x.var){
-  data.table(dt, x.var=factor(x.var, c("poisson mean", "log(poisson mean)")))
-}
-finite.loss <- loss.fun[is.finite(loss),]
+addX <- function(dt, x.var)data.table(dt, x.var=factor(
+  x.var, c("poisson mean", "log(poisson mean)")))
+finite.loss <- loss.fun[is.finite(loss)]
 finite.loss[, log.poisson.mean := log(poisson.mean)]
-finite.log.loss <- finite.loss[is.finite(log.poisson.mean),]
+finite.log.loss <- finite.loss[is.finite(log.poisson.mean)]
 mean.tallrects[, log.min := ifelse(min < 0, -Inf, log(min))]
 viz.log.loss$loss <- ggplot()+
   theme_bw()+
