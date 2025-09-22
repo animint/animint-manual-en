@@ -113,4 +113,4 @@ knitr:
       datatable.print.nrows: 10
       datatable.print.class: false
       datatable.print.keys: false
-      datatable.print.trunc.cols: TRUE
+      datatable.print.trunc.cols: false

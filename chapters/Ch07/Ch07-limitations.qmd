@@ -334,7 +334,8 @@ limitation is by defining `shiny` inputs that are used as animint
 aesthetics, as in the following example.
 
 ```{r, eval=FALSE}
-shiny::runApp(system.file("examples", "shiny-WorldBank", package="animint"))
+shiny::runApp(system.file(
+  "examples", "shiny-WorldBank", package="animint"))
 ```
 
 ## Interactive computation {#shiny-computation}

@@ -170,7 +170,7 @@ data.all.folds.list <- future.apply::future_lapply(
     data.table(validation.fold, one.fold)
   },
   future.seed = NULL)
-(data.all.folds <- do.call(rbind, data.all.folds.list))
+data.all.folds <- do.call(rbind, data.all.folds.list)
 ```
 
 The data table of predictions contains almost 3 million observations!
@@ -270,9 +270,9 @@ the model with 7 neighbors.
 
 ```{r}
 show.neighbors <- 7
-show.data <- data.all.folds[validation.fold==0 & neighbors==show.neighbors,]
-show.points <- show.data[set=="train",]
-show.points
+show.data <- data.all.folds[
+  validation.fold==0 & neighbors==show.neighbors]
+show.points <- show.data[set=="train"]
 ```
 
 Next, we compute the Train, Test, and Bayes mis-classification error
@@ -283,19 +283,21 @@ text.height <- 0.25
 text.V1.prop <- 0
 text.V2.bottom <- -2
 text.V1.error <- -2.6
-error.text <- rbind(
+(error.text <- rbind(
   Bayes.error,
-  other.error[neighbors==show.neighbors,])
-error.text[, V2.top := text.V2.bottom + text.height * (1:.N)]
-error.text[, V2.bottom := V2.top - text.height]
-error.text
+  other.error[neighbors==show.neighbors]
+)[
+, V2.top := text.V2.bottom + text.height * (1:.N)
+][
+, V2.bottom := V2.top - text.height
+][])
 ```
 
 We define the following function which we will use to compute the
 decision boundaries.
 
 ```{r}
-getBoundaryDF <- function(prob.vec){
+getBoundaryDT <- function(prob.vec){
   stopifnot(length(prob.vec) == 6831)
   several.paths <- with(ESL.mixture, contourLines(
     px1, px2,
@@ -315,13 +317,18 @@ learned 7-Nearest-Neighbors classifier, and for the optimal Bayes
 classifier.
 
 ```{r}
-boundary.grid <- show.data[set=="grid",]
-boundary.grid[, label := pred.label]
-pred.boundary <- getBoundaryDF(boundary.grid$probability)
-pred.boundary$classifier <- "KNN"
-Bayes.boundary <- getBoundaryDF(ESL.mixture$prob)
-Bayes.boundary$classifier <- "Bayes"
-Bayes.boundary
+boundary.grid <- show.data[set=="grid"][
+, label := pred.label]
+pred.boundary <- getBoundaryDT(
+  boundary.grid$probability
+)[
+, classifier := "KNN"
+][]
+(Bayes.boundary <- getBoundaryDT(
+  ESL.mixture$prob
+)[
+, classifier := "Bayes"
+][])
 ```
 
 Below, we consider only the grid points that do not overlap the text
@@ -331,8 +338,7 @@ labels.
 on.text <- function(V1, V2){
   V2 <= max(error.text$V2.top) & V1 <= text.V1.prop
 }
-show.grid <- boundary.grid[!on.text(V1, V2),]
-show.grid
+show.grid <- boundary.grid[!on.text(V1, V2)]
 ```
 
 The scatterplot below reproduces the 7-Nearest-Neighbors classifier of
@@ -344,9 +350,10 @@ label.colors <- c(
   "1"="#FF7F00")
 scatterPlotStatic <- ggplot()+
   theme_bw()+
-  theme(axis.text=element_blank(),
-        axis.ticks=element_blank(),
-        axis.title=element_blank())+
+  theme(
+    axis.text=element_blank(),
+    axis.ticks=element_blank(),
+    axis.title=element_blank())+
   ggtitle("7-Nearest Neighbors")+
   scale_color_manual(values=label.colors)+
   scale_linetype_manual(values=classifier.linetypes)+
@@ -422,8 +429,8 @@ Bayes.segment <- data.table(
   Bayes.error,
   classifier="Bayes",
   min.neighbors=1,
-  max.neighbors=29)
-Bayes.segment$set <- "test"
+  max.neighbors=29
+)[, set := "test"]
 ```
 
 We also add an error variable to the data tables that contain the
@@ -511,21 +518,20 @@ with 7 neighbors. Our re-design includes the following changes:
   the same as the Euclidean distance in the feature space.
 
 ```{r}
-show.data <- data.all.folds[validation.fold==0,]
-show.points <- show.data[set=="train",]
-show.points
+show.data <- data.all.folds[validation.fold==0]
+show.points <- show.data[set=="train"]
 ```
 
 Below, we compute the predicted decision boundaries separately for
 each K-Nearest-Neighbors model.
 
 ```{r}
-boundary.grid <- show.data[set=="grid",]
-boundary.grid[, label := pred.label]
-show.grid <- boundary.grid[!on.text(V1, V2),]
-pred.boundary <- boundary.grid[, getBoundaryDF(probability), by=neighbors]
-pred.boundary$classifier <- "KNN"
-pred.boundary
+boundary.grid <- show.data[set=="grid"][
+, label := pred.label]
+show.grid <- boundary.grid[!on.text(V1, V2)]
+(pred.boundary <- boundary.grid[
+, getBoundaryDT(probability), by=neighbors
+][, classifier := "KNN"][])
 ```
 
 Instead of showing the number of neighbors in the plot title, below we
@@ -533,8 +539,10 @@ create a `geom_text` element that will be updated based on the number of
 selected neighbors.
 
 ```{r}
-show.text <- show.grid[, list(
-  V1=mean(range(V1)), V2=3.05), by=neighbors]
+show.text <- show.grid[, .(
+  V1=mean(range(V1)),
+  V2=3.05
+), by=neighbors]
 ```
 
 Below we compute the position of the text in the bottom left, which we
