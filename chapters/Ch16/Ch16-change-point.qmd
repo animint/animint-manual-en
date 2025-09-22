@@ -25,6 +25,7 @@ We begin by loading the `intreg` data set.
 ```{r intreg}
 library(animint2)
 data(intreg)
+library(data.table)
 lapply(intreg, function(df)data.table(df)[1:2])
 ```
 
@@ -110,7 +111,6 @@ gg.one
 We plot some of these models for one of the signals below:
 
 ```{r models}
-library(data.table)
 sig.segs <- data.table(
   intreg$segments)[signal == sig.name & segments <= show.segs]
 sig.breaks <- data.table(
