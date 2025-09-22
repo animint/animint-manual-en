@@ -149,9 +149,9 @@ accidents.tall <- melt(
   variable.name="severity",
   value.name="people")
 severity.colors <- c(
-    "people.slightly.injured"="#FEE0D2",#lite red
-    "people.severely.injured"="#FB6A4A",
-    deaths="#A50F15")#dark red
+  deaths="#A50F15",#dark red
+  people.severely.injured="#FB6A4A",
+  people.slightly.injured="#FEE0D2")#lite red
 ggplot()+
   theme_bw()+
   geom_bar(aes(
@@ -312,7 +312,7 @@ ggplot()+
   theme(panel.margin=grid::unit(0, "cm"))+
   facet_wrap("month")+
   geom_text(aes(15, 25, label=month), data=accidents.per.month)+
-  scale_fill_manual(values=severity.colors)+
+  scale_fill_manual(values=severity.colors, breaks=rev(names(severity.colors)))+
   scale_x_continuous("day of the month", breaks=c(1, 10, 20, 30))+
   geom_point(aes(
     day.of.the.month, accident.i, fill=severity),
@@ -422,7 +422,7 @@ MonthSummary <- ggplot()+
     color=severity.colors[["deaths"]],
     data=accidents.range,
     size=10)
-print(MonthSummary)
+MonthSummary
 ```
 
 The plot below shows the bike counts at each location and day.
@@ -458,7 +458,7 @@ TimeSeries <- ggplot()+
     showSelected=location,
     clickSelects=location),
     data=location.labels)
-print(TimeSeries)
+TimeSeries
 ```
 
 The plot below shows the same data but for each month.
@@ -497,22 +497,29 @@ MonthSeries <- ggplot()+
     showSelected="location",
     clickSelects="location",
     data=month.labels)
-print(MonthSeries)
+MonthSeries
 ```
 
 ```{r}
 counter.title <- "mean cyclists/day"
 accidents.title <- "city-wide accidents"
-deaths_severe_slight <- function(deaths, severe, slight)paste(
-  fcase(
+person_people <- function(num, suffix)ifelse(
+  num==0, "",
+  sprintf(
+    "%d %s %s",
+    num,
+    ifelse(num==1, "person", "people"),
+    suffix))
+deaths_severe_slight <- function(deaths, severe, slight)apply(cbind(
+  ifelse(
     deaths==0, "",
-    deaths==1, "1 death,",
-    default=paste(deaths, "deaths,")),
-  fcase(
-    severe==0, "",
-    severe==1, "1 person severely injured,",
-    default=paste(severe, "people severely injured,")),
-  slight, "people slightly injured")
+    sprintf(
+      "%d death%s",
+      deaths,
+      ifelse(deaths==1, "", "s"))),
+  person_people(severe, "severely injured"),
+  person_people(slight, "slightly injured")),
+  1, function(x)paste(x[x!=""], collapse=", "))
 MonthFacet <- ggplot()+
   ggtitle("All data, select month")+
   guides(color="none", fill="none")+
@@ -552,7 +559,7 @@ MonthFacet <- ggplot()+
     showSelected="location",
     clickSelects="location",
     data=data.table(month.labels, facet=counter.title))+
-  scale_fill_manual(values=severity.colors, breaks=names(severity.colors))+
+  scale_fill_manual(values=severity.colors)+
   geom_bar(aes(
     month.POSIXct, people,
     fill=severity),
@@ -630,7 +637,7 @@ DaysFacet <- ggplot()+
     chunk_vars=c("month"),
     fill="white",
     data=data.table(counts.dt, facet=counter.title))+
-  scale_fill_manual(values=severity.colors, breaks=names(severity.colors))+
+  scale_fill_manual(values=severity.colors, breaks=rev(names(severity.colors)))+
   geom_text(aes(
     15, 23, label=month, key=1),
     showSelected="month",
@@ -672,7 +679,7 @@ animint(
   first=list(
     location="Berri",
     month="September 2012"),
-  time=list(variable="month", ms=5000))#buggy.
+  time=list(variable="month", ms=5000))
 ```
 
 ## Chapter summary and exercises {#exercises}
