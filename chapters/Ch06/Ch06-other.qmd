@@ -1,34 +1,28 @@
----
-title: Options
-layout: default
-output: bookdown::html_chapter
----
-
+# New features
 
 ```{r setup, echo=FALSE}
 knitr::opts_chunk$set(fig.path="Ch06-figures/")
 ```
 
-This chapter gives a complete list of new features that animint
-introduces to the grammar of graphics. After reading this chapter, you
-will understand how to customize your animint graphics via
+This chapter gives a complete list of new features in `animint2`, beyond what is present in `ggplot2`.
+After reading this chapter, you will understand how to customize your `animint2` graphics via
 
 * the `href`, `tooltip`, `id` aesthetics for observation-specific
   characteristics;
 * named elements of `clickSelects` and `showSelected` for specifying
   several selection variables at once;
+* new geoms: `tallrect`, `widerect`, `label_aligned`;
 * the `chunk_vars` geom-specific option;
 * the `color_off`, `fill_off`, and `alpha_off` geom parameters for
   specifying how selection state is displayed;
 * the `help` and `title` geom-specific parameters, which can be set to
-  text strings that will be shown in the guided tour.
-* plot-specific legends and height/width options; and
-* global data viz options.
+  text strings that will be shown in the guided tour;
+* plot-specific options for legends, HTML table layout, and height/width;
+* global options such as `duration`, `title`, and `source`.
 
 ## Observation-specific options (new aesthetics) {#new-aesthetics}
 
-This section explains the new aesthetics that are recognized by
-animint2.
+This section explains the new aesthetics that are recognized by `animint2`.
 
 ### Review of previously introduced aesthetics {#review-aesthetics}
 
@@ -41,7 +35,7 @@ are interpretable.
 
 ### Hyperlinks using `aes(href)` {#aes-href}
 
-The code below uses animint to draw a map of the United States. 
+The code below uses `animint2` to draw a map of the United States. 
 
 ```{r Ch06-viz-href}
 library(animint2)
@@ -62,7 +56,7 @@ corresponding wikipedia page open in a new tab.
 ### Tooltips using `aes(tooltip)` {#aes-tooltip}
 
 Tooltips are little windows of text information that appear when you
-hover the cursor over something on the screen. In animint you can use
+hover the cursor over something on the screen. In `animint2` you can use
 `aes(tooltip)` to designate the observation-specific message that 
 appears. For example we use it to display the population and country
 name in the scatterplot of the World Bank data below.
@@ -91,7 +85,7 @@ default by explicitly specifying `aes(tooltip)`.
 
 ### HTML id attribute using `aes(id)` {#aes-id}
 
-Since everything plotted by animint is rendered as an
+Since everything plotted by `animint2` is rendered as an
 [SVG](http://www.w3schools.com/html/html5_svg.asp) element in a web
 page, you may want to specify a
 [HTML id attribute](http://www.w3schools.com/tags/att_global_id.asp)
@@ -112,7 +106,7 @@ Note how `gsub` is used to convert spaces to underscores, since a
 well-defined id must not include spaces. Note also that `paste` is
 used to add a group number, since there may be more than one polygon
 per state/region, and each id must be unique on a web page. The
-animint2 developers use this feature
+`animint2` developers use this feature
 [for testing the animint JavaScript renderer code](https://github.com/tdhock/animint/wiki/Testing).
 
 ### Data-driven selector names using named clickSelects and showSelected {#data-driven-selectors}
@@ -172,7 +166,7 @@ viz <- list(
 )
 ```
 
-The animint compiler looks through the data.frame `all.data` and
+The `animint2dir()` compiler looks through the data.frame `all.data` and
 create selectors for each of the distinct values of
 `all.data$selector.name`. Clicking one of the data points updates the
 corresponding selector with the value indicated in
@@ -187,9 +181,41 @@ are more computationally efficient. For a detailed example with
 timings and disk space measurements, see
 [Chapter 14](../Ch14/Ch14-PeakSegJoint.html).
 
+## New geoms {#new-geoms}
+
+There are several new geoms in `animint2`, with respect to the geoms that are provided in `ggplot2`.
+
+### Tall and wide rectangles for selection {#tall-wide-rect}
+
+Tall and wide rectangles are special cases of `geom_rect` which by default cover the entire Y/X range.
+
+* `geom_tallrect()` covers the entire Y range, and was first introduced in [Chapter 4](../Ch04/Ch04-clickSelects.html).
+* `geom_widerect()` covers the entire X range, and is discussed in [Chapter 8](../Ch08/Ch08-WorldBank-facets.html).
+
+Both are useful in combination with `clickSelects`, so we also provide helper functions for this common use case:
+
+* `make_tallrect(data, "x_variable")` creates a rectangle for each unique value of the column with name `x_variable` in `data`.
+* `make_widerect(data, "y_variable")` creates a rectangle for each unique value of the column with name `y_variable` in `data`.
+
+Both of these are capable of showing smooth transitions for the selected rectangle, as in the [WorldBank data visualization with two time series facets](https://tdhock.github.io/2025-01-WorldBank-facets-map/).
+
+* a expanded data set with `N^2` rows is computed for `N` unique values to select.
+* there are `N` sets of rows, each with a different `showSelected` value.
+* in each `showSelected` subset, the selected value has a special `aes(key)` value.
+* so the result is a smooth transition: when we change the selection, we see the selected/special row moving to its new position (and all of the others are invisible).
+
+For more discussion about this technique, see [Chapter 11](../Ch11/Ch11-lasso.html).
+
+### Aligned labels for avoiding overlapping text {#geom-text-aligned}
+
+When using multiple selection, it is often useful to display text labels to indicate the items in the selection set.
+When labels are aligned (with the same X or Y value), then `geom_label_aligned()` can be used to adjust positions, to avoid overlapping labels.
+For example, the [WorldBank data visualization](https://tdhock.github.io/2025-01-WorldBank-facets-map/) shows a text label before the first year of each selected country's time series.
+For more discussion about this technique, see [Chapter 8](../Ch08/Ch08-WorldBank-facets.html).
+
 ## Geom options {#geom-options}
 
-In animint, there are several options for customization at the geom
+In `animint2`, there are several options for customization at the geom
 level: `chunk_vars` is used to specify how to split data sets for
 storage on disk, and `*_off` parameters are used to specify how a
 clickSelects geom should be displayed when it is not selected.
@@ -213,7 +239,7 @@ file. When `chunk_vars` is set to all of the `showSelected` variable
 names, then a TSV file is created for each combination of values of
 those variables.
 
-In general the animint compiler chooses a sensible default for
+In general the `animint2dir()` compiler chooses a sensible default for
 `chunk_vars`, but you may want to specify `chunk_vars` if the data viz
 is loading slowly, or taking up too much space on disk. If the data
 viz is loading slowly, you should add selection variables to
@@ -339,7 +365,10 @@ tsvSizes <- function(segment.chunk.vars){
   setnames(kb.dt, c("kb", "dir"))
   tsv.vec <- Sys.glob(paste0(info$out.dir, "/*.tsv"))
   is.geom6 <- grepl("geom6", tsv.vec)
-  data.frame(kb=kb.dt$kb, geom6.tsv=sum(is.geom6), other.tsv=sum(!is.geom6))
+  data.frame(
+    kb=kb.dt$kb,
+    geom6.tsv=sum(is.geom6),
+    other.tsv=sum(!is.geom6))
 }
 chunk_vars_list <- list(
   neither=c(),
@@ -370,21 +399,17 @@ than many small files.
 
 ### Specifying how selection state is displayed {#display-selection-state}
 
-Animint has sensible defaults for displaying selection state. In
-particular, 
+Different geoms in `animint2` have sensible defaults for displaying selection state.
+In particular, 
 
-* when there is a rect or tile with clickSelects, we use black
-  color/border to show items which are selected, and transparent for
-  items which are not selected.
-* for any other geom with clickSelects, we use full opacity `alpha` to
-  show items which are selected, and `alpha-0.5` opacity to show items
-  which are not selected.
+* when there is a `rect` or `tile` with `clickSelects`, we use black color/border to show items which are selected, and transparent for items which are not selected.
+* for any other geom with `clickSelects`, we use full opacity `alpha` to show items which are selected, and `alpha-0.5` opacity to show items which are not selected.
   
 The defaults explained above are illustrated in the first plot
 below. Those defaults may be customized by using the `alpha_off`,
 `fill_off`, and `color_off` geom parameters as in the code below,
 
-```{r}
+```{r Ch06-viz-off}
 N <- 3
 set.seed(1)
 demo_df <- data.frame(i=1:N, num=rnorm(N,2))
@@ -439,7 +464,7 @@ state).
 
 ### Specifying guided tour text {#custom-guided-tour}
 
-Since Jan 2025, animint supports a guided tour, which displays
+Since Jan 2025, `animint2` supports a guided tour, which displays
 information about possible interactions with each geom. To customize
 what is displayed for each geom, you can specify the `help` and
 `title` parameters, as in the code below.
@@ -477,14 +502,13 @@ understand what is displayed, and what interactions are possible.
 
 ## Plot-specific options {#plot-options}
 
-This section discusses options which are specific to one ggplot of a
-data viz. The `theme_animint` function is used to attach animint
-options to ggplot objects.
+This section discusses options which are specific to one ggplot of a data viz.
+The `theme_animint` function is used to attach `animint2` options to ggplot objects.
 
 ### Plot height and width {#plot-height-width}
 
 The `width` and `height` options are for specifying the dimensions (in
-pixels) of a ggplot rendered by animint. For example, consider the
+pixels) of a ggplot rendered by `animint2`. For example, consider the
 following re-design of the plot of the United States:
 
 ```{r Ch06-viz-width-height}
@@ -507,16 +531,45 @@ animint(
 
 Note that the plot above was rendered with a width of 750 pixels and a
 height of 500 pixels, due to the `theme_animint` options. If either of
-these options is not specified for any ggplot, then animint uses a
+these options is not specified for any ggplot, then `animint2` uses a
 default of 400 pixels.
 
 Also note that `theme` was used to specify several blank
 elements. This has the effect of removing the axes and background, and
 is generally useful for rendering maps.
 
+### HTML table layout {#html-table-layout}
+
+Since summer 2025, `animint2` supports plot layout in an HTML table.
+A typical example is when you want to display three linked plots, with one plot to the right of two other plots, as in [this visualization of cross-validation for change-point model selection](https://tdhock.github.io/figure-binseg-cv-most-frequently-selected-fr/).
+To specify the HTML table layout, we use three new arguments in `theme_animint()`:
+
+* `rowspan=2` means the plot takes up two rows in the table (default 1).
+* `colspan=2` means the plot takes up two columns in the table (default 1).
+* `last_in_row=TRUE` means the plot is last in the current row, so the next plot will appear on the next row.
+* if none of these are specified in any plots, then we use the classic layout (no HTML table, each plot appears one after the other, and is wrapped to the next row if there is not enough horizontal space).
+
+For example, consider the demo below:
+
+```{r Ch06-viz-html-table}
+df <- data.frame(x="foo")
+animint(
+  left=ggplot()+
+    theme_animint(width=200, rowspan=2)+
+    geom_point(aes(x, x, color=x), data=df),
+  topRight=ggplot()+
+    theme_animint(width=200, height=200, last_in_row=TRUE)+
+    geom_point(aes(x, x, color=x), data=df),
+  bottomRight=ggplot()+
+    theme_animint(width=200, height=200)+
+    geom_point(aes(x, x, color=x), data=df))
+```
+
+The visualization above shows one plot on the left, with two plots on the right, as expected.
+
 ### Size scale in pixels {#scale-size-animint}
 
-The `scale_size_animint` scale should be used in all ggplots where you
+The `scale_size_animint()` scale should be used in all ggplots where you
 specify `aes(size)`. To see why, consider the following examples.
 
 ```{r Ch06-viz-scale-size}
@@ -552,7 +605,7 @@ specify the radius of the largest and smallest circles.
 ### Axes and legend text size {#axes-legend-text-size}
 
 The syntax of defining axes and legend text size(in pixels) is almost
-the same as ggplot2. Inside `theme`, you can use numbers directly to
+the same as `ggplot2`. Inside `theme`, you can use numbers directly to
 change the font size, or you can use `rel()` to define the relative
 size.
 
@@ -580,7 +633,7 @@ scatter1975 <- ggplot()+
 This allows you to change the font size while changing the size of 
 the plot to make it look more coherent.
 
-Note that the default font size in animint is 11px for the axes and 
+Note that the default font size in `animint2` is 11px for the axes and 
 16px for the legend.
 
 ## Global data viz options {#global-options}
@@ -610,7 +663,7 @@ variables.
 The `title` option should be a character string, and will be used to
 set the `<title>` element of the web page. It does not make sense to
 use the `title` option in an Rmd document such as this page. A title
-can and should be used with `animint2dir`, as in the code below.
+can and should be used with `animint2dir()`, as in the code below.
 
 ```{r Ch06-viz-title}
 viz.title <- viz.scale.size
@@ -621,12 +674,6 @@ animint2dir(viz.title, "Ch06-title")
 Note that `viz.scale.size` already has three ggplots, each with a
 `ggtitle`. Adding the global `title` option has the effect of defining
 a title for [the web page](../Ch06/Ch06-title/index.html).
-
-Chapter 5 introduced the [`animint2pages`](../Ch05/Ch05-sharing.html#pages)
-function, which is used to publish an animint to GitHub Pages. It
-requires that the animint defines the `title` option, because that
-meta-data is required for organizing the animint in a
-[gallery](../Ch05/Ch05-sharing.html#gallery).
 
 ### Link R code with source option {#source-option}
 
@@ -639,16 +686,14 @@ animint(
     geom_point(aes(
       Petal.Length, Sepal.Length),
       data=iris),
-  source="https://github.com/tdhock/animint-book/edit/master/Ch06-other.Rmd")
+  source=
+    "https://github.com/tdhock/animint-book/edit/master/Ch06-other.Rmd")
 ```
 
 Note above how there is a source link at the bottom of the data viz.
 
-Chapter 5 introduced the [`animint2pages`](../Ch05/Ch05-sharing.html#pages)
-function, which is used to publish an animint to GitHub Pages. It
-requires that the animint defines the `source` option, because that
-meta-data is required for organizing the animint in a
-[gallery](../Ch05/Ch05-sharing.html#gallery).
+Chapter 5 introduced the [`animint2pages`](../Ch05/Ch05-sharing.html#pages) function, which is used to publish an animint to GitHub Pages.
+It requires that the animint defines the `title` and `source` options, because that meta-data is required for organizing the animint in a [gallery](../Ch05/Ch05-sharing.html#gallery).
 
 ### Link a video {#video-option}
 
@@ -682,7 +727,7 @@ The selectize option should be a named list of logical values. Names
 should be selector variables, and values should indicate whether or
 not you would like to render a selection menu via
 [selectize.js](http://selectize.github.io/selectize.js/). By default,
-animint will render a selection menu for every selection variable,
+`animint2` will render a selection menu for every selection variable,
 with two exceptions:
 
 * data-driven selection variables that are defined using [named
@@ -694,7 +739,7 @@ with two exceptions:
 These defaults should work well for the vast majority of animints. For
 those who are interested to see an example of how the `selectize`
 option works, please see the
-[PredictedPeaks test in the animint2 source code](https://github.com/tdhock/animint2/blob/master/tests/testthat/test-renderer2-PredictedPeaks.R).
+[PredictedPeaks test in the `animint2` source code](https://github.com/tdhock/animint2/blob/master/tests/testthat/test-renderer2-PredictedPeaks.R).
   
 ## Chapter summary and exercises {#Ch06-exercises}
 
@@ -709,4 +754,4 @@ Exercises:
   The disk space? The loading time?
 
 Next, [Chapter 7](../Ch07/Ch07-limitations.html) explains the limitations of
-the current implementation of animint2.
+the current implementation of `animint2`.

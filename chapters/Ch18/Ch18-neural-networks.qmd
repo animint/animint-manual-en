@@ -1,9 +1,4 @@
----
-title: Neural networks
-author: Toby Dylan Hocking
-output: bookdown::html_chapter
----
-
+# Neural networks
 
 ```{r setup, echo=FALSE}
 knitr::opts_chunk$set(fig.path="Ch18-figures/")
@@ -168,7 +163,11 @@ via the decision boundary, which can be computed using the code below,
 get_boundary <- function(score){
   contour.list <- contourLines(
     grid.list$V1, grid.list$V2, 
-    matrix(score, length(grid.list$V1), length(grid.list$V2), byrow=TRUE),
+    matrix(
+      score,
+      length(grid.list$V1),
+      length(grid.list$V2),
+      byrow=TRUE),
     levels=0)
   if(length(contour.list)){
     data.table(contour.i=seq_along(contour.list))[, {
@@ -576,10 +575,12 @@ boundary is shown on the predictions plot.
 
 ```{r Ch18-nnet-vs-linear}
 n.subtrain <- sum(is.set.list$subtrain)
-loss.dt[, n.set := ifelse(set=="subtrain", n.subtrain, sim.row-n.subtrain)]
-loss.dt[, error.count := n.set*error.percent/100]
+loss.dt[, n.set := ifelse(
+  set=="subtrain", n.subtrain, sim.row-n.subtrain
+)][, error.count := n.set*error.percent/100]
 it.by <- 10
-some <- function(DT)DT[iteration%in%as.integer(seq(1,max.iterations,by=it.by))]
+some <- function(DT)DT[iteration %in% as.integer(
+  seq(1, max.iterations, by=it.by))]
 animint(
   title="Neural network vs linear model",
   out.dir="neural-networks-sim",
@@ -591,7 +592,7 @@ animint(
     facet_grid(variable ~ ., scales="free")+
     scale_y_continuous("")+
     scale_x_continuous(
-      "Iteration/epoch of learning, with gradient computed on subtrain set")+
+      "Iteration/epoch of learning")+
     geom_line(aes(
       iteration, value, color=set, group=set),
       data=loss.tall)+

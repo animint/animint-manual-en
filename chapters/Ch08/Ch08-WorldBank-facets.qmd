@@ -1,9 +1,4 @@
----
-title: World Bank data viz
-layout: default
-output: bookdown::html_chapter
----
-
+# World Bank
 
 ```{r setup, echo=FALSE}
 knitr::opts_chunk$set(fig.path="Ch08-figures/")
@@ -23,17 +18,19 @@ Chapter outline:
 
 ## Load data and define helper functions {#load}
 
-First we load the WorldBank data set, and consider only the subset
-which has both non-missing values for both life.expectancy and
-fertility.rate.
+First we load the `WorldBank` data set, and consider only the subset
+which has both non-missing values for both `life.expectancy` and
+`fertility.rate`.
 
 ```{r}
 library(animint2)
 data(WorldBank)
-WorldBank$Region <- sub(" (all income levels)", "", WorldBank$region, fixed=TRUE)
+WorldBank$Region <- sub(
+  " (all income levels)", "", WorldBank$region, fixed=TRUE)
 library(data.table)
-not.na <- data.table(
-  WorldBank)[!(is.na(life.expectancy) | is.na(fertility.rate))]
+not.na <- data.table(WorldBank)[
+  !(is.na(life.expectancy) | is.na(fertility.rate))
+]
 ```
 
 We will also be plotting the population variable using a size
@@ -50,7 +47,9 @@ for the population variable. They are for the country Kuwait during
 from the neighboring years, 1991-1995.
 
 ```{r}
-not.na[country == "Kuwait" & 1991 <= year & year <= 1995]
+not.na[
+  country == "Kuwait" & 1991 <= year & year <= 1995,
+  .(country, year, population)]
 ```
 
 The table above shows that the population of Kuwait decreased over the
@@ -59,29 +58,30 @@ fill in those missing values below.
 
 ```{r}
 not.na[is.na(population), population := 1700000]
-not.na[country == "Kuwait" & 1991 <= year & year <= 1995]
+not.na[
+  country == "Kuwait" & 1991 <= year & year <= 1995,
+  .(country, year, population)]
 ```
 
 Next, we define the following helper function, which will be used to
 add columns to data sets in order to assign geoms to facets. 
 
 ```{r}
-FACETS <- function(df, top, side){
-  data.frame(df,
-             top=factor(top, c("Fertility rate", "Years")),
-             side=factor(side, c("Years", "Life expectancy")))
-}
+FACETS <- function(df, top, side)data.frame(
+  df,
+  top=factor(top, c("Fertility rate", "Years")),
+  side=factor(side, c("Years", "Life expectancy")))
 ```
 
 Note that the factor levels will specify the order of the facets in
 the ggplot. This is an example of the
 [addColumn then facet idiom](../Ch99/Ch99-appendix.html#addColumn-then-facet).
-Below, we define three helper functions, one for each facet.
+Below, we define three more helper functions, one for each facet.
 
 ```{r}
-TS.RIGHT <- function(df)FACETS(df, "Years", "Life expectancy")
+TS.LIFE <- function(df)FACETS(df, "Years", "Life expectancy")
 SCATTER <- function(df)FACETS(df, "Fertility rate", "Life expectancy")
-TS.ABOVE <- function(df)FACETS(df, "Fertility rate", "Years")
+TS.FERT <- function(df)FACETS(df, "Fertility rate", "Years")
 ```
 
 ## First time series plot {#first-ts}
@@ -97,22 +97,24 @@ We define the ggplot with a `geom_tallrect` in the background, and a
 `geom_line` for the time series.
 
 ```{r}
+line_alpha <- 3/5
+line_size <- 4
 ts.right <- ggplot()+
   geom_tallrect(aes(
     xmin=year-1/2, xmax=year+1/2),
     clickSelects="year",
-    data=TS.RIGHT(years), alpha=1/2)+
+    data=TS.LIFE(years), alpha=1/2)+
   geom_line(aes(
-    year, life.expectancy, group=country, colour=Region),
+    year, life.expectancy, group=country, color=Region),
     clickSelects="country",
-    data=TS.RIGHT(not.na), size=4, alpha=3/5)
+    data=TS.LIFE(not.na), size=line_size, alpha=line_alpha)
 ts.right
 ```
 
 Note that we specified `clickSelects=year` so that clicking a tallrect
 will change the selected year, and `clickSelects=country` so that
 clicking a line will select or de-select a country. Also note that we
-used `TS.RIGHT` to specify columns that we will use in the facet
+used `TS.LIFE` to specify columns that we will use in the facet
 specification (next section).
 
 ## Add a scatterplot facet {#add-scatter}
@@ -129,7 +131,7 @@ ts.facet <- ts.right+
 ts.facet
 ```
 
-We set the `panel.margin` to 0, which is always a good idea to
+We set the `panel.margin` to 0, which is often a good idea to
 [save space in a ggplot with facets](../Ch99/Ch99-appendix.html#space-saving-facets).
 We use `scales="free"` and hide the axis labels, in an example of the
 [addColumn then facet idiom](../Ch99/Ch99-appendix.html#addColumn-then-facet). Instead,
@@ -142,7 +144,7 @@ ts.scatter <- ts.facet+
   theme_animint(width=600)+
   geom_point(aes(
     fertility.rate, life.expectancy,
-    colour=Region, size=population,
+    color=Region, size=population,
     key=country), # key aesthetic for animated transitions!
     clickSelects="country",
     showSelected="year",
@@ -160,8 +162,14 @@ specification. We also render this ggplot interactively below.
 animint(ts.scatter)
 ```
 
-Note that single selection is used by default for both year and
-country.
+Note that single selection is used by default for both year and country.
+
+* The selected year is shown as a grey rectangle on the right.
+* The selected country is shown with more opacity in the `geom_point` on the left, and in the `geom_line` on the right.
+
+**Exercise:** how would you further emphasize the selected year and country?
+Hint: you can modify the `alpha_off` parameter from the default of `0.5` to a smaller value, like `0.2`.
+Try using `color_off`, which can not be used in combination with `aes(color)`, so try using `aes(fill)` instead in the `geom_point`.
 
 ## Adding another time series facet {#add-ts}
 
@@ -173,27 +181,59 @@ scatter.both <- ts.scatter+
   geom_widerect(aes(
     ymin=year-1/2, ymax=year+1/2),
     clickSelects="year",
-    data=TS.ABOVE(years), alpha=1/2)+
+    data=TS.FERT(years), alpha=1/2)+
   geom_path(aes(
-    fertility.rate, year, group=country, colour=Region),
+    fertility.rate, year, group=country, color=Region),
     clickSelects="country",
-    data=TS.ABOVE(not.na), size=4, alpha=3/5)
+    data=TS.FERT(not.na), size=line_size, alpha=line_alpha)
 scatter.both
 ```
 
-Note that `TS.ABOVE` was used to specify facet columns `top` and
-`side`. We render an interactive version below.
+Note in the code above that `TS.FERT` was used to specify facet columns `top` and `side`.
+A final touch is to add text labels to the time series, using `geom_label_aligned`, which is new in `animint2` (it is not in `ggplot2`).
+It is a text label that adjusts its position to avoid overlaps with other labels with the same `y` value (in horizontal alignment).
+The code below first creates a data set with the extreme values of `year`, and then uses that with `alignment="horizontal"`.
+
+```{r}
+ext.years <- not.na[year %in% range(year)]
+scatter.labels <- scatter.both+
+  geom_label_aligned(aes(
+    fertility.rate, year,
+    vjust=ifelse(year==min(year), 1, 0),
+    color=Region,
+    label=country),
+    data=TS.FERT(ext.years),
+    showSelected="country",
+    alignment="horizontal")
+```
+
+Note in the code above that we set `vjust`
+
+* to 1 so that the top of the label is aligned with the min year at the bottom of the panel.
+* to 0 so that the bottom of the label is aligned with the max year at the top of the panel.
+
+We render an interactive version below.
 
 ```{r Ch08-viz-scatter-both}
-viz.scatter.both <- animint(
+animint(
   title="World Bank data (multiple selection, facets)",
-  scatterBoth=scatter.both+
-    theme_animint(width=1000, height=800),
+  scatter=scatter.labels+
+    theme_animint(width=600, height=600),
   duration=list(year=1000),
   time=list(variable="year", ms=3000),
-  first=list(year=1975, country=c("United States", "Vietnam")),
+  first=list(year=1975, country=c("United States", "Canada")),
   selector.types=list(country="multiple"))
 ```
+
+The visualization above has three facets: two time series, and one scatter plot.
+The fertility rate time series shows two labels for each selected country, with a few special features:
+
+* If the values of fertility rate for selected countries are too close, then the label positions are adjusted to avoid overlapping text.
+* If there are selected countries near the left/right plot boundaries, then the labels are adjusted to avoid going outside of these boundaries.
+* If there are too many countries selected to display all text labels in the available space (between left and right boundaries), then the text size is reduced until the text labels fit.
+* These features are used in each group of labels with the same Y value, because `alignment="horizontal"` was specified.
+
+**Try** selecting a few more neighboring countries to see how this works.
 
 ## Chapter summary and exercises {#Ch08-exercises}
 
@@ -202,17 +242,18 @@ visualization of the World Bank data.
 
 Exercises:
 
-* Add a points on each time series plot, with size proportional to
-  population as in the scatterplot. The points should appear only when
-  the country is selected, and clicking the points should de-select
-  that country.
-* Add text labels to the time series plot on the right, with names for
-  each country. Each label should appear only when the country is
-  selected, and should disappear after clicking on the label.
+* Simplify the code by using `make_*()` instead of `geom_*()` for `tallrect` and `widerect`.
+* The X axis for fertility rate shows default breaks 2.5, 5.0, 7.5.
+  Change these to 2, 4, 6, 8. Hint: use `breaks` argument of `scale_x_continuous`.
+* Since no smooth transition has been specified for `country`, the text labels appear and disappear instantaneously when the set of selected countries is modified. Try adding a smooth transition, by adding the global `duration` option, and by adding `aes(key)` to the `geom_label_aligned`. Hint: since there are two labels for each country, the key should depend on both `year` and `country`.
+* Make it so that clicking a country label de-selects the corresponding country.
+* Add text labels to the time series plot on the right, with names for each country, using `geom_label_aligned(alignment="vertical")`.
+  Each label should appear only when the country is selected, and should disappear after clicking on the label.
 * Add a text label to the scatterplot to indicate the selected year.
-* Add text labels to the scatterplot, with names for each
-  country. Each label should appear only when the country is selected,
-  and should disappear after clicking on the label.
+* Add text labels to the scatterplot, with names for each country.
+  Each label should appear only when the country is selected, and should disappear after clicking on the label.
+* Add points on each time series plot, with size proportional to population, as in the scatterplot.
+  The points should appear only when the country is selected, and clicking the points should de-select that country.
+* As in [this gallery example](https://tdhock.github.io/2025-01-WorldBank-facets-map/), add world map in the Year/Year facet which is currently empty.
 
-Next, [Chapter 9](../Ch09/Ch09-Montreal-bikes.html) explains how to visualize the
-Montreal bike data set.
+Next, [Chapter 9](../Ch09/Ch09-Montreal-bikes.html) explains how to visualize the Montreal bike data set.
