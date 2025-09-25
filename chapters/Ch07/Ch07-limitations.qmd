@@ -1,15 +1,10 @@
----
-title: Limitations
-layout: default
-output: bookdown::html_chapter
----
-
+# Limitations
 
 ```{r setup, echo=FALSE}
 knitr::opts_chunk$set(fig.path="Ch07-figures/")
 ```
 
-This chapter explains several known limitations of animint2 for some
+This chapter explains several known limitations of `animint2` for some
 interactive data visualization tasks. It also explains some
 workarounds that you can use in these situations. After reading this
 chapter, you will understand how to 
@@ -28,13 +23,13 @@ chapter, you will understand how to
   aesthetic mapping of an animint, or to perform computations based on
   selected values.
 
-If you have an idea for improving animint2 so that it overcomes one of
-these limitations, the animint2 developers would be more than happy to
-accept your [Pull Request](https://github.com/tdhock/animint2/compare).
+If you have an idea for improving `animint2` so that it overcomes one of
+these limitations, the `animint2` developers would be more than happy to
+review your [Pull Request](https://github.com/tdhock/animint2/compare).
 
 ## Use normalized variables to work with fixed scales {#normalized-variables}
 
-We implement axes and legends in the same way ggplot2 does, by
+We implement axes and legends in the same way `ggplot2` does, by
 computing them once when the plot is first rendered. As a consequence,
 the axes and legends in each animint plot are not interactive. For
 most
@@ -53,7 +48,7 @@ for details.
 
 ## Compute statistics for each showSeleted subset {#stats}
 
-Animint does not support ggplot2 statistics with `showSelected`. For
+Animints do not support `ggplot2` statistics with `showSelected`. For
 example, consider the facetted ggplot below.
 
 ```{r}
@@ -62,20 +57,24 @@ library(data.table)
 random.counts <- data.table(
   letter = c(replicate(4, LETTERS[1:5])),
   count = c(replicate(4, rbinom(5, 50, 0.5))),
-  stack = rep(rep(1:2, each = 5), 2),
+  stack = rep(rep(factor(
+    c("lower","upper"), c("upper","lower")
+  ), each = 5), 2),
   facet = rep(1:2, each = 10))
 library(animint2)
 ggstat <- ggplot() +
   theme_bw()+
   theme(panel.margin=grid::unit(0, "lines"))+
-  geom_bar(
-      aes(letter, count, fill = stack),
-      showSelected="facet",
+  geom_bar(aes(
+    letter, count,
+    key=paste(letter, stack),
+    fill = stack),
+    showSelected="facet",
     data = random.counts,
     stat = "identity",
     position="stack"
   )
-ggstat+facet_grid(facet ~ .)
+ggstat+facet_grid(facet ~ ., labeller=label_both)
 ```
 
 Using `showSelected` instead of facets does not result in what you
@@ -84,43 +83,46 @@ may expect.
 ```{r Ch07-viz-stat}
 animint(
   plot = ggstat,
-  time = list(variable = "facet", ms = 1000),
   duration = list(facet = 1000))
 ```
 
-A workaround is to compute what you want to display, and use
-position=identity.
+**Try** changing the selection from facet 1 to 2.
+The data viz above shows bars moving from top to bottom, indicating that `position=stack` has only been computed globally (not for each `showSelected` subset).
+
+A workaround is to compute what you want to display, and use `position=identity`, which is demonstrated in the code below.
 
 ```{r}
-random.cumsums <- random.counts[, list(
+random.cumsums <- random.counts[, data.table(
   cumsum=cumsum(count),
-  count=count,
-  stack=stack),
-  by=.(letter, facet)]
+  count,
+  stack
+), by=.(letter, facet)]
 ggidentity <- ggplot() +
   theme_bw()+
   theme(panel.margin=grid::unit(0, "lines"))+
   geom_segment(aes(
     x=letter, xend=letter,
     y=cumsum, yend=cumsum-count,
+    key=paste(letter, stack),
     color=stack),
     showSelected="facet",
     data = random.cumsums,
     size=10,
     stat = "identity",
     position="identity")
-ggidentity+facet_grid(facet ~ .)
+ggidentity+facet_grid(facet ~ ., labeller=label_both)
 ```
 
-Note how we used `geom_segment` instead of `geom_bar`, but their
-appearance is similar.
+Note how we used `geom_segment` instead of `geom_bar`, but their appearance is similar.
 
 ```{r Ch07-viz-identity}
 animint(
   plot = ggidentity,
-  time = list(variable = "facet", ms = 1000),
   duration = list(facet = 1000))
 ```
+
+**Try** changing the selection from facet 1 to 2.
+The data viz above shows bars adjusting their size, indicating that using `position=identity` is a valid work-around.
 
 ## Add values to a multiple selection set one at a time {#multiple-selection}
 
@@ -131,14 +133,14 @@ multiple selection set. Use the
 [selector.types](../Ch04/Ch04-clickSelects.html#selector-types-option) option
 to declare a multiple selection variable.
 
-## Adjust y instead of using vjust {#vjust}
+## Adjust y instead of using vjust with `geom_text` {#vjust}
 
 For horizontal text alignment, animint supports using `hjust` in R
 with the most common values: 0 for left alignment, 0.5 for middle
 alignment, and 1 for right alignment. Animint translates these three
 `hjust` values to the `text-anchor` property in the rendered data viz.
 
-However, animint does not support vertical text alignment using
+However, animint `geom_text` does not support vertical text alignment using
 `vjust` in R, because there is no property that can be used for
 vertical text alignment in SVG. 
 
@@ -179,10 +181,13 @@ The workaround in animint is shown in the right panel above. You can
 adjust the vertical position `y` values of the text elements for which
 you would have used `vjust`.
 
-It is possible to implement `vjust` support in animint, but we haven't
+It is possible to implement `vjust` support for `geom_text` in animint, but we haven't
 yet had time to work on it. If you would like to implement it, we
 would be more than happy to accept a Pull Request. We already have an
 [issue explaining how to implement it](https://github.com/tdhock/animint/issues/148).
+
+Another work-around is to use the new `geom_label_aligned`, which does support `vjust`.
+For an example, please read [Chapter 8](../Ch08/Ch08-WorldBank-facets.html).
 
 ## Order the plots on the page {#order-plots}
 
@@ -248,6 +253,11 @@ gg.two.lines <- ggplot()+
 gg.two.lines
 animint(gg.two.lines)
 ```
+
+Also note in these examples that the text size is not consistent between static and interactive rendering, which [is an issue](https://github.com/animint/animint2/issues/230)
+
+* in interactive plots, we want `size` to be the number of pixels, and
+* in static plots, `size` interpretation is consistent with legacy `ggplot2` interpretation of size (could be changed for consistency with interactive rendering).
 
 ## Avoid some ggplot theme options {#theme-options}
 
@@ -324,7 +334,8 @@ limitation is by defining `shiny` inputs that are used as animint
 aesthetics, as in the following example.
 
 ```{r, eval=FALSE}
-shiny::runApp(system.file("examples", "shiny-WorldBank", package="animint"))
+shiny::runApp(system.file(
+  "examples", "shiny-WorldBank", package="animint"))
 ```
 
 ## Interactive computation {#shiny-computation}
@@ -337,7 +348,7 @@ case, it would be better to use shiny.
 
 ## Chapter summary and exercises {#Ch07-exercises}
 
-We discussed limitations of the current implementation of animint2, and
+We discussed limitations of the current implementation of `animint2`, and
 explained several workarounds.
 
 Exercises:

@@ -1,9 +1,4 @@
----
-title: Named clickSelects/showSelected
-layout: default
-output: bookdown::html_chapter
----
-
+# Named clickSelects/showSelected
 
 ```{r setup, echo=FALSE}
 knitr::opts_chunk$set(fig.path="Ch14-figures/")
@@ -16,7 +11,7 @@ write animint code, and makes it faster to compile.
 
 Chapter outline:
 
-* We begin by downloading the PSJ data set and computing the data to
+* We begin by downloading the `PSJ` data set and computing the data to
   plot.
 * We show one method of defining an animint with many selectors, using
   for loops. This method is technically correct, but computationally
@@ -32,13 +27,9 @@ The example data come from the
 code below downloads the data set.
 
 ```{r download-PSJ}
-if(!file.exists("PSJ.RData")){
-  u <- paste0(
-    "http://github.com/tdhock/animint-examples",
-    "/blob/master/data/PSJ.RData?raw=true")
-  download.file(u, "PSJ.RData", mode="wb")
-}
-load("PSJ.RData")
+if(!requireNamespace("animint2data"))
+  remotes::install_github("animint/animint2data")
+data(PSJ, package="animint2data")
 ```
 
 ## Compute data to plot {#compute-data-to-plot}
@@ -446,7 +437,7 @@ In this section we compute the disk usage of both methods.
 viz.dirs.vec <- c("Ch14-for", "Ch14-named")
 viz.dirs.text <- paste(viz.dirs.vec, collapse=" ")
 (cmd <- paste("du -ks", viz.dirs.text))
-kb.dt <- fread(cmd)
+kb.dt <- fread(cmd=cmd)
 setnames(kb.dt, c("kilobytes", "path"))
 kb.dt
 ```

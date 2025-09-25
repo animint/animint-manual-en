@@ -1,9 +1,4 @@
----
-title: Support Vector Machines
-layout: default
-output: bookdown::html_chapter
----
-
+# Support Vector Machines
 
 ```{r setup, echo=FALSE}
 knitr::opts_chunk$set(fig.path="Ch12-figures/")
@@ -100,11 +95,17 @@ scores <- data.table(x1=seq(-1, 1, l=101))[
 , x1.sq := x1^2
 ][
 , f := x1.sq ]
-x1.boundaries <- data.table(boundary=c(1, -1)*sqrt(true.decision.boundary))
+x1.boundaries <- data.table(
+  boundary=c(1, -1)*sqrt(true.decision.boundary))
 ggplot()+
   scale_y_continuous(breaks=seq(0, 1, by=0.2))+
-  geom_vline(aes(xintercept=boundary), color="grey50", data=x1.boundaries)+
-  geom_line(aes(x1, f), data=scores)+
+  geom_vline(aes(
+    xintercept=boundary),
+    color="grey50",
+    data=x1.boundaries)+
+  geom_line(aes(
+    x1, f),
+    data=scores)+
   geom_point(aes(
     x1, f.noise, color=y),
     shape=21,
@@ -247,12 +248,12 @@ to just have one color legend.
 ```{r}
 train.i <- 1:N
 data.dt[
-, set := "test"
+, set := "validation"
 ][
-  train.i, set := "train"
+  train.i, set := "subtrain"
 ]
 table(data.dt$set)
-train.dt <- data.dt[set=="train",]
+subtrain.dt <- data.dt[set=="subtrain",]
 ggplot()+
   theme_bw()+
   theme(panel.margin=grid::unit(0, "lines"))+
@@ -274,17 +275,17 @@ predicted labels `pred.y`.
 
 ```{r}
 library(kernlab)
-squared.mat <- train.dt[, cbind(x1.sq, x2.sq)]
-y.vec <- train.dt$y
+squared.mat <- subtrain.dt[, cbind(x1.sq, x2.sq)]
+y.vec <- subtrain.dt$y
 fit <- ksvm(squared.mat, y.vec, kernel="vanilladot")
-train.dt$pred.y <- predict(fit)
+subtrain.dt$pred.y <- predict(fit)
 ggplot()+
   geom_point(aes(
     x1.sq, x2.sq, color=pred.y, fill=y),
     shape=21,
     size=4,
     stroke=2,
-    data=train.dt)
+    data=subtrain.dt)
 ```
 
 It is clear from the plot above that there are several mis-classified
@@ -314,7 +315,7 @@ grid.sq.dt <- data.table(expand.grid(
   x2.sq=xsq.vec
 ))[
 , pred.f := predF(fit, cbind(x1.sq, x2.sq))]
-train.dt[, train.error := ifelse(y==pred.y, "correct", "error")]
+subtrain.dt[, train.error := ifelse(y==pred.y, "correct", "error")]
 ggplot()+
   theme_bw()+
   scale_color_manual(values=c(error="black", correct=NA))+
@@ -323,7 +324,7 @@ ggplot()+
     shape=21,
     stroke=1,
     size=4,
-    data=train.dt)+
+    data=subtrain.dt)+
   geom_vline(aes(
     xintercept=boundary), color="grey50",
     data=x1sq.boundary)+
@@ -386,7 +387,7 @@ ggplot()+
     shape=21,
     fill=NA,
     size=4,
-    data=train.dt)+
+    data=subtrain.dt)+
   geom_contour(aes(
     x1.sq, x2.sq, z=pred.f),
     breaks=0,
@@ -406,14 +407,14 @@ the plot below, we show the learned `alpha` coefficients, and add a
 `geom_segment` to visualize the slack.
 
 ```{r}
-train.dt[, alpha := 0]
+subtrain.dt[, alpha := 0]
 train.row.vec <- as.integer(rownames(xmatrix(fit)[[1]]))
-train.dt[train.row.vec, alpha := kernlab::alpha(fit)[[1]] ]
-train.dt[, status := ifelse(
+subtrain.dt[train.row.vec, alpha := kernlab::alpha(fit)[[1]] ]
+subtrain.dt[, status := ifelse(
   alpha==0, "alpha=0",
   ifelse(alpha==1, "alpha=C", "0<alpha<C"))]
 slack.slope <- weight.vec[2]*sigma[1]/(weight.vec[1]*sigma[2])
-slack.dt <- train.dt[alpha==1,]
+slack.dt <- subtrain.dt[alpha==1,]
 slack.join <- abline.dt[slack.dt, on=list(y)]
 slack.join[, x1.sq.margin := (
   x2.sq-slack.slope*x1.sq-intercept)/(slope-slack.slope)]
@@ -442,7 +443,7 @@ ggplot()+
     x1.sq, x2.sq, color=y, fill=status),
     shape=21,
     size=4,
-    data=train.dt)
+    data=subtrain.dt)
 ```
 
 The plot above shows the slack in grey segments, and the decision and
@@ -495,7 +496,7 @@ ggplot()+
     size=train.error,
     fill=status),
     shape=21,
-    data=train.dt)
+    data=subtrain.dt)
 ```
 
 The goal below will be to make an animint that shows
@@ -527,15 +528,15 @@ for(cost.param in round(10^seq(-1, 1, by=cost.by),1)){
   one.error <- data.dt[, list(errors=sum(y!=pred.y)), by=set]
   setErrors.list[[paste(cost.param)]] <- data.table(
     cost.param, one.error)
-  train.dt[, pred.f := predF(fit, cbind(x1^2, x2^2))]
+  subtrain.dt[, pred.f := predF(fit, cbind(x1^2, x2^2))]
   grid.dt[, pred.f := predF(fit, cbind(x1^2, x2^2))]
   boundaries <- getBoundaryDF(grid.dt$pred.f)
   inputBoundaries.list[[paste(cost.param)]] <- data.table(
     cost.param, boundaries)
-  train.dt$alpha <- 0
+  subtrain.dt$alpha <- 0
   train.row.vec <- as.integer(rownames(xmatrix(fit)[[1]]))
-  train.dt[train.row.vec, alpha := kernlab::alpha(fit)[[1]] ]
-  train.dt[, status := ifelse(
+  subtrain.dt[train.row.vec, alpha := kernlab::alpha(fit)[[1]] ]
+  subtrain.dt[, status := ifelse(
     alpha==0, "alpha=0",
     ifelse(alpha==cost.param, "alpha=C", "0<alpha<C"))]
   ## The equation of the margin lines is x2 = m2 + s2/w2[c+b+w1*m1/s1]
@@ -548,7 +549,7 @@ for(cost.param in round(10^seq(-1, 1, by=cost.by),1)){
     intercept=mu[2]+sigma[2]/weight.vec[2]*(
       c(-1, 0, 1)+b(fit)+weight.vec[1]*mu[1]/sigma[1]),
     slope=-weight.vec[1]*sigma[2]/(weight.vec[2]*sigma[1]))
-  slack.dt <- train.dt[alpha==cost.param]
+  slack.dt <- subtrain.dt[alpha==cost.param]
   slack.join <- abline.dt[slack.dt, on=list(y)]
   slack.join[, x1.sq.margin := (
     x2.sq-slack.slope*x1.sq-intercept)/(slope-slack.slope)]
@@ -560,7 +561,7 @@ for(cost.param in round(10^seq(-1, 1, by=cost.by),1)){
     norm=norm.weights,
     margin=2/sqrt(norm.weights))
   predictions.list[[paste(cost.param)]] <- data.table(
-    cost.param, train.dt)
+    cost.param, subtrain.dt)
   slackSegs.list[[paste(cost.param)]] <- data.table(
     cost.param, slack.join)
   modelLines.list[[paste(cost.param)]] <- data.table(
@@ -579,12 +580,13 @@ inputBoundaries[, boundary := ifelse(level.num==0, "decision", "margin")]
 slackSegs$boundary <- "margin"
 set.label.select <- data.table(
   cost.param=range(setErrors$cost.param),
-  set=c("test", "train"),
+  set=c("validation", "subtrain"),
   hjust=c(1, 0))
 set.labels <- setErrors[set.label.select, on=list(cost.param, set)]
-animint(
+viz.linear.svm <- animint(
   selectModel=ggplot()+
-    ggtitle("select regularization parameter")+
+    ggtitle("Select regularization parameter")+
+    scale_x_continuous(limits=c(-1.5, 1.5))+
     geom_tallrect(aes(
       xmin=log10(cost.param)-cost.by/2,
       xmax=log10(cost.param)+cost.by/2),
@@ -671,6 +673,7 @@ animint(
       showSelected=c("cost.param", "boundary"),
       color="grey",
       data=slackSegs))
+viz.linear.svm
 ```
 
 ## Non-linear polynomial kernel SVM {#nonlinear-polynomial-kernel-svm}
@@ -685,7 +688,7 @@ predictions.list <- list()
 inputBoundaries.list <- list()
 setErrors.list <- list()
 cost.by <- 0.2
-orig.mat <- train.dt[, cbind(x1, x2)]
+orig.mat <- subtrain.dt[, cbind(x1, x2)]
 for(cost.param in 10^seq(-1, 3, by=cost.by)){
   for(degree.num in seq(1, 6, by=1)){
     k <- polydot(degree.num, offset=0)
@@ -704,35 +707,34 @@ for(cost.param in 10^seq(-1, 3, by=cost.by)){
       inputBoundaries.list[[cost.deg]] <- data.table(
         cost.param, degree.num, boundaries)
     }
-    train.dt[, alpha := 0]
+    subtrain.dt[, alpha := 0]
     train.row.vec <- as.integer(rownames(xmatrix(fit)[[1]]))
-    train.dt[train.row.vec, alpha := kernlab::alpha(fit)[[1]] ]
-    train.dt[, status := ifelse(
+    subtrain.dt[train.row.vec, alpha := kernlab::alpha(fit)[[1]] ]
+    subtrain.dt[, status := ifelse(
       alpha==0, "alpha=0",
       ifelse(alpha==cost.param, "alpha=C", "0<alpha<C"))]
     predictions.list[[paste(cost.param, degree.num)]] <- data.table(
-      cost.param, degree.num, train.dt)
+      cost.param, degree.num, subtrain.dt)
   }
 }
 inputBoundaries <- do.call(rbind, inputBoundaries.list)
 predictions <- do.call(rbind, predictions.list)
 setErrors <- do.call(rbind, setErrors.list)
-
-testErrors <- setErrors[set=="test"]
-testErrors$select <- "degree"
+validationErrors <- setErrors[set=="validation"]
+validationErrors$select <- "degree"
 setErrors$select <- "cost"
-
 animint(
   selectModel=ggplot()+
-    ggtitle("select hyper parameters")+
+    ggtitle("Select hyper parameters")+
     geom_tallrect(aes(
       xmin=log10(cost.param)-cost.by/2,
       xmax=log10(cost.param)+cost.by/2),
       clickSelects="cost.param",
       alpha=0.5,
-      data=setErrors[degree.num==1 & set=="train",])+
+      data=setErrors[degree.num==1 & set=="subtrain",])+
     theme_bw()+
     theme(panel.margin=grid::unit(0, "lines"))+
+    theme_animint(width=350, rowspan=1)+
     facet_grid(select ~ ., scales="free")+
     ylab("")+
     geom_line(aes(
@@ -742,11 +744,11 @@ animint(
       color=set),
       showSelected="degree.num",
       data=setErrors)+
-    scale_fill_gradient("TestErrors", low="white", high="red")+
+    scale_fill_gradient("validErr", low="white", high="red")+
     geom_tile(aes(
       log10(cost.param), degree.num, fill=errors),
       clickSelects="degree.num",
-      data=testErrors),
+      data=validationErrors),
   inputSpace=ggplot()+
     theme_bw()+
     ggtitle("Input space features")+
@@ -781,9 +783,10 @@ hyper-parameters.
 
 Exercises:
 
-* Use `rbfdot` as the kernel function. Compute train and test error,
+* Use [HTML table layout](../ch06/ch06-other#html-table-layout) for [`viz.linear.svm`](#linear-svm), so that the two feature space plots appear beside each other, and the "Select regularization parameter" plot appears above or below.
+* Use `rbfdot` as the kernel function. Compute subtrain and validation error,
   then add a new panel to the "select hyper parameters" plot.
-* By default ggplot2 uses the same two colors for the **y** and
+* Default scales use the same two colors for the **y** and
   **set** legends, which could be confusing. Change the colors in one
   of the two legends so that they are different.
 * Use `color` and `color_off` parameters to change the appearance of

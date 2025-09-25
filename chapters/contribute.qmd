@@ -1,27 +1,24 @@
----
-title: Contributing
-layout: default
-output: bookdown::html_chapter
----
+# Contributing
 
-This manual has been developed in the open, and it wouldn't be nearly as good 
-without your contributions. There are a number of ways you can help make the
-manual even better:
+This manual has been developed in the open, and it wouldn't be nearly as good without outside contributions.
+There are two primary ways you can help make the manual even better.
 
-* If you don't understand something, please 
-  [let me know](mailto:tdhock5@gmail.com). Your feedback on what is confusing
-  or hard to understand is valuable.
+## Reporting issues {#reporting-issues}
 
-* If you spot a typo, feel free to edit the underlying page and send a pull 
-  request. If you've never done this before, the process is very easy: 
+If you don't understand something in this manual, please let us know!
+Your feedback on what is confusing or hard to understand is valuable.
+
+* For most issues, please [report an issue](https://github.com/animint/animint-manual-en/issues/new) in public to animint developers in this GitHub repo. The link also appears on the right sidebar of each web page.
+* For issues which you would prefer to discuss privately, please [write me an email](mailto:Toby.Hocking@R-Project.org).
+
+## Submitting edits {#submitting-edits}
+
+If you spot a typo, or you know how to fix another issue, then feel free to edit the underlying page, and send a pull request:
   
-    * Click "edit this page" on the left sidebar.
-  
-    * Make the changes using github's in-page editor and save.
-    
-    * Submit a pull request including a brief description of your changes: 
-      "fixing typos" is perfectly adequate.
-      
-    * If you make significant changes, include the phrase "I assign the 
-      copyright of this contribution to Toby Dylan Hocking" - 
-	  I need this so I can publish the printed manual.
+* Click "<i class="bi bi-github"></i>Edit this page" on the right sidebar.
+* Make the changes using github's in-page editor and save.
+* Submit a pull request including a brief description of your changes: 
+  "fixing typos" is perfectly adequate.
+* If you make significant changes, include the phrase "I assign the 
+  copyright of this contribution to Toby Dylan Hocking" - 
+  I need this so I can publish the printed manual.
