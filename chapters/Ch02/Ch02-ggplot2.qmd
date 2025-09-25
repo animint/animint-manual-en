@@ -34,32 +34,25 @@ charting packages such as `lattice` were developed
 ([Sarkar, 2008](http://lmdvr.r-forge.r-project.org/figures/figures.html)). Such
 packages have several pre-defined chart types, and provide a dedicated
 function for creating each chart type. For example, `lattice` provides
-the `bwplot` function for making box and whisker plots. The advantage
-of such systems is that they make it much easier to create entire
-plots, including a legend and panels. The disadvantage is the set of
-pre-defined chart types, which means that it is not easy to create
-more complex graphics.
+the `bwplot` function for making box and whisker plots.
+The advantage of such systems is that they provide a column name specification interface that simplifies creation of entire plots, including legends and panels.
+Crucially, this column name specification interface allows for rapid experimentation with different plot designs (for example, exchanging the variables used for legends and panels).
+The disadvantage is the set of pre-defined chart types, which means that it is not easy to create more complex graphics (with several layers of geoms super-imposed on top of each other, each with its own data).
 
-Newer plotting systems based on the grammar of graphics are situated
-between these two extremes. Wilkinson proposed the grammar of graphics
+Newer plotting systems based on the grammar of graphics are situated between these two extremes.
+Wilkinson proposed the grammar of graphics
 in order to describe and create a large class of plots
-([Wilkinson, 2005](http://www.springer.com/us/book/9780387245447?wt_mc=GoogleBooks.GoogleBooks.3.EN&token=gbgen#otherversion=9780387286952)). Wickham
-later implemented several ideas from the grammar of graphics in the
+([Wilkinson, 2005](http://www.springer.com/us/book/9780387245447?wt_mc=GoogleBooks.GoogleBooks.3.EN&token=gbgen#otherversion=9780387286952)).
+Wickham later implemented several ideas from the grammar of graphics in the
 `ggplot2` R package
-([Wickham, 2009](https://www.amazon.com/dp/0387981403/ref=cm_sw_su_dp?tag=ggplot2-20)). The
-`ggplot2` package has several advantages with respect to previous
-plotting systems.
+([Wickham, 2009](https://www.amazon.com/dp/0387981403/ref=cm_sw_su_dp?tag=ggplot2-20)).
+The `ggplot2` package has several advantages with respect to previous plotting systems.
 
-* Like general plotting systems, and unlike `lattice`, `ggplot2`
-  imposes few limitations on the types of plots that can be created
-  (there are no pre-defined chart types).
-* Unlike general plotting systems, and like `lattice`, `ggplot2` makes
-  it easy to include common plot elements such as axes, panels, and
-  legends.
-* Since `ggplot2` is based on the grammar of graphics, an explicit
-  mapping of data variables to visual properties is required. Later in
-  this chapter, we will explain how this mapping allows sketches of
-  plot ideas to be directly translated into R code.
+* Like general plotting systems, and unlike `lattice`, `ggplot2` imposes few limitations on the types of plots that can be created (there are no pre-defined chart types).
+  So it is possible to create complex graphics, with different layers plotted on top of each other, each with its own data.
+* Unlike general plotting systems, and like `lattice`, `ggplot2` simplifies creation of legends and panels via a column name specification interface (and so makes it easy to rapidly experiment with using different variables in different plot designs).
+* Since `ggplot2` is based on the grammar of graphics, an explicit mapping of data variables to visual properties is required.
+  Later in this chapter, we will explain how this mapping allows sketches of plot ideas to be directly translated into R code.
 
 Finally, all of the previously discussed plotting systems are intended
 for creating *static* graphics, which can be viewed equally well on a
