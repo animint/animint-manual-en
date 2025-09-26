@@ -20,6 +20,9 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - name: Install headless chromium
+        run: quarto tools install chromium
+
       - name: Render book
         run: R --vanilla < render.R
 
