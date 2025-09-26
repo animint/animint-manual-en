@@ -688,7 +688,7 @@ animint(
   time=list(variable="month", ms=5000))
 ```
 
-## Chapter summary and exercises {#exercises}
+## Chapter summary and exercises {#Ch09-exercises}
 
 Exercises:
 
