@@ -1,6 +1,7 @@
 options(repos="http://cloud.r-project.org")
 for(p in c("penaltyLearning","future.apply","maps","lars","LambertW","kernlab","data.table","quarto"))if(!requireNamespace(p))install.packages(p)
 remotes::install_github("animint/animint2@screenshot-in-rmd")
+unlink("chapters/_book", recursive = TRUE)
 quarto::quarto_render("chapters")
 ## copy data viz to site.
 for(glob in c("chapters/*/animint.js", "chapters/Ch*/*/animint.js")){
