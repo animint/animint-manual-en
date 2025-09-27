@@ -25,30 +25,6 @@ book:
     background: "#f8f9fa"
   chapters:
     - index.qmd
-    - part: "animint2 basics"
-      chapters:
-        - Ch02/Ch02-ggplot2.qmd
-        - Ch03/Ch03-showSelected.qmd
-        - Ch04/Ch04-clickSelects.qmd
-        - Ch05/Ch05-sharing.qmd
-        - Ch06/Ch06-other.qmd
-        - Ch07/Ch07-limitations.qmd
-    - part: "Advanced examples"
-      chapters:
-        - Ch08/Ch08-WorldBank-facets.qmd
-        - Ch09/Ch09-Montreal-bikes.qmd
-        - Ch10/Ch10-nearest-neighbors.qmd
-        - Ch11/Ch11-lasso.qmd
-        - Ch12/Ch12-SVM.qmd
-        - Ch13/Ch13-poisson-regression.qmd
-        - Ch14/Ch14-PeakSegJoint.qmd
-        - Ch15/Ch15-Newton.qmd
-        - Ch16/Ch16-change-point.qmd
-        - Ch17/Ch17-k-means-clustering.qmd
-        - Ch18/Ch18-neural-networks.qmd
-  appendices:
-    - Ch99/Ch99-appendix.qmd
-    - contribute.qmd
 
 bibliography: refs.bib
 
