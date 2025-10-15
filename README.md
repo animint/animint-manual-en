@@ -4,4 +4,5 @@ Read [the rendered version of this manual](https://animint-manual-en.netlify.app
 
 ## Related work
 
-This repo uses quarto, and is adapted from code in the previous [animint-book repo](https://github.com/tdhock/animint-book) that used jekyll.
+* This repo uses quarto, and is adapted from code in the previous [animint-book repo](https://github.com/tdhock/animint-book) that used jekyll.
+* There is a [French translation](https://github.com/animint/animint-manual-fr) of this repo.
