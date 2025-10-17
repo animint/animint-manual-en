@@ -24,7 +24,7 @@ We start by reproducing a static version of Figure 13.4 from
 [Elements of Statistical Learning by Hastie et al](http://statweb.stanford.edu/~tibs/ElemStatLearn/). That
 Figure consists of two plots:
 
-![Static KNN viz](../Ch10/Ch10-viz-static.png)
+![Sketch of static data visualization of K-Nearest Neighbors classification](Ch10-viz-static.png)
 
 Left: mis-classification error curves, as a function of the number of
 neighbors.
@@ -179,7 +179,7 @@ practical or informative. Instead of visualizing them all at once, we
 will compute and plot summary statistics. In the code below we compute
 the mean and standard error of the mis-classification error for each
 model (over the 10 validation folds). This is an example of the
-[summarize data table idiom](../Ch99/Ch99-appendix.html#summarize-data-table)
+[summarize data table idiom](/Ch99#summarize-data-table)
 which is generally useful for computing summary statistics for a
 single data table.
 
@@ -405,7 +405,7 @@ In this section we propose an interactive re-design which allows the
 user to select K, the number of neighbors in the K-Nearest-Neighbors
 classifier.
 
-![Interactive KNN viz](../Ch10/Ch10-viz-interactive.png)
+![Sketch of interactive data visualization of K-Nearest Neighbors](Ch10-viz-interactive.png)
 
 ### Clickable error curves plot {#neighbors-error}
 
@@ -791,7 +791,7 @@ Exercises:
   plot are hidden after clicking the legend entries for Bayes, train,
   test. Hint: you can either use one `geom_text` with
   `showSelected=c(selectorNameColumn="selectorValueColumn")` (as
-  explained in [Chapter 14](../Ch14/Ch14-PeakSegJoint.html)) or two
+  explained in [Chapter 14](/Ch14)) or two
   `geom_text`, each with a different showSelected parameter.
 * The probability column of the show.grid data table is the predicted
   probability of class 1. How would you re-design the visualization to
@@ -811,5 +811,5 @@ Exercises:
   validation.fold, and a facetted feature space plot (one facet for
   train set, one facet for validation set). 
 
-Next, [Chapter 11](../Ch11/Ch11-lasso.html) explains how to visualize the
+Next, [Chapter 11](/Ch11) explains how to visualize the
 Lasso, a machine learning model.

@@ -16,13 +16,13 @@ This chapter gives an overview of data analysis and visualization.
 It provides motivation and a theoretical foundation for the other chapters, and should be especially useful for readers who are completely new to data analysis.
 It introduces the method of data visualization prototyping using sketches, without introducing R code.
 
-Starting with [chapter 2](Ch02/Ch02-ggplot2.html), we will show how plot
+Starting with [chapter 2](Ch02), we will show how plot
 sketches can be translated into R code. Chapter 2 explains the basics
 of plotting using ggplots and `animint2`, and should be most useful for
 readers who have never used `ggplot2`. It explains how standard ggplots
 can be rendered on web pages using `animint2`.
 
-[Chapter 3](Ch03/Ch03-showSelected.html) introduces showSelected, one of
+[Chapter 3](Ch03) introduces showSelected, one of
 the two main keywords that `animint2` introduces for interactive data
 visualization design. Chapter 3 begins by explaining selection
 variables, which provide the mechanism of interaction in
@@ -30,20 +30,20 @@ variables, which provide the mechanism of interaction in
 possible to plot data subsets. Chapter 3 also explains how to use
 smooth transitions and animation.
 
-[Chapter 4](Ch04/Ch04-clickSelects.html) introduces clickSelects, the other
+[Chapter 4](Ch04) introduces clickSelects, the other
 main keyword that `animint2` introduces for interactive data
 visualization design. The clickSelects keyword makes it possible for
 the user to change a selection variable by directly clicking on a plot
 element.
 
-[Chapter 5](Ch05/Ch05-sharing.html) explains several different ways to
+[Chapter 5](Ch05) explains several different ways to
 share your interactive data visualizations on the web.
 
-[Chapter 6](Ch06/Ch06-other.html) covers some other features of `animint2`,
+[Chapter 6](Ch06) covers some other features of `animint2`,
 including how to specify hyperlinks, tooltips, data-driven selector
 variable names.
 
-[Chapter 7](Ch07/Ch07-limitations.html) covers the limitations of the
+[Chapter 7](Ch07) covers the limitations of the
 current implementation of the `animint2` R package, and explains
 workarounds for some common issues. It also includes some ideas for
 improvements, for those who would like to contribute to `animint2`.
@@ -54,44 +54,44 @@ The remaining chapters can be read in any order, since each
 chapter explains how to make data visualizations for a particular data
 set. 
 
-[Chapter 8](Ch08/Ch08-WorldBank-facets.html) explains how to create a multi-panel interactive World Bank
+[Chapter 8](Ch08) explains how to create a multi-panel interactive World Bank
 data visualization.
 
-[Chapter 9](Ch09/Ch09-Montreal-bikes.html) shows a visualization of data from cyclists in Montreal.
+[Chapter 9](Ch09) shows a visualization of data from cyclists in Montreal.
 
-[Chapter 10](Ch10/Ch10-nearest-neighbors.html) explains how to create an
+[Chapter 10](Ch10) explains how to create an
 interactive re-design of the nearest neighbors data visualization from
 the Elements of Statistical Learning book by Hastie et al.
 
-[Chapter 11](Ch11/Ch11-lasso.html) shows a data visualization that explains the Lasso, a
+[Chapter 11](Ch11) shows a data visualization that explains the Lasso, a
 machine learning model for regularized regression.
 
-[Chapter 12](Ch12/Ch12-SVM.html) shows a data visualization that explains support vector
+[Chapter 12](Ch12) shows a data visualization that explains support vector
 machines (SVM), a machine learning model for binary classification.
 
-[Chapter 13](Ch13/Ch13-poisson-regression.html) explains how to create an
+[Chapter 13](Ch13) explains how to create an
 interactive visualization that explains the Poisson regression model.
 
-[Chapter 14](Ch14/Ch14-PeakSegJoint.html) shows an example of how to create
+[Chapter 14](Ch14) shows an example of how to create
 data-driven selectors using named clickSelects/showSelects in an
 interactive visualization of a peak detection model.
 
-[Chapter 15](Ch15/Ch15-Newton.html) explains how to create an interactive
+[Chapter 15](Ch15) explains how to create an interactive
 visualization of the Newton root-finding algorithm.
 
-[Chapter 16](Ch16/Ch16-change-point.html) explains how to create an interactive
+[Chapter 16](Ch16) explains how to create an interactive
 visualization of an optimal changepoint detection model.
 
-[Chapter 17](Ch17/Ch17-k-means-clustering.html) explains how to create an
+[Chapter 17](Ch17) explains how to create an
 interactive visualization of the k-means clustering algorithm.
 
-[Chapter 18](Ch18/Ch18-neural-networks.html) explains how to create an
+[Chapter 18](Ch18) explains how to create an
 interactive visualization of the gradient descent algorithm for
 learning neural network weight matrices.
 
 ### Appendices {#appendices}
 
-[Useful idioms](Ch99/Ch99-appendix.html) contains detailed explanations of several R code idioms that are used throughout this manual.
+[Useful idioms](Ch99) contains detailed explanations of several R code idioms that are used throughout this manual.
 
 [The contributing guide](contribute.html) contains instructions about how you can contribute improvments to this manual.
 
@@ -358,4 +358,4 @@ This chapter explained some basic facts about data, and gave definitions of diff
 * Based on the definitions introduced in this chapter, what is the difference between small and medium data?
 * What is the difference between medium and large data?
 
-Next, [Chapter 2](Ch02/Ch02-ggplot2.html) explains how the grammar of graphics can be used to create data visualizations.
+Next, [Chapter 2](Ch02) explains how the grammar of graphics can be used to create data visualizations.

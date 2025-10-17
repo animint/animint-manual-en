@@ -702,4 +702,4 @@ Exercises:
 * Remove the `MonthSummary` plot and add a similar visualization as a
   third panel in the `MonthFacet` plot.
 
-Next, [Chapter 10](../Ch10/Ch10-nearest-neighbors.html) explains how to visualize the K-Nearest-Neighbors machine learning model.
+Next, [Chapter 10](/Ch10) explains how to visualize the K-Nearest-Neighbors machine learning model.

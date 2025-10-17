@@ -29,9 +29,9 @@ In fact, we have already used the showSelected keyword, which was
 automatically created by the interactive legends that we created in
 the previous two chapters. For example, consider the sketch below of
 the
-[Keeling Curve data visualization from Chapter 1](../Ch01/Ch01-motivation.html#large-data).
+[Keeling Curve data visualization from Chapter 1](/Ch01#large-data).
 
-![CO2 data viz](../Ch03/Ch03-viz-co2.png)
+![CO2 data viz](Ch03-viz-co2.png)
 
 The sketch above includes `showSelected=month` for the `geom_point`,
 meaning that it should show the subset of data for the selected
@@ -42,7 +42,7 @@ months. In contrast, since the `geom_line` does not include
 As another example, consider the sketch below of the first WorldBank
 data visualization from Chapter 2.
 
-![WorldBank data viz with showSelected](../Ch03/Ch03-viz-showSelectedColor.png)
+![WorldBank data viz with showSelected](Ch03-viz-showSelectedColor.png)
 
 The sketch above specifies `showSelected=region` for the `geom_point`,
 meaning that it should show the subset of data for the selected
@@ -77,7 +77,7 @@ visualization of the World Bank data that has selection variables for
 Consider the following sketch which adds a `showSelected` variable,
 and changes the data set. 
 
-![WorldBank data viz with showSelected](../Ch03/Ch03-viz-scatter.png)
+![WorldBank data viz with showSelected](Ch03-viz-scatter.png)
 
 Note that there are two `showSelected` variables, `region` and
 `year`. Also note that the data is specified as all years (but only
@@ -141,7 +141,7 @@ the fertility rate and life expectancy of all the countries in the
 year that you selected.
 
 **Multi-layer exercise:** Add another geom to this interactive
-scatterplot. As in [Chapter 2](../Ch02/Ch02-ggplot2.html#multi-layer), you can
+scatterplot. As in [Chapter 2](/Ch02#multi-layer), you can
 use a `geom_text` to show the name of each country (easy), or a
 `geom_text` to show the selected year (medium), or a `geom_path` to
 show the previous 5 years of data (hard). Hint: make sure to specify
@@ -274,11 +274,11 @@ Exercises:
   to an animint. Hint: in the code for the animation package there is
   always a for loop over the time variable. Instead of calling a
   plotting function inside the for loop, use the
-  [list of data tables idiom](../Ch99/Ch99-appendix.html#list-of-data-tables)
+  [list of data tables idiom](/Ch99#list-of-data-tables)
   to store the data that should be plotted. Then use those data along
   with `showSelected` to create ggplots, and render them
   using animint.
 
-Next, [Chapter 4](../Ch04/Ch04-clickSelects.html) explains the `clickSelects`
+Next, [Chapter 4](/Ch04) explains the `clickSelects`
 keyword, which indicates a geom that can be clicked to update a
 selection variable.

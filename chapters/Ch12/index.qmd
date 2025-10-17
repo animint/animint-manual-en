@@ -237,7 +237,7 @@ animint(
 ```
 
 Note how we used two multi-panel plots with the
-[addColumn then facet](../Ch99/Ch99-appendix.html#addColumn-then-facet) idiom,
+[addColumn then facet](/Ch99#addColumn-then-facet) idiom,
 rather than creating four separate plots. This emphasizes the fact
 that some plots/facets have a common `x1` or `x1.sq` axis. Note that
 we also hid the color legend in the first plot, since it is sufficient
@@ -783,7 +783,7 @@ hyper-parameters.
 
 Exercises:
 
-* Use [HTML table layout](../ch06/ch06-other#html-table-layout) for [`viz.linear.svm`](#linear-svm), so that the two feature space plots appear beside each other, and the "Select regularization parameter" plot appears above or below.
+* Use [HTML table layout](/ch06#html-table-layout) for [`viz.linear.svm`](#linear-svm), so that the two feature space plots appear beside each other, and the "Select regularization parameter" plot appears above or below.
 * Use `rbfdot` as the kernel function. Compute subtrain and validation error,
   then add a new panel to the "select hyper parameters" plot.
 * Default scales use the same two colors for the **y** and
@@ -792,7 +792,7 @@ Exercises:
 * Use `color` and `color_off` parameters to change the appearance of
   the `geom_tile` when selected or not, as explained in [Chapter 6,
   section Specifying how selection state is
-  displayed](../Ch06/Ch06-other.html#display-selection-state).
+  displayed](/Ch06#display-selection-state).
 
-Next, [Chapter 13](../Ch13/Ch13-poisson-regression.html) explains how to
+Next, [Chapter 13](/Ch13) explains how to
 visualize the Poisson regression model.

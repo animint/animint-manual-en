@@ -5,7 +5,7 @@ knitr::opts_chunk$set(fig.path="Ch14-figures/")
 ```
 
 This chapter explains how to use
-[named clickSelects/showSelected variables](../Ch06/Ch06-other.html#data-driven-selectors) for
+[named clickSelects/showSelected variables](/Ch06#data-driven-selectors) for
 creating data-driven selector names. This feature makes it easier to
 write animint code, and makes it faster to compile.
 
@@ -251,7 +251,7 @@ print(timing.for.compile <- system.time({
 
 Note that the compilation also takes a long time, since there are so
 many geoms. The data viz can be viewed on
-[Ch14-for/index.html](../Ch14/Ch14-for/index.html). In the next section we
+[Ch14-for/index.html](Ch14-for). In the next section we
 will create the same data viz, but more efficiently.
 
 ## Define data viz using named clickSelects/showSelected {#define-using-named}
@@ -424,7 +424,7 @@ print(timing.named.compile <- system.time({
 ```
 
 The animint produced above can be viewed on
-[Ch14-named/index.html](../Ch14/Ch14-named/index.html). Note that it
+[Ch14-named/index.html](Ch14-named). Note that it
 should appear to be the same as the other data viz above. The timings
 above show that named clickSelects/showSelected are much faster
 than for loops, in both the definition and compilation steps.
@@ -470,5 +470,5 @@ Exercises:
 * Use named clickSelects/showSelected to create a visualization
   of some data from your domain of expertise.
 
-Next, [Chapter 15](../Ch15/Ch15-Newton.html) explains how to visualize
+Next, [Chapter 15](/Ch15) explains how to visualize
 root-finding algorithms.

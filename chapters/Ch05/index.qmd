@@ -103,12 +103,8 @@ Since animints are just directories with HTML, TSV, and JavaScript
 files, you can publish them on any web server by simply copying the
 directory to that server.
 
-For example I executed the World Bank data viz example code to create the `WorldBank-facets` directory on my personal computer.[^1]
-I copied that directory to my lab web server using `rsync -r WorldBank-facets/ monsoon.hpc.nau.edu:genomic-ml/WorldBank-facets/` and so I can view it on my university web server.[^2]
-
-[^1] <https://github.com/animint/animint2/blob/master/inst/examples/WorldBank-facets.R>
-
-[^2] <https://rcdata.nau.edu/genomic-ml/WorldBank-facets/>
+For example I executed the World Bank data viz example code to create the `WorldBank-facets` directory on my personal computer.^[<https://github.com/animint/animint2/blob/master/inst/examples/WorldBank-facets.R>]
+I copied that directory to my lab web server using `rsync -r WorldBank-facets/ monsoon.hpc.nau.edu:genomic-ml/WorldBank-facets/` and so I can view it on my university web server.^[<https://rcdata.nau.edu/genomic-ml/WorldBank-facets/>]
 
 If you don't have access to a personal/lab web server, try using
 one of the methods described below, which are free for anyone.
@@ -143,6 +139,8 @@ gert::git_config_global_set("user.name", "<your_full_name>")
 gert::git_config_global_set("user.email", "<your_email>")
 ```
 
+Before publishing, make sure that your `viz` object has the [`title`](/Ch06#title-option) and [`source`](/Ch06#source-option) options, which are required by default, in order to encourage interpretability and reproducibility.
+
 You can then use `animint2pages(viz, "new_repo")` function to publish
 your data `viz` to the `gh-pages` branch of
 `your_github_username/new_repo` (note that `your_github_username` is
@@ -161,7 +159,7 @@ specified repository.
 Beware that GitHub Pages imposes a limit of 100MB per file. For most
 animints, this limit should not be a problem. If your data viz
 contains a TSV file over 100MB, consider using the
-[`chunk_vars`](https://rcdata.nau.edu/genomic-ml/animint2-manual/Ch06-other.html#geom-options)
+[`chunk_vars`](/ch06#chunk-vars)
 option to break that TSV file into several smaller files.
 
 ## Organizing animints in a gallery {#gallery}
@@ -217,9 +215,9 @@ the following method:
 There is a recommended sequence of actions for creating and publishing animints, which we call the `animint2` GitHub deployment steps, because GitHub is used for publishing and reproducibility.
 
 * Begin by writing some visualization code in `figure-name.R` in a GitHub repository, where `name` is an informative name for your data visualization. For example, the [tdhock/cs499-spring2020](https://github.com/tdhock/cs499-spring2020) GitHub repository contains visualization code in [figure-quadratic-interactive.R](https://github.com/tdhock/cs499-spring2020/blob/master/2020-02-03-capacity/figure-quadratic-interactive.R).
-* Commit and push the R code file to GitHub, so you can get a public URL that you can add in your R code as the [`source` option](https://animint-manual-en.netlify.app/ch06/ch06-other#source-option), for example `source="https://github.com/tdhock/cs499-spring2020/blob/master/2020-02-03-capacity/figure-quadratic-interactive.R"`.
-* Add a [`title` option](https://animint-manual-en.netlify.app/ch06/ch06-other#title-option) in your R code, for example `title="Overfitting using linear model polynomial degree"`.
-* Use [HTML table layout](https://animint-manual-en.netlify.app/ch06/ch06-other#html-table-layout) to make sure that the ggplots in your visualisation always have the same arrangement (in any size web browser window).
+* Commit and push the R code file to GitHub, so you can get a public URL that you can add in your R code as the [`source` option](/Ch06#source-option), for example `source="https://github.com/tdhock/cs499-spring2020/blob/master/2020-02-03-capacity/figure-quadratic-interactive.R"`.
+* Add a [`title` option](/Ch06#title-option) in your R code, for example `title="Overfitting using linear model polynomial degree"`.
+* Use [HTML table layout](/Ch06#html-table-layout) to make sure that the ggplots in your visualisation always have the same arrangement (in any size web browser window).
 * Optionally, create a 2-5 minute screencast video with voice narration that explains how to interpret and interact with the visualization. Upload the video to a site like [vimeo](https://vimeo.com) (up to 1GB free hosting without advertisement), then add a [`video` option](https://animint-manual-en.netlify.app/ch06/ch06-other#video-option) in your R code, for example `video="https://vimeo.com/1127992420"`.
 * At this point, using `animint()` or `animint2dir()` to output your visualization to a local directory of files should result in working "source" and "video" links at the bottom.
 * Before publishing your visualization on GitHub, make sure that you can create an automatic screenshot, which requires `chromote` and `magick` packages, `install.packages(c("chromote","magick"))`.
@@ -261,5 +259,5 @@ Exercises:
 * Create your own animint gallery repository, and add two or more of
   your own animints to that gallery.
   
-Next, [Chapter 6](../Ch06/Ch06-other.html) explains the different options that
+Next, [Chapter 6](/Ch06) explains the different options that
 can be used to customize an animint.

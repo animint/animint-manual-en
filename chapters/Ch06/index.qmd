@@ -29,7 +29,7 @@ This section explains the new aesthetics that are recognized by `animint2`.
 First we discuss the new aesthetics that we have already introduced in
 previous chapters.
 
-[Chapter 3](../Ch03/Ch03-showSelected.html#duration-key) also introduced
+[Chapter 3](/Ch03#duration-key) also introduced
 `aes(key)` to designate a variable to use for smooth transitions that
 are interpretable.
 
@@ -111,11 +111,11 @@ per state/region, and each id must be unique on a web page. The
 
 ### Data-driven selector names using named clickSelects and showSelected {#data-driven-selectors}
 
-[Chapter 3](../Ch03/Ch03-showSelected.html#selecting-with-menus) introduced
+[Chapter 3](/Ch03#selecting-with-menus) introduced
 `showSelected` for designating a geom which shows only
 the selected subset of its data.
 
-[Chapter 4](../Ch04/Ch04-clickSelects.html#clickSelects-keyword) introduced
+[Chapter 4](/Ch04#clickSelects-keyword) introduced
 `clickSelects` to designate a geom which can be clicked to change
 a selection variable.
 
@@ -179,7 +179,7 @@ This feature is useful not only to avoid
 repetition in the definition of the data viz, but also because they
 are more computationally efficient. For a detailed example with
 timings and disk space measurements, see
-[Chapter 14](../Ch14/Ch14-PeakSegJoint.html).
+[Chapter 14](/Ch14).
 
 ## New geoms {#new-geoms}
 
@@ -189,8 +189,8 @@ There are several new geoms in `animint2`, with respect to the geoms that are pr
 
 Tall and wide rectangles are special cases of `geom_rect` which by default cover the entire Y/X range.
 
-* `geom_tallrect()` covers the entire Y range, and was first introduced in [Chapter 4](../Ch04/Ch04-clickSelects.html).
-* `geom_widerect()` covers the entire X range, and is discussed in [Chapter 8](../Ch08/Ch08-WorldBank-facets.html).
+* `geom_tallrect()` covers the entire Y range, and was first introduced in [Chapter 4](/Ch04).
+* `geom_widerect()` covers the entire X range, and is discussed in [Chapter 8](/Ch08).
 
 Both are useful in combination with `clickSelects`, so we also provide helper functions for this common use case:
 
@@ -204,14 +204,14 @@ Both of these are capable of showing smooth transitions for the selected rectang
 * in each `showSelected` subset, the selected value has a special `aes(key)` value.
 * so the result is a smooth transition: when we change the selection, we see the selected/special row moving to its new position (and all of the others are invisible).
 
-For more discussion about this technique, see [Chapter 11](../Ch11/Ch11-lasso.html).
+For more discussion about this technique, see [Chapter 11](/Ch11).
 
 ### Aligned labels for avoiding overlapping text {#geom-text-aligned}
 
 When using multiple selection, it is often useful to display text labels to indicate the items in the selection set.
 When labels are aligned (with the same X or Y value), then `geom_label_aligned()` can be used to adjust positions, to avoid overlapping labels.
 For example, the [WorldBank data visualization](https://tdhock.github.io/2025-01-WorldBank-facets-map/) shows a text label before the first year of each selected country's time series.
-For more discussion about this technique, see [Chapter 8](../Ch08/Ch08-WorldBank-facets.html).
+For more discussion about this technique, see [Chapter 8](/Ch08).
 
 ## Geom options {#geom-options}
 
@@ -253,7 +253,7 @@ for every file.
 To illustrate the usage of `chunk_vars`, consider the following
 visualization of the `breakpoints` data set.
 
-![Breakpoints data viz](../Ch06/Ch06-viz-breakpoints.png)
+![Sketch of breakpoints data visualization](Ch06-viz-breakpoints.png)
 
 The sketch above consists of two plots. We begin by creating the plot
 of error curves on the left.
@@ -643,18 +643,18 @@ not ggplots.
 
 ### Review of previously introduced global options {#review-global}
 
-[Chapter 3](../Ch03/Ch03-showSelected.html#duration-key) introduced the
+[Chapter 3](/Ch03#duration-key) introduced the
 `duration` option for specifying the duration of smooth transitions.
 
-[Chapter 3](../Ch03/Ch03-showSelected.html#animation-time) introduced the
+[Chapter 3](/Ch03#animation-time) introduced the
 `time` option for specifying a selection variable which is
 automatically updated (animation).
 
-[Chapter 4](../Ch04/Ch04-clickSelects.html#first-option) introduced the
+[Chapter 4](/Ch04#first-option) introduced the
 `first` option for specifying the selection when the data viz is first
 rendered.
 
-[Chapter 4](../Ch04/Ch04-clickSelects.html#selector-types-option) introduced
+[Chapter 4](/Ch04#selector-types-option) introduced
 the `selector.types` option for specifying multiple selection
 variables.
 
@@ -673,7 +673,9 @@ animint2dir(viz.title, "Ch06-title")
 
 Note that `viz.scale.size` already has three ggplots, each with a
 `ggtitle`. Adding the global `title` option has the effect of defining
-a title for [the web page](../Ch06/Ch06-title/index.html).
+a title for [the web page](/Ch06/Ch06-title).
+
+Additionally, when organizing animints in a [gallery](/Ch05#gallery), the `title` option is used as the name of the data visualization.
 
 ### Link R code with source option {#source-option}
 
@@ -692,8 +694,8 @@ animint(
 
 Note above how there is a source link at the bottom of the data viz.
 
-Chapter 5 introduced the [`animint2pages`](../Ch05/Ch05-sharing.html#pages) function, which is used to publish an animint to GitHub Pages.
-It requires that the animint defines the `title` and `source` options, because that meta-data is required for organizing the animint in a [gallery](../Ch05/Ch05-sharing.html#gallery).
+Chapter 5 introduced the [`animint2pages()`](/Ch05#pages) function, which is used to publish an animint to GitHub Pages.
+By default, it requires that the animint defines the `title` and `source` options, because that meta-data is required for organizing the animint in a [gallery](/Ch05#gallery).
 
 ### Link a video {#video-option}
 
@@ -753,5 +755,4 @@ Exercises:
   choice of `chunk_vars` affect the appearance of the visualization?
   The disk space? The loading time?
 
-Next, [Chapter 7](../Ch07/Ch07-limitations.html) explains the limitations of
-the current implementation of `animint2`.
+Next, [Chapter 7](/Ch07) explains the limitations of the current implementation of `animint2`.

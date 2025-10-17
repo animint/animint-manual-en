@@ -31,7 +31,7 @@ automatically created for the interactive legends in the previous
 chapters. For example, consider the sketch of the World Bank data viz
 from the last chapter.
 
-![legend clickSelects](../Ch04/Ch04-legend-clickSelects.png)
+![Sketch of World Bank data visualization with clickSelects](Ch04-legend-clickSelects.png)
 
 Since the legend has `clickSelects=region`, clicking an entry of that
 legend updates the `region` selection variable. Note that animint
@@ -56,7 +56,7 @@ interactive data visualizations.
 The goal of this section is to create the following visualization of
 the World Bank data.
 
-![World Bank viz text](../Ch04/Ch04-viz-text-single.png)
+![Sketch of World Bank data visualization with text for one selected country](Ch04-viz-text-single.png)
 
 To start, consider the following R code which generates a
 scatterplot of the World Bank data:
@@ -211,7 +211,7 @@ version of the scatterplot in the last section. The sketch below has
 only one difference with respect to the sketch from the last section:
 text labels are shown for more than one country.
 
-![World Bank viz text](../Ch04/Ch04-viz-text.png)
+![Sketch of World Bank data visualization with text for several selected countries](Ch04-viz-text.png)
 
 In animint, each selection variable has a type, either single or
 multiple. Single selection means that only one value can be selected
@@ -259,7 +259,7 @@ directly clicked to change the year variable.
 The goal of this section is to add a time series plot that can be
 clicked to change the selected year.
 
-![World Bank time series](../Ch04/Ch04-ggplot-time-series-plot.png)
+![Sketch of World Bank data visualization with time series](Ch04-ggplot-time-series-plot.png)
 
 Note that the sketch above includes `geom_tallrect`, a new geom
 introduced in animint. It is "tall" because it occupies the entire
@@ -300,7 +300,7 @@ viz.timeSeries
   
 **Animation exercise:** make the data viz animated by specifying the
   `time` option,
-  [as explained in Chapter 3](../Ch03/Ch03-showSelected.html#animation-time).
+  [as explained in Chapter 3](/Ch03#animation-time).
 
 **Multi-layer exercise:** add a `geom_text` that shows the current
   year on the scatterplot. Add a `geom_path` that shows data for the
@@ -311,10 +311,10 @@ viz.timeSeries
 The goal of this section is to add a facet with a time series plot
 that can be clicked to change the selected year.
 
-![World Bank scatter facet](../Ch04/Ch04-ggplot-scatterFacet.png)
+![World Bank scatter facet](Ch04-ggplot-scatterFacet.png)
 
 First, we re-create the scatterplot from the previous section using the
-[addColumn then facet idiom](../Ch99/Ch99-appendix.html#addColumn-then-facet), 
+[addColumn then facet idiom](/Ch99#addColumn-then-facet), 
 which is useful for creating ggplots
 with aligned axes.
 
@@ -390,7 +390,7 @@ parameters in the geom (not aes) to freely create a different
 appearance for selected and un-selected items, instead of being forced
 to rely on the behavior described above. For more information, see the
 discussion and example in [Chapter 6, section Specifying how selection
-state is displayed](../Ch06/Ch06-other.html#display-selection-state).
+state is displayed](/Ch06#display-selection-state).
 
 Finally, we use the R code below to render the new aligned scatterplot
 and time series using animint.
@@ -446,5 +446,5 @@ Exercises:
   a Tour which is more informative about what is displayed in each
   geom.
 
-Next, [Chapter 5](../Ch05/Ch05-sharing.html) explains several different
+Next, [Chapter 5](/Ch05) explains several different
 methods for publishing and sharing animints on the web.
