@@ -109,77 +109,130 @@ per state/region, and each id must be unique on a web page. The
 `animint2` developers use this feature
 [for testing the animint JavaScript renderer code](https://github.com/tdhock/animint/wiki/Testing).
 
-### Data-driven selector names using named clickSelects and showSelected {#data-driven-selectors}
+### Data compression using `aes(group)` {#aes-group}
 
-[Chapter 3](/Ch03#selecting-with-menus) introduced
-`showSelected` for designating a geom which shows only
-the selected subset of its data.
+Normally `aes(group)` is used to define different lines, paths, polygons, or ribbons.
+In `animint2` it has a secondary usage, for defining how to perform data compression (and can be used with other geoms).
+It should be set to an identifier with common data across different `showSelected` subsets.
+Consider the following simple example: we have monthly data for a number of years and countries.
 
-[Chapter 4](/Ch04#clickSelects-keyword) introduced
-`clickSelects` to designate a geom which can be clicked to change
-a selection variable.
-
-Usually selector names are defined in  `showSelected` or
-`clickSelects`. For example, `showSelected=c("year", "country")` means
-to create two selection variables (named `year` and
-`country`). However, that method becomes
-inconvenient if you have many selectors in your data viz. To
-illustrate we consider the following theoretical example (the code in
-this section is not directly executable). Say you want to use 20
-different selector variable names, `selector1value`
-... `selector20value`. The usual way to define your data viz would be
-
-```{r, eval=FALSE}
-viz <- list(
-  points=ggplot()+
-    geom_point(clickSelects="selector1value", data=data1)+
-    ...
-    geom_point(clickSelects="selector20value", data=data20)
-)
+```{r}
+month.dt <- rbind(
+  data.table(year=1, month=10:12),
+  data.table(year=2, month=1:12),
+  data.table(year=3, month=1:5))
+set.seed(1)
+country.dt <- rbind(
+  data.table(month.dt, country="USA")[, value := rnorm(.N, 5)][-.N],
+  data.table(month.dt, country="Canada")[, value := rnorm(.N, 9)][-1])
+country.dt
 ```
 
-However that method is bad since it violates the DRY principle (Don't
-Repeat Yourself). Another way to do that would be to use a for loop:
+The output above shows a table with one row per year and country.
+We use these data in the visualization below.
 
-```{r, eval=FALSE}
-viz <- list(points=ggplot())
-for(selector.name in paste0("selector", 1:20, "value")){
-  data.for.selector <- all.data.list[[selector.name]]
-  viz$points <- viz$points +
-    geom_point(clickSelects=selector.name, data=data.for.selector)
+```{r Ch06-viz-group}
+animint(
+  ggplot()+
+    geom_point(aes(
+      month, value, color=country),
+      data=country.dt,
+      showSelected="year"))
+```
+
+This data visualization contains two columns with common data values across years which could be compressed:
+
+* `country` is either USA or Canada.
+* `month` is an integer from 1 to 12.
+
+To analyze the different kinds of compression we can attempt, we define a helper function, which will compile the animint and then summarize its TSV files.
+
+```{r}
+animint_tsv <- function(...){
+  viz <- animint(...)
+  info <- animint2dir(viz, "Ch06tsv")
+  tsv.files <- Sys.glob(file.path(info$out.dir,"*.tsv"))
+  sapply(tsv.files, fread, nrow=3, simplify=FALSE)
 }
 ```
 
-That method is bad since it is slow to construct `viz`, and the
-compiled viz potentially takes up a lot of disk space since there is
-at least one TSV file created for each `geom_point`. The preferable
-method is to use a named character vector for `clickSelects`. The
-names should be used to indicate the column that contains the selector
-variable name. For example:
+Below we use the function to analyze the previous visualization,
 
-```{r, eval=FALSE}
-viz <- list(
-  points=ggplot()+
-    geom_point(
-      clickSelects=c(selector.name="selector.value"),
-      data=all.data)
-)
+```{r}
+animint_tsv(
+  ggplot()+
+    geom_point(aes(
+      month, value, color=country),
+      data=country.dt,
+      showSelected="year"))
 ```
 
-The `animint2dir()` compiler looks through the data.frame `all.data` and
-create selectors for each of the distinct values of
-`all.data$selector.name`. Clicking one of the data points updates the
-corresponding selector with the value indicated in
-`all.data$selector.value`.
+The output above shows a list of one data table, which means that there is only one TSV file output by default, since this is a relatively small data set.
+Compression is not used when there is only one TSV file output.
+To study compression, we force creating separate files for this geom, by adding the `chunk_vars` parameter:
 
-You can similarly use one geom with a named `showSelected` instead of
-a bunch of different geoms with `showSelected`.
+```{r}
+animint_tsv(
+  ggplot()+
+    geom_point(aes(
+      month, value, color=country),
+      data=country.dt,
+      chunk_vars="year",
+      showSelected="year"))
+```
 
-This feature is useful not only to avoid
-repetition in the definition of the data viz, but also because they
-are more computationally efficient. For a detailed example with
-timings and disk space measurements, see
-[Chapter 14](/Ch14).
+The output above is a list of three data tables, one for each year.
+They have the same columns as the previous TSV file (output with no `chunk_vars`), so there is no compression.
+To enable compression in these data, we specify `aes(group=country)` in the code below.
+This tells the compiler to check if there are common data values for each `country`, across the different values of `year`.
+
+```{r}
+animint_tsv(
+  ggplot()+
+    geom_point(aes(
+      month, value, color=country, group=country),
+      data=country.dt,
+      chunk_vars="year",
+      showSelected="year"))
+```
+
+The output above is a list of four data tables which exhibit compression:
+
+* The first three are numbered chunks, one for each year, and columns `group`, `x`, `y`. These are the columns which have different values in each group (`x` and `y` are different for each country, across years).
+* The last one is the common chunk, with one row per country/group, and columns `group`, `colour`, `fill`, `showSelected2`. These are the columns which have common values in each group (same for each country, across years).
+
+Below we use `aes(group=month)` for comparison:
+
+```{r}
+animint_tsv(
+  ggplot()+
+    geom_point(aes(
+      month, value, color=country, group=month),
+      data=country.dt,
+      chunk_vars="year",
+      showSelected="year"))
+```
+
+The output above is a list of three data tables (all numbered chunks), with no common chunk TSV file.
+Compression was not used in this case, because there is only one column (`x`) with one common value in each group/month, across years.
+To get compression when `group=month`, we would need at least two variables that are specific to each group across years, as shown in the example below:
+
+```{r}
+animint_tsv(
+  ggplot()+
+    geom_point(aes(
+      month, value, color=month, group=month),
+      data=country.dt,
+      chunk_vars="year",
+      showSelected="year"))
+```
+
+The output above is a list of four data tables which exhibit compression:
+
+* The first three are numbered chunks, one for each year, and columns `group`, `y`. The only column which has different values in each group/month across years is `y`.
+* The last one is the common chunk, with one row per country/month, and columns `group`, `colour`, `fill`, `x`. These are the columns which have common values in each group (same for each month, across years).
+
+In conclusion, we have seen several examples about how `aes(group)` can be used for data compression.
 
 ## New geoms {#new-geoms}
 
@@ -396,6 +449,78 @@ number of TSV files created for each geom. When deciding the value of
 `chunk_vars`, you should consider both disk usage and loading time. A
 few large files take up less disk space but are slower to download
 than many small files.
+
+### Data-driven selector names using named `clickSelects` and `showSelected` {#data-driven-selectors}
+
+[Chapter 3](/Ch03#selecting-with-menus) introduced
+`showSelected` for designating a geom which shows only
+the selected subset of its data.
+
+[Chapter 4](/Ch04#clickSelects-keyword) introduced
+`clickSelects` to designate a geom which can be clicked to change
+a selection variable.
+
+Usually selector names are defined in `showSelected` or
+`clickSelects`. For example, `showSelected=c("year", "country")` means
+to create two selection variables (named `year` and
+`country`). However, that method becomes
+inconvenient if you have many selectors in your data viz. To
+illustrate we consider the following theoretical example (the code in
+this section is not directly executable). Say you want to use 20
+different selector variable names, `selector1value`
+... `selector20value`. The usual way to define your data viz would be
+
+```{r, eval=FALSE}
+viz <- list(
+  points=ggplot()+
+    geom_point(clickSelects="selector1value", data=data1)+
+    ...
+    geom_point(clickSelects="selector20value", data=data20)
+)
+```
+
+However that method is bad since it violates the DRY principle (Don't
+Repeat Yourself). Another way to do that would be to use a for loop:
+
+```{r, eval=FALSE}
+viz <- list(points=ggplot())
+for(selector.name in paste0("selector", 1:20, "value")){
+  data.for.selector <- all.data.list[[selector.name]]
+  viz$points <- viz$points +
+    geom_point(clickSelects=selector.name, data=data.for.selector)
+}
+```
+
+That method is bad since it is slow to construct `viz`, and the
+compiled viz potentially takes up a lot of disk space since there is
+at least one TSV file created for each `geom_point`. The preferable
+method is to use a named character vector for `clickSelects`. The
+names should be used to indicate the column that contains the selector
+variable name. For example:
+
+```{r, eval=FALSE}
+viz <- list(
+  points=ggplot()+
+    geom_point(
+      clickSelects=c(selector.name="selector.value"),
+      data=all.data)
+)
+```
+
+The `animint2dir()` compiler looks through the data.frame `all.data` and
+create selectors for each of the distinct values of
+`all.data$selector.name`. Clicking one of the data points updates the
+corresponding selector with the value indicated in
+`all.data$selector.value`.
+
+You can similarly use one geom with a named `showSelected` instead of
+a bunch of different geoms with `showSelected`.
+
+This feature is useful not only to avoid
+repetition in the definition of the data viz, but also because they
+are more computationally efficient. For a detailed example with
+timings and disk space measurements, see
+[Chapter 14](/Ch14).
 
 ### Specifying how selection state is displayed {#display-selection-state}
 
