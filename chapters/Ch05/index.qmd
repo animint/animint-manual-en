@@ -228,7 +228,7 @@ There is a recommended sequence of actions for creating and publishing animints,
 * If you want to make larger modifications, it is recommended to copy the R code to a new file, for example [figure-several-interactive.R](https://github.com/tdhock/cs499-spring2020/blob/master/2020-02-03-capacity/figure-several-interactive.R) for a new visualization with an additional selector for `pattern`.
 * Then repeat the steps in this list for the new file!
 
-The GitHub deployment steps are useful because they result in data visualizations that is reproducible due to various links.
+The GitHub deployment steps are useful because they result in a data visualization that is reproducible due to various links.
 
 * The data visualization has links to the corresponding `source` code and explanatory `video`.
 * The gallery entry has links to the data visualization, along with its `source` code and explanatory `video`.

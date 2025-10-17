@@ -58,10 +58,8 @@ str(ESL.mixture)
 
 We will use the following components of this data set:
 
-* `x`, the input matrix of the training data set (200 observations x 2
-  numeric features). 
-* `y`, the output vector of the training data set (200 class labels,
-  either 0 or 1).
+* `x`, the input matrix (200 observations x 2 numeric features) of the data which will be split into train and validation sets.
+* `y`, the output vector (200 class labels, either 0 or 1) of the data which will be split into train and validation sets.
 * `xnew`, the grid of points in the input space where we will show the
   classifier predictions (6831 grid points x 2 numeric features).
 * `prob`, the true probability of class 1 at each of the grid points
@@ -83,16 +81,18 @@ faster and more memory efficient for big data sets.
 library(MASS)
 library(data.table)
 set.seed(123)
+N_each <- 5000
 centers <- c(
-  sample(1:10, 5000, replace=TRUE),
-  sample(11:20, 5000, replace=TRUE))
-mix.test <- mvrnorm(10000, c(0,0), 0.2*diag(2))
+  sample(1:10, N_each, replace=TRUE),
+  sample(11:20, N_each, replace=TRUE))
+mix.test <- mvrnorm(2*N_each, c(0,0), 0.2*diag(2))
 test.points <- data.table(
   mix.test + ESL.mixture$means[centers,],
-  label=factor(c(rep(0, 5000), rep(1, 5000))))
+  label=factor(c(rep(0, N_each), rep(1, N_each))))
 test.points
 ```
 
+The output above shows that `test.points` has 10,000 rows and three columns (`V1` and `V2` are the features, and `label` is the class to predict).
 We then create a data table which includes all test points and grid
 points, which we will use in the test argument to the knn function.
 
@@ -107,8 +107,8 @@ test.and.grid$fold <- NA
 test.and.grid
 ```
 
-We randomly assign each observation of the training data set to one of
-ten folds.
+The output above shows that there are 16,831 rows for which we need to compute predictions. The `label` is missing for the bottom grid rows, because those are the grid points which we will use to show predictions in the 2D feature space (and they do not have labels).
+Below, we randomly assign each observation of the mixture data set to one of ten folds.
 
 ```{r}
 n.folds <- 10
@@ -118,6 +118,7 @@ mixture$fold <- sample(rep(1:n.folds, l=nrow(mixture)))
 mixture
 ```
 
+The output above is a table with 200 rows, which will be divided into train and validation sets.
 We define the following `OneFold` function, which divides the 200
 observations into one train and one validation set. It then computes
 the predicted probability of the K-Nearest-Neighbors classifier for
@@ -129,7 +130,7 @@ OneFold <- function(validation.fold){
   set <- ifelse(mixture$fold == validation.fold, "validation", "train")
   fold.data <- rbind(test.and.grid, data.table(mixture, set))
   fold.data$data.i <- 1:nrow(fold.data)
-  only.train <- subset(fold.data, set == "train")
+  only.train <- fold.data[set == "train"]
   data.by.neighbors <- list()
   for(neighbors in seq(1, 30, by=2)){
     if(interactive())cat(sprintf(
@@ -184,17 +185,18 @@ which is generally useful for computing summary statistics for a
 single data table.
 
 ```{r}
-labeled.data <- data.all.folds[!is.na(label),]
-error.stats <- labeled.data[, list(
+labeled.data <- data.all.folds[!is.na(label)]
+error.stats <- labeled.data[, .(
   error.prop=mean(is.error)
-  ), by=.(set, validation.fold, neighbors)]
-validation.error <- error.stats[set=="validation", list(
+), by=.(set, validation.fold, neighbors)]
+validation.error <- error.stats[set=="validation", .(
   mean=mean(error.prop),
   sd=sd(error.prop)/sqrt(.N)
-  ), by=.(set, neighbors)]
+), by=.(set, neighbors)]
 validation.error
 ```
 
+The table above shows the mean and standard deviation of the validation set error, for 15 choices of the number of neighbors.
 Below we construct data tables for the Bayes error (which we know is
 0.21 for the mixture example data), and the train/test error.
 
@@ -205,12 +207,13 @@ Bayes.error <- data.table(
   neighbors=NA,
   error.prop=0.21)
 Bayes.error
-other.error <- error.stats[validation.fold==0,]
+other.error <- error.stats[validation.fold==0]
 head(other.error)
 ```
 
+Above we see the first few rows of train and test error.
 Below we construct a color palette from
-`dput(RColorBrewer::brewer.pal(Inf, "Set1"))`, and linetype palettes.
+`dput(RColorBrewer::brewer.pal(Inf, "Set1"))`, and line type palettes.
 
 ```{r}
 set.colors <- c(
@@ -227,6 +230,7 @@ set.linetypes["Bayes"] <- classifier.linetypes[["Bayes"]]
 cbind(set.linetypes, set.colors)
 ```
 
+The output above shows the line types and colors that will be used to show the different error rates.
 The code below reproduces the plot of the error curves from the
 original Figure. 
 
@@ -263,6 +267,10 @@ errorPlotStatic <- ggplot()+
 errorPlotStatic
 ```
 
+The figure above is a reproduction of the static figure from the ESL book.
+It shows the error rate as a function of the number of neighbors.
+As expected, the train error minimum occurs for 1 neighbor, but that is clearly sub-optimal for the validation and test sets, which have minima for larger numbers of neighbors.
+
 ### Plot of decision boundaries in the input feature space {#static-features}
 
 For the static data visualization of the feature space, we show only
@@ -293,6 +301,7 @@ text.V1.error <- -2.6
 ][])
 ```
 
+The output above shows the error rates to display as text labels.
 We define the following function which we will use to compute the
 decision boundaries.
 
@@ -331,8 +340,8 @@ pred.boundary <- getBoundaryDT(
 ][])
 ```
 
-Below, we consider only the grid points that do not overlap the text
-labels.
+The output above shows the data used to represent the Bayes optimal decision boundary for this problem.
+Below, we consider only the grid points that do not overlap the text labels.
 
 ```{r}
 on.text <- function(V1, V2){
@@ -341,8 +350,7 @@ on.text <- function(V1, V2){
 show.grid <- boundary.grid[!on.text(V1, V2)]
 ```
 
-The scatterplot below reproduces the 7-Nearest-Neighbors classifier of
-the original Figure. 
+The scatterplot below reproduces the 7-Nearest-Neighbors classifier of the original Figure.
 
 ```{r}
 label.colors <- c(
@@ -384,6 +392,7 @@ scatterPlotStatic <- ggplot()+
     text.V1.prop, V2.bottom, label=sprintf("%.3f", error.prop)),
     data=error.text,
     hjust=1)
+devtools::load_all("~/R/animint2")
 scatterPlotStatic
 ```
 
@@ -774,6 +783,16 @@ animint(
   scatterPlot,
   first=list(neighbors=7, n.folds=10))
 ```
+
+## Analysis of data compression
+
+In the previous scatterplot, the data for several geoms were broken into different files, one for each number of neighbors.
+
+```{r}
+Sys.glob("Ch10vizfolds/*common.tsv")
+```
+
+the plotted points all occur at the same x/y positions, across `showSelected` subsets.
 
 ## Chapter summary and exercises {#Ch10-exercises}
 
