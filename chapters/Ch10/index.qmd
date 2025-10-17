@@ -784,16 +784,6 @@ animint(
   first=list(neighbors=7, n.folds=10))
 ```
 
-## Analysis of data compression
-
-In the previous scatterplot, the data for several geoms were broken into different files, one for each number of neighbors.
-
-```{r}
-Sys.glob("Ch10vizfolds/*common.tsv")
-```
-
-the plotted points all occur at the same x/y positions, across `showSelected` subsets.
-
 ## Chapter summary and exercises {#Ch10-exercises}
 
 We showed how to add two interactive features to a data visualization
