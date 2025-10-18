@@ -117,6 +117,7 @@ It should be set to an identifier with common data across different `showSelecte
 Consider the following simple example: we have monthly data for a number of years and countries.
 
 ```{r}
+library(data.table)
 month.dt <- rbind(
   data.table(year=1, month=10:12),
   data.table(year=2, month=1:12),
@@ -315,7 +316,6 @@ of error curves on the left.
 data(breakpoints)
 only.error <- subset(breakpoints$error, type=="E")
 only.segments <- subset(only.error,bases.per.probe==bases.per.probe[1])
-library(data.table)
 fp.fn.names <- rbind(
   data.table(error.type="false positives", type="FP"),
   data.table(error.type="false negatives", type=c("I", "FN")))
