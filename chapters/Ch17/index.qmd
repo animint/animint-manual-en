@@ -290,6 +290,6 @@ Exercises:
 * Make a similar visualization using another data set such as
   `data("penguins", package="palmerpenguins")`.
 
-Next, [Chapter 18](../Ch18/Ch18-neural-networks.html) explains how to
+Next, [Chapter 18](/Ch18) explains how to
 visualize the gradient descent learning algorithm for neural network
 learning.
