@@ -111,9 +111,10 @@ per state/region, and each id must be unique on a web page. The
 
 ### Data compression using `aes(group)` {#aes-group}
 
+Data compression can be useful for efficient storage and download of large data sets that have common data across different chunks (TSV files for different values of `showSelected` variables).
 Normally `aes(group)` is used to define different lines, paths, polygons, or ribbons.
 In `animint2` it has a secondary usage, for defining how to perform data compression (and can be used with other geoms).
-It should be set to an identifier with common data across different `showSelected` subsets.
+It should be set to a grouping variable that has common data across different `showSelected` subsets.
 Consider the following simple example: we have monthly data for a number of years and countries.
 
 ```{r}
@@ -170,7 +171,7 @@ animint_tsv(
 
 The output above shows a list of one data table, which means that there is only one TSV file output by default, since this is a relatively small data set.
 Compression is not used when there is only one TSV file output.
-To study compression, we force creating separate files for this geom, by adding the `chunk_vars` parameter:
+To study compression, we force creating separate files for this geom, by adding the [`chunk_vars` parameter](#chunk-vars):
 
 ```{r}
 animint_tsv(
@@ -197,7 +198,7 @@ animint_tsv(
       showSelected="year"))
 ```
 
-The output above is a list of four data tables which exhibit compression:
+The output above is a list of four data tables which exhibit compression based on one common value for each group (country), across `showSelected` subsets (years).
 
 * The first three are numbered chunks, one for each year, and columns `group`, `x`, `y`. These are the columns which have different values in each group (`x` and `y` are different for each country, across years).
 * The last one is the common chunk, with one row per country/group, and columns `group`, `colour`, `fill`, `showSelected2`. These are the columns which have common values in each group (same for each country, across years).
@@ -228,12 +229,55 @@ animint_tsv(
       showSelected="year"))
 ```
 
-The output above is a list of four data tables which exhibit compression:
+The output above is a list of four data tables which exhibit another example of compression, again based on one common value for each group (this time each month), across `showSelected` subsets (years as before).
 
 * The first three are numbered chunks, one for each year, and columns `group`, `y`. The only column which has different values in each group/month across years is `y`.
 * The last one is the common chunk, with one row per country/month, and columns `group`, `colour`, `fill`, `x`. These are the columns which have common values in each group (same for each month, across years).
 
-In conclusion, we have seen several examples about how `aes(group)` can be used for data compression.
+Below, we use paths instead of points.
+
+```{r}
+animint_tsv(
+  ggplot()+
+    geom_path(aes(
+      month, value, color=country, group=country),
+      data=country.dt,
+      chunk_vars="year",
+      showSelected="year"))
+```
+
+Above we see a common chunk data table with columns for `group`, `colour`, and `showSelected2`. This example of compression is the same as the first example above (same constant value for each group/country, across years).
+
+The previous examples demonstrate how compression can be used if each group has a common value across `showSelected` subsets. Another method is when each group has a common vector of values across `showSelected` subsets, which we would need to use if we wanted `x` to be considered common data in the `geom_path()`  example.
+We would need to create a new data set,
+
+* with an identical `x=month` vector in each group,
+* and missing values in some elements of `y=value`,
+
+which we can do using the code below.
+
+```{r}
+grid.list <- lapply(country.dt[, .(country,year,month)], unique)
+grid.dt <- do.call(CJ, grid.list)
+na.dt <- country.dt[grid.dt, on=names(grid.dt)]
+animint_tsv(
+  ggplot()+
+    geom_path(aes(
+      month, value, color=country, group=country),
+      data=na.dt,
+      chunk_vars="year",
+      showSelected="year"))
+```
+
+The output above shows a common chunk data table with columns for `group`, `colour`, `showSelected2`, and `x`. Whereas `x` has different values in each row, `colour` and `showSelected2` do not (so some efficiency is lost in this repetition). Also note above that the `chunk1.tsv` file has columns `row_in_group` and `na_group` which are used to join these data with the common chunk file. These columns are not necessary in the other two chunks, because there are no missing values at the beginning of the data sequence.
+
+The previous examples show that there are various parameters that can be used to control data compression:
+
+* `chunk_vars` define the `showSelected` variables used to split the data into different TSV files.
+* `aes(group)` should be set to a grouping variable that has common data across chunks.
+* Explicit missing values (`NA`) can be used if you want a vector of values in the common chunk, or implicit missing values (removing rows) can be used if you want only constant values in the common chunk.
+
+The best choices for each of these parameters will be different for each data set. Typically they are chosen in order to minimize disk usage, and thereby minimize download times.
 
 ## New geoms {#new-geoms}
 
