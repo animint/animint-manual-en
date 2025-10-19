@@ -392,7 +392,6 @@ scatterPlotStatic <- ggplot()+
     text.V1.prop, V2.bottom, label=sprintf("%.3f", error.prop)),
     data=error.text,
     hjust=1)
-devtools::load_all("~/R/animint2")
 scatterPlotStatic
 ```
 
