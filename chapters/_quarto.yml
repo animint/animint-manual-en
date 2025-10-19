@@ -27,27 +27,27 @@ book:
     - index.qmd
     - part: "animint2 basics"
       chapters:
-        - Ch02/index.qmd
-        - Ch03/index.qmd
-        - Ch04/index.qmd
-        - Ch05/index.qmd
-        - Ch06/index.qmd
-        - Ch07/index.qmd
+        - ch02/index.qmd
+        - ch03/index.qmd
+        - ch04/index.qmd
+        - ch05/index.qmd
+        - ch06/index.qmd
+        - ch07/index.qmd
     - part: "Advanced examples"
       chapters:
-        - Ch08/index.qmd
-        - Ch09/index.qmd
-        - Ch10/index.qmd
-        - Ch11/index.qmd
-        - Ch12/index.qmd
-        - Ch13/index.qmd
-        - Ch14/index.qmd
-        - Ch15/index.qmd
-        - Ch16/index.qmd
-        - Ch17/index.qmd
-        - Ch18/index.qmd
+        - ch08/index.qmd
+        - ch09/index.qmd
+        - ch10/index.qmd
+        - ch11/index.qmd
+        - ch12/index.qmd
+        - ch13/index.qmd
+        - ch14/index.qmd
+        - ch15/index.qmd
+        - ch16/index.qmd
+        - ch17/index.qmd
+        - ch18/index.qmd
   appendices:
-    - Ch99/index.qmd
+    - ch99/index.qmd
     - contribute.qmd
 
 bibliography: refs.bib
