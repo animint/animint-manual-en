@@ -130,7 +130,7 @@ country.dt <- rbind(
 country.dt
 ```
 
-The output above shows a table with one row per year and country.
+The output above shows a table with one row per month and country.
 We use these data in the visualization below.
 
 ```{r Ch06-viz-group}
@@ -154,7 +154,7 @@ animint_tsv <- function(...){
   viz <- animint(...)
   info <- animint2dir(viz, "Ch06tsv")
   tsv.files <- Sys.glob(file.path(info$out.dir,"*.tsv"))
-  sapply(tsv.files, fread, nrow=3, simplify=FALSE)
+  sapply(tsv.files, fread, simplify=FALSE)
 }
 ```
 
@@ -171,7 +171,7 @@ animint_tsv(
 
 The output above shows a list of one data table, which means that there is only one TSV file output by default, since this is a relatively small data set.
 Compression is not used when there is only one TSV file output.
-To study compression, we force creating separate files for this geom, by adding the [`chunk_vars` parameter](#chunk-vars):
+To study compression, we force creating a separate file for each year, by adding the [`chunk_vars` parameter](#chunk-vars):
 
 ```{r}
 animint_tsv(
@@ -184,7 +184,7 @@ animint_tsv(
 ```
 
 The output above is a list of three data tables, one for each year.
-They have the same columns as the previous TSV file (output with no `chunk_vars`), so there is no compression.
+Compared to the previous example, there is one missing column, `showSelected1`, which was used for `year` values, and is no longer necessary (because the column would be constant in each file).
 To enable compression in these data, we specify `aes(group=country)` in the code below.
 This tells the compiler to check if there are common data values for each `country`, across the different values of `year`.
 
@@ -217,7 +217,7 @@ animint_tsv(
 
 The output above is a list of three data tables (all numbered chunks), with no common chunk TSV file.
 Compression was not used in this case, because there is only one column (`x`) with one common value in each group/month, across years.
-To get compression when `group=month`, we would need at least two variables that are specific to each group across years, as shown in the example below:
+To get compression when `group=month`, we would need at least two variables that are specific to each group across years, as shown in the example below, which changes `aes(color)`.
 
 ```{r}
 animint_tsv(
@@ -232,9 +232,10 @@ animint_tsv(
 The output above is a list of four data tables which exhibit another example of compression, again based on one common value for each group (this time each month), across `showSelected` subsets (years as before).
 
 * The first three are numbered chunks, one for each year, and columns `group`, `y`. The only column which has different values in each group/month across years is `y`.
-* The last one is the common chunk, with one row per country/month, and columns `group`, `colour`, `fill`, `x`. These are the columns which have common values in each group (same for each month, across years).
+* The last one is the common chunk, with one row per country/month, and columns `group`, `colour`, `fill`, `x`. These are the columns which have one common value in each group (same for each month, across years).
 
-Below, we use paths instead of points.
+Below we show an example of how compression works with `geom_path()`, for which `aes(group)` is also used to determine how to draw different paths.
+We also change `color` and `group` back to `country`:
 
 ```{r}
 animint_tsv(
@@ -248,18 +249,23 @@ animint_tsv(
 
 Above we see a common chunk data table with columns for `group`, `colour`, and `showSelected2`. This example of compression is the same as the first example above (same constant value for each group/country, across years).
 
-The previous examples demonstrate how compression can be used if each group has a common value across `showSelected` subsets. Another method is when each group has a common vector of values across `showSelected` subsets, which we would need to use if we wanted `x` to be considered common data in the `geom_path()`  example.
+The previous examples demonstrate how compression can be used if each group has a common scalar value across `showSelected` subsets. Another method is when each group has a common vector of values across `showSelected` subsets, which we would need to use if we wanted `x` to be considered common data in the `geom_path()`  example.
 We would need to create a new data set,
 
 * with an identical `x=month` vector in each group,
 * and missing values in some elements of `y=value`,
 
-which we can do using the code below.
+We create the new data set with missing values in the code below.
+We use `CJ` (cross join) to get a new data table with 72 rows (one for each unique combination of `country`, `year`, `month`).
 
 ```{r}
-grid.list <- lapply(country.dt[, .(country,year,month)], unique)
-grid.dt <- do.call(CJ, grid.list)
-na.dt <- country.dt[grid.dt, on=names(grid.dt)]
+(na.dt <- country.dt[CJ(country,year,month,unique=TRUE), on=.NATURAL])
+```
+
+As expected, the output above shows `NA` in the `value` column.
+Below, we use this data table in the same `geom_path()` code as in the previous example.
+
+```{r}
 animint_tsv(
   ggplot()+
     geom_path(aes(
@@ -269,7 +275,12 @@ animint_tsv(
       showSelected="year"))
 ```
 
-The output above shows a common chunk data table with columns for `group`, `colour`, `showSelected2`, and `x`. Whereas `x` has different values in each row, `colour` and `showSelected2` do not (so some efficiency is lost in this repetition). Also note above that the `chunk1.tsv` file has columns `row_in_group` and `na_group` which are used to join these data with the common chunk file. These columns are not necessary in the other two chunks, because there are no missing values at the beginning of the data sequence.
+The output above shows a common chunk data table with columns for `group`, `colour`, `showSelected2`, and `x`.
+
+* `x` has different values in each row, indicating that it contains the vector of values which is common for each country, across years.
+* `colour` and `showSelected2` have the same value in each row. These are the single values which are common for each country, across years.
+
+Also note above that the `chunk1.tsv` file has columns `row_in_group` and `na_group` which are used to join these data with the common chunk file. These columns are not necessary in the other two chunks, because there are no missing values at the beginning of the data sequence.
 
 The previous examples show that there are various parameters that can be used to control data compression:
 
