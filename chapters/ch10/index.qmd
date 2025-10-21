@@ -783,6 +783,45 @@ animint(
   first=list(neighbors=7, n.folds=10))
 ```
 
+## Note about compression {#note-about-compression}
+
+In [Chapter 6](/ch06#aes-group), there was a discussion of data compression using `aes(group)` with a simple toy example.
+The `scatterPlot` code above shows a more complex example about how that works.
+In particular, there are two uses of `geom_point()` with `showSelected="neighbors"`, but `aes(group)` is not specified, so the default value of `group=1` is used.
+Data compression is activated because some columns have common vectors of values, across values of `neighbors`.
+
+The first `geom_point()` shows the predictions on the grid points in the background, which each occur as the same `x` and `y` positions, across values of `neighbors`. We therefore see those columns in the common chunk TSV file:
+
+```{r}
+fread("Ch10vizfolds/geom8_point_plot2_chunk_common.tsv")
+```
+
+And each of the other TSV files for this geom can therefore omit there two columns, for example:
+
+```{r}
+fread("Ch10vizfolds/geom8_point_plot2_chunk1.tsv")
+```
+
+The second `geom_point()` shows the data points used for training.
+Across the different values of `neighbors`, these points keep the same values for `x`, `y`, and `color` (label), as can be seen in the common chunk TSV file:
+
+```{r}
+fread("Ch10vizfolds/geom11_point_plot2_chunk_common.tsv")
+```
+
+And each of the other TSV files for this geom can therefore omit those columns. For example, the first TSV file is used for `neighbors=1`.
+This parameter choice results in predictions that are always correct with respect to the displayed training data points, so we only see one row of data below, which is copied to each of the data points.
+
+```{r}
+fread("Ch10vizfolds/geom11_point_plot2_chunk1.tsv")
+```
+
+For other values of `neighbors`, some predictions are correct, and others are incorrect, so we need more rows of data in the TSV files, for example:
+
+```{r}
+fread("Ch10vizfolds/geom11_point_plot2_chunk2.tsv")
+```
+
 ## Chapter summary and exercises {#Ch10-exercises}
 
 We showed how to add two interactive features to a data visualization
