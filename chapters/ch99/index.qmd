@@ -1,7 +1,7 @@
 # Useful R programming idioms
 
 ```{r setup, echo=FALSE}
-knitr::opts_chunk$set(fig.path="Ch99-figures/")
+knitr::opts_chunk$set(fig.path="ch99-figures/")
 ```
 
 This appendix describes several R programming idioms which are useful

@@ -1,7 +1,7 @@
 # Poisson regression
 
 ```{r setup, echo=FALSE}
-knitr::opts_chunk$set(fig.path="Ch13-figures/")
+knitr::opts_chunk$set(fig.path="ch13-figures/")
 ```
 
 This goal of this chapter is to create an interactive data
@@ -32,7 +32,7 @@ Chapter outline:
 The goal of this section is to create a data visualization that shows
 the probability mass function for a selected Poisson mean parameter.
 
-![Sketch of data visualization of Poisson probability](Ch13-viz-prob.png)
+![Sketch of data visualization of Poisson probability](ch13-viz-prob.png)
 
 ```{r}
 library(data.table)
@@ -89,7 +89,7 @@ tallrects have 0.1 opacity. Note also that we use `color="red"` and
 grey background, and to hover the cursor over the points to see the
 tooltip. We next create an interactive version with animint.
 
-```{r Ch13-viz-prob}
+```{r ch13-viz-prob}
 animint(prob.mass)
 ```
 
@@ -106,13 +106,13 @@ values of 2 and 3.
 To add a panel for the cumulative distribution function, we will
 re-make the ggplot based on the sketch below.
 
-![Sketch of data visualization with cumulative probability](Ch13-viz-cum-prob.png)
+![Sketch of data visualization with cumulative probability](ch13-viz-cum-prob.png)
 
 When we specify the data sets, we will use the
-[addColumn then facet](/Ch99#addColumn-then-facet) idiom
+[addColumn then facet](/ch99#addColumn-then-facet) idiom
 to add a `panel` variable.
 
-```{r Ch13-viz-cum-prob}
+```{r ch13-viz-cum-prob}
 addPanel <- function(dt, panel){
   data.table(dt, panel=factor(panel, c("probability", "cum prob")))
 }
@@ -188,7 +188,7 @@ PoissonLoss <- function(label, seg.mean){
 ```
 
 Below we compute the loss for several label values, using the
-[list of data tables idiom](/Ch99#list-of-data-tables).
+[list of data tables idiom](/ch99#list-of-data-tables).
 
 ```{r}
 label.vec <- unique(poisson.prob$label)
@@ -224,7 +224,7 @@ label.text <- data.table(
 
 Next we make a data viz with an additional panel.
 
-```{r Ch13-viz-loss}
+```{r ch13-viz-loss}
 (viz.loss <- animint(
   prob=ggplot()+
     theme_bw()+
@@ -286,7 +286,7 @@ Next we make a data viz with an additional panel.
 The data viz above shows the probability on the left and the Poisson
 loss on the right.
 
-```{r Ch13-viz-log-loss}
+```{r ch13-viz-log-loss}
 viz.log.loss <- viz.loss
 addX <- function(dt, x.var)data.table(dt, x.var=factor(
   x.var, c("poisson mean", "log(poisson mean)")))
@@ -335,7 +335,7 @@ viz.log.loss$loss <- ggplot()+
 viz.log.loss
 ```
 
-## Chapter summary and exercises {#Ch13-exercises}
+## Chapter summary and exercises {#ch13-exercises}
 
 We explained how to visualize the Poisson distribution and loss, which
 are used for the Poisson regression model.
@@ -353,6 +353,6 @@ Exercises:
   [Binomial regression](https://en.wikipedia.org/wiki/Binomial_regression)
   model.
 
-Next, [Chapter 14](/Ch14) explains how to use the
+Next, [Chapter 14](/ch14) explains how to use the
 named clickSelects/showSelected to visualize the PeakSegJoint
 machine learning model with data-driven selector variables.

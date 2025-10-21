@@ -1,7 +1,7 @@
 # The `showSelected` keyword
 
 ```{r setup, echo=FALSE}
-knitr::opts_chunk$set(fig.path="Ch03-figures/")
+knitr::opts_chunk$set(fig.path="ch03-figures/")
 ```
 
 This chapter explains showSelected, one of the two main keywords that
@@ -29,9 +29,9 @@ In fact, we have already used the showSelected keyword, which was
 automatically created by the interactive legends that we created in
 the previous two chapters. For example, consider the sketch below of
 the
-[Keeling Curve data visualization from Chapter 1](/Ch01#large-data).
+[Keeling Curve data visualization from Chapter 1](/ch01#large-data).
 
-![CO2 data viz](Ch03-viz-co2.png)
+![CO2 data viz](ch03-viz-co2.png)
 
 The sketch above includes `showSelected=month` for the `geom_point`,
 meaning that it should show the subset of data for the selected
@@ -42,7 +42,7 @@ months. In contrast, since the `geom_line` does not include
 As another example, consider the sketch below of the first WorldBank
 data visualization from Chapter 2.
 
-![WorldBank data viz with showSelected](Ch03-viz-showSelectedColor.png)
+![WorldBank data viz with showSelected](ch03-viz-showSelectedColor.png)
 
 The sketch above specifies `showSelected=region` for the `geom_point`,
 meaning that it should show the subset of data for the selected
@@ -77,7 +77,7 @@ visualization of the World Bank data that has selection variables for
 Consider the following sketch which adds a `showSelected` variable,
 and changes the data set. 
 
-![WorldBank data viz with showSelected](Ch03-viz-scatter.png)
+![WorldBank data viz with showSelected](ch03-viz-scatter.png)
 
 Note that there are two `showSelected` variables, `region` and
 `year`. Also note that the data is specified as all years (but only
@@ -105,7 +105,7 @@ automatically uses `region` as a `showSelected` variable.
 In constrast, rendering the same ggplot using animint yields the
 interactive data visualization below.
 
-```{r Ch03-viz-scatter}
+```{r ch03-viz-scatter}
 animint(scatter)
 ```
 
@@ -141,14 +141,14 @@ the fertility rate and life expectancy of all the countries in the
 year that you selected.
 
 **Multi-layer exercise:** Add another geom to this interactive
-scatterplot. As in [Chapter 2](/Ch02#multi-layer), you can
+scatterplot. As in [Chapter 2](/ch02#multi-layer), you can
 use a `geom_text` to show the name of each country (easy), or a
 `geom_text` to show the selected year (medium), or a `geom_path` to
 show the previous 5 years of data (hard). Hint: make sure to specify
 `showSelected=year` for all geoms.
 
 **Multi-plot exercise:** Add a time series plot to the data viz
-above. As in [Chapter 2](../Ch02/Ch02-ggplot2.html#multi-plot), you can use a
+above. As in [Chapter 2](../ch02/ch02-ggplot2.html#multi-plot), you can use a
 `geom_line` to show the fertility rate for each country over all
 years. Add a `geom_vline` with `showSelected=year` to highlight the
 currently selected year.
@@ -219,7 +219,7 @@ usual R graphics devices.
 However, if we render this ggplot using `animint2`, the `country` variable will be used to make sure transtion durations are meaningful. 
 To specify a default transition duration for the `year` variable, we use the `duration` option in the data viz below.
 
-```{r Ch03-viz-duration}
+```{r ch03-viz-duration}
 (viz.duration <- animint(scatter.key, duration=list(year=2000)))
 ```
 
@@ -245,7 +245,7 @@ aesthetic for this geom.
 The `time` option is used to specify a variable to use for animation.
 The code below specifies `year` as the variable to animate over time, with an update every 2000 milliseconds.
 
-```{r Ch03-viz-duration-time}
+```{r ch03-viz-duration-time}
 viz.duration.time <- viz.duration
 viz.duration.time$time <- list(variable="year", ms=2000)
 viz.duration.time
@@ -257,7 +257,7 @@ The data visualization above is animated, because the selected year advances eve
 smooth transitions. Hint: make a list of ggplots that has the `time`
 option but no `duration` option.
 
-## Chapter summary and exercises {#Ch03-exercises}
+## Chapter summary and exercises {#ch03-exercises}
 
 This chapter explained the `showSelected` keyword, selection menus,
 transition durations, and animation.
@@ -274,11 +274,11 @@ Exercises:
   to an animint. Hint: in the code for the animation package there is
   always a for loop over the time variable. Instead of calling a
   plotting function inside the for loop, use the
-  [list of data tables idiom](/Ch99#list-of-data-tables)
+  [list of data tables idiom](/ch99#list-of-data-tables)
   to store the data that should be plotted. Then use those data along
   with `showSelected` to create ggplots, and render them
   using animint.
 
-Next, [Chapter 4](/Ch04) explains the `clickSelects`
+Next, [Chapter 4](/ch04) explains the `clickSelects`
 keyword, which indicates a geom that can be clicked to update a
 selection variable.

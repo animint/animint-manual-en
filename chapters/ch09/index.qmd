@@ -1,7 +1,7 @@
 # Montreal bikes
 
 ```{r setup, echo=FALSE}
-knitr::opts_chunk$set(fig.path="Ch09-figures/")
+knitr::opts_chunk$set(fig.path="ch09-figures/")
 ```
 
 In this chapter we will explore several data visualizations of the
@@ -221,7 +221,7 @@ As shown above, some months do not have observations for all days.
 
 ## Interactive viz of accident frequency {#regression}
 
-```{r Ch09-viz-regression}
+```{r ch09-viz-regression}
 complete.months <- counts.per.month[days == days.in.month]
 month.labels <- counts.per.month[, {
   .SD[which.max(count), ]
@@ -675,7 +675,7 @@ DaysFacet <- ggplot()+
 DaysFacet
 ```
 
-```{r Ch09-viz-mtl}
+```{r ch09-viz-mtl}
 animint(
   DaysFacet,
   MonthFacet,
@@ -688,7 +688,7 @@ animint(
   time=list(variable="month", ms=5000))
 ```
 
-## Chapter summary and exercises {#Ch09-exercises}
+## Chapter summary and exercises {#ch09-exercises}
 
 Exercises:
 
@@ -702,4 +702,4 @@ Exercises:
 * Remove the `MonthSummary` plot and add a similar visualization as a
   third panel in the `MonthFacet` plot.
 
-Next, [Chapter 10](/Ch10) explains how to visualize the K-Nearest-Neighbors machine learning model.
+Next, [Chapter 10](/ch10) explains how to visualize the K-Nearest-Neighbors machine learning model.

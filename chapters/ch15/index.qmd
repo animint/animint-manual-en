@@ -1,7 +1,7 @@
 # Newton's root-finding method
 
 ```{r setup, echo=FALSE}
-knitr::opts_chunk$set(fig.path="Ch15-figures/")
+knitr::opts_chunk$set(fig.path="ch15-figures/")
 ```
 
 Roots of a function `f(x)` are values `x` such that `f(x)=0`. Some
@@ -185,7 +185,7 @@ ggplot()+
 It is clear that the algorithm quickly converges to the root. The
 following is an animated interactive version of the same data viz.
 
-```{r Ch15-viz}
+```{r ch15-viz}
 animint(
   time=list(variable="iteration", ms=2000),
   iterations=gg.it+
@@ -277,7 +277,7 @@ ggplot()+
 function, in order to find the root that is smaller than the
 minimum. Create an animint similar to the previous section.
 
-## Chapter summary and exercises {#Ch15-exercises}
+## Chapter summary and exercises {#ch15-exercises}
 
 In this chapter we explored several visualizations of the Newton
 method for finding roots of smooth functions.
@@ -308,5 +308,5 @@ Exercises:
   and visualize the corresponding Newton root finding method.
 * Refactor `gg.it` code to use only one `geom_point`, instead of the four geoms in the current code. Hint: use `rbind()` to create a single table with all of the data.
 
-Next, [Chapter 16](/Ch16) explains how to visualize
+Next, [Chapter 16](/ch16) explains how to visualize
 change-point detection models.

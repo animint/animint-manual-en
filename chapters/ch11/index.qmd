@@ -1,7 +1,7 @@
 # Lasso
  
 ```{r setup, echo=FALSE}
-knitr::opts_chunk$set(fig.path="Ch11-figures/")
+knitr::opts_chunk$set(fig.path="ch11-figures/")
 ```
 
 This goal of this chapter is to create an interactive data
@@ -245,7 +245,7 @@ Below, we combine the ggplots above in a single animint
 below. Clicking the first plot changes the regularization parameter,
 and the residuals that are shown in the second plot.
 
-```{r Ch11-viz-one-split}
+```{r ch11-viz-one-split}
 animint(
   gg.path,
   gg.res,
@@ -271,11 +271,11 @@ specify a `duration` for the `arclength` variable, and the same
 grey tallrect. The second tallrect has `clickSelects=arclength` and so
 clicking it has the effect of changing the selected value of
 `arclength`. We specify a another data set with more rows, and use the
-[named clickSelects/showSelected variables](/Ch06#data-driven-selectors) to
+[named clickSelects/showSelected variables](/ch06#data-driven-selectors) to
 indicate that `arclength` should also be used as a `showSelected`
 variable.
 
-```{r Ch11-viz-moving-rect}
+```{r ch11-viz-moving-rect}
 tallrect.show.list <- list()
 for(a in tallrect.dt$arclength){
   is.selected <- tallrect.dt$arclength == a
@@ -353,7 +353,7 @@ animint(
   time=list(variable="arclength", ms=2000))
 ```
 
-## Chapter summary and exercises {#Ch11-exercises}
+## Chapter summary and exercises {#ch11-exercises}
 
 We created a visualization of the Lasso machine learning model, which
 simulataneously shows the regularization path and error
@@ -374,5 +374,5 @@ Exercises:
   were chosen?  Perform 4-fold cross-validation and add a plot that
   can be used to select test fold.
 
-Next, [Chapter 12](/Ch12) explains how to visualize the
+Next, [Chapter 12](/ch12) explains how to visualize the
 Support Vector Machine.

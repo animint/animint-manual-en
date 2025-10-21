@@ -1,7 +1,7 @@
 # World Bank
 
 ```{r setup, echo=FALSE}
-knitr::opts_chunk$set(fig.path="Ch08-figures/")
+knitr::opts_chunk$set(fig.path="ch08-figures/")
 ```
 
 In this chapter we will explore several data visualizations of the
@@ -75,7 +75,7 @@ FACETS <- function(df, top, side)data.frame(
 
 Note that the factor levels will specify the order of the facets in
 the ggplot. This is an example of the
-[addColumn then facet idiom](/Ch99#addColumn-then-facet).
+[addColumn then facet idiom](/ch99#addColumn-then-facet).
 Below, we define three more helper functions, one for each facet.
 
 ```{r}
@@ -132,9 +132,9 @@ ts.facet
 ```
 
 We set the `panel.margin` to 0, which is often a good idea to
-[save space in a ggplot with facets](/Ch99#space-saving-facets).
+[save space in a ggplot with facets](/ch99#space-saving-facets).
 We use `scales="free"` and hide the axis labels, in an example of the
-[addColumn then facet idiom](/Ch99#addColumn-then-facet). Instead,
+[addColumn then facet idiom](/ch99#addColumn-then-facet). Instead,
 we use the facet label to show the variable encoded on each
 axis. Below, we add a scatterplot facet with a point for each year and
 country.
@@ -158,7 +158,7 @@ pixels, and the breaks in the legend. Also note that we use `SCATTER`
 to specify `top` and `side` columns which are used in the facet
 specification. We also render this ggplot interactively below.
 
-```{r Ch08-viz-ts-scatter}
+```{r ch08-viz-ts-scatter}
 animint(ts.scatter)
 ```
 
@@ -214,7 +214,7 @@ Note in the code above that we set `vjust`
 
 We render an interactive version below.
 
-```{r Ch08-viz-scatter-both}
+```{r ch08-viz-scatter-both}
 animint(
   title="World Bank data (multiple selection, facets)",
   scatter=scatter.labels+
@@ -235,7 +235,7 @@ The fertility rate time series shows two labels for each selected country, with 
 
 **Try** selecting a few more neighboring countries to see how this works.
 
-## Chapter summary and exercises {#Ch08-exercises}
+## Chapter summary and exercises {#ch08-exercises}
 
 We showed how to create a multi-layer, multi-panel (but single-plot)
 visualization of the World Bank data.
@@ -256,4 +256,4 @@ Exercises:
   The points should appear only when the country is selected, and clicking the points should de-select that country.
 * As in [this gallery example](https://tdhock.github.io/2025-01-WorldBank-facets-map/), add world map in the Year/Year facet which is currently empty.
 
-Next, [Chapter 9](/Ch09) explains how to visualize the Montreal bike data set.
+Next, [Chapter 9](/ch09) explains how to visualize the Montreal bike data set.

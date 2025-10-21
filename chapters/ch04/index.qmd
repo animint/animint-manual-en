@@ -4,7 +4,7 @@ title: The `clickSelects` keyword
 
 
 ```{r setup, echo=FALSE}
-knitr::opts_chunk$set(fig.path="Ch04-figures/")
+knitr::opts_chunk$set(fig.path="ch04-figures/")
 ```
 
 This chapter explains clickSelects, one of the two main keywords that
@@ -31,7 +31,7 @@ automatically created for the interactive legends in the previous
 chapters. For example, consider the sketch of the World Bank data viz
 from the last chapter.
 
-![Sketch of World Bank data visualization with clickSelects](Ch04-legend-clickSelects.png)
+![Sketch of World Bank data visualization with clickSelects](ch04-legend-clickSelects.png)
 
 Since the legend has `clickSelects=region`, clicking an entry of that
 legend updates the `region` selection variable. Note that animint
@@ -56,12 +56,12 @@ interactive data visualizations.
 The goal of this section is to create the following visualization of
 the World Bank data.
 
-![Sketch of World Bank data visualization with text for one selected country](Ch04-viz-text-single.png)
+![Sketch of World Bank data visualization with text for one selected country](ch04-viz-text-single.png)
 
 To start, consider the following R code which generates a
 scatterplot of the World Bank data:
 
-```{r Ch04-ggplot-scatter}
+```{r ch04-ggplot-scatter}
 library(animint2)
 data(WorldBank)
 scatter <- ggplot()+
@@ -79,7 +79,7 @@ using the traditional R graphics device. In contrast,
 rendering the same ggplot using `animint2` results in the following
 interactive plot:
 
-```{r Ch04-viz-scatter}
+```{r ch04-viz-scatter}
 (viz.scatter <- animint(
   scatter=scatter,
   duration=list(year=2000)))
@@ -95,7 +95,7 @@ opaque, no transparency), and the other points have alpha=0.5
 (semi-transparent). These defaults can be customized; for example in
 the code below a black outline is used to highlight the current selection.
 
-```{r Ch04-viz-color-off}
+```{r ch04-viz-color-off}
 animint(
   ggplot()+
     geom_point(aes(
@@ -114,7 +114,7 @@ the selection menu, but it would be better to show it as a text label
 on the scatterplot. We can do that by adding a `geom_text` layer with
 two showSelected variables:
 
-```{r Ch04-viz-text}
+```{r ch04-viz-text}
 viz.text <- viz.scatter
 viz.text$scatter <- scatter+
   geom_text(aes(
@@ -190,7 +190,7 @@ entries for each selection variable. For example, the code below
 specifies 1970 as the first year, United States as the first country,
 and North America and South Asia as the first regions.
 
-```{r Ch04-viz-first}
+```{r ch04-viz-first}
 viz.first <- viz.text
 viz.first$first <- list(
   year=1970,
@@ -211,7 +211,7 @@ version of the scatterplot in the last section. The sketch below has
 only one difference with respect to the sketch from the last section:
 text labels are shown for more than one country.
 
-![Sketch of World Bank data visualization with text for several selected countries](Ch04-viz-text.png)
+![Sketch of World Bank data visualization with text for several selected countries](ch04-viz-text.png)
 
 In animint, each selection variable has a type, either single or
 multiple. Single selection means that only one value can be selected
@@ -227,7 +227,7 @@ using the `selector.types` option. In the R code below, we use the
 `selector.types` option to specify that `country` should be treated as
 a multiple selection variable.
 
-```{r Ch04-viz-multiple}
+```{r ch04-viz-multiple}
 viz.multiple <- viz.first
 viz.multiple$selector.types <- list(country="multiple")
 viz.multiple
@@ -259,7 +259,7 @@ directly clicked to change the year variable.
 The goal of this section is to add a time series plot that can be
 clicked to change the selected year.
 
-![Sketch of World Bank data visualization with time series](Ch04-ggplot-time-series-plot.png)
+![Sketch of World Bank data visualization with time series](ch04-ggplot-time-series-plot.png)
 
 Note that the sketch above includes `geom_tallrect`, a new geom
 introduced in animint. It is "tall" because it occupies the entire
@@ -277,7 +277,7 @@ head(years)
 
 Next, we add the time series ggplot to the existing data viz.
 
-```{r Ch04-viz-timeSeries}
+```{r ch04-viz-timeSeries}
 viz.timeSeries <- viz.multiple
 viz.timeSeries$timeSeries <- ggplot()+
   geom_tallrect(aes(
@@ -300,7 +300,7 @@ viz.timeSeries
   
 **Animation exercise:** make the data viz animated by specifying the
   `time` option,
-  [as explained in Chapter 3](/Ch03#animation-time).
+  [as explained in Chapter 3](/ch03#animation-time).
 
 **Multi-layer exercise:** add a `geom_text` that shows the current
   year on the scatterplot. Add a `geom_path` that shows data for the
@@ -311,14 +311,14 @@ viz.timeSeries
 The goal of this section is to add a facet with a time series plot
 that can be clicked to change the selected year.
 
-![World Bank scatter facet](Ch04-ggplot-scatterFacet.png)
+![World Bank scatter facet](ch04-ggplot-scatterFacet.png)
 
 First, we re-create the scatterplot from the previous section using the
-[addColumn then facet idiom](/Ch99#addColumn-then-facet), 
+[addColumn then facet idiom](/ch99#addColumn-then-facet),
 which is useful for creating ggplots
 with aligned axes.
 
-```{r Ch04-ggplot-scatterFacet}
+```{r ch04-ggplot-scatterFacet}
 add.x.var <- function(df, x.var){
   data.frame(df, x.var=factor(x.var, c("life expectancy", "year")))
 }
@@ -349,7 +349,7 @@ have used an augmented `WorldBank` data set with an additional
 geoms for a time series plot that is aligned on the fertility rate
 axis.
 
-```{r Ch04-ggplot-scatterTS}
+```{r ch04-ggplot-scatterTS}
 scatterTS <- scatterFacet+
   geom_tallrect(aes(
     xmin=year-0.5, xmax=year+0.5),
@@ -390,12 +390,12 @@ parameters in the geom (not aes) to freely create a different
 appearance for selected and un-selected items, instead of being forced
 to rely on the behavior described above. For more information, see the
 discussion and example in [Chapter 6, section Specifying how selection
-state is displayed](/Ch06#display-selection-state).
+state is displayed](/ch06#display-selection-state).
 
 Finally, we use the R code below to render the new aligned scatterplot
 and time series using animint.
 
-```{r Ch04-viz-facets}
+```{r ch04-viz-facets}
 (viz.facets <- animint(scatterTS))
 ```
 
@@ -409,7 +409,7 @@ year.
 **Exercise:** add `time`, `duration`, `first`, and `selector.types`
   options to the data viz above.
 
-## Chapter summary and exercises {#Ch04-exercises}
+## Chapter summary and exercises {#ch04-exercises}
 
 This chapter explained `clickSelects`, one of the two main keywords
 that animint introduces for interactive data visualization design. We
@@ -446,5 +446,5 @@ Exercises:
   a Tour which is more informative about what is displayed in each
   geom.
 
-Next, [Chapter 5](/Ch05) explains several different
+Next, [Chapter 5](/ch05) explains several different
 methods for publishing and sharing animints on the web.

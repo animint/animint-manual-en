@@ -1,7 +1,7 @@
 # Support Vector Machines
 
 ```{r setup, echo=FALSE}
-knitr::opts_chunk$set(fig.path="Ch12-figures/")
+knitr::opts_chunk$set(fig.path="ch12-figures/")
 ```
 
 This goal of this chapter is to create an interactive data
@@ -174,7 +174,7 @@ The animint below uses `clickSelects` to show which points in the
 input and squared space correspond. We just need to create an
 `data.i` variable that has a unique ID for each data point.
 
-```{r, Ch12-viz-simple}
+```{r, ch12-viz-simple}
 data.dt[, data.i := 1:.N]
 YVAR <- function(dt, y.var){
   dt$y.var <- factor(y.var, c("x2", "x2.sq", "f"))
@@ -237,7 +237,7 @@ animint(
 ```
 
 Note how we used two multi-panel plots with the
-[addColumn then facet](/Ch99#addColumn-then-facet) idiom,
+[addColumn then facet](/ch99#addColumn-then-facet) idiom,
 rather than creating four separate plots. This emphasizes the fact
 that some plots/facets have a common `x1` or `x1.sq` axis. Note that
 we also hid the color legend in the first plot, since it is sufficient
@@ -503,7 +503,7 @@ The goal below will be to make an animint that shows
 how the decision boundary, margin, and slack change as a function of
 the cost parameter.
 
-```{r Ch12-viz-linear}
+```{r ch12-viz-linear}
 modelInfo.list <- list()
 predictions.list <- list()
 slackSegs.list <- list()
@@ -683,7 +683,7 @@ space, which resulted in learning a function which is non-linear in
 terms of the original feature space. In this section we directly fit a
 non-linear polynomial kernel in the original space.
 
-```{r Ch12-viz-poly}
+```{r ch12-viz-poly}
 predictions.list <- list()
 inputBoundaries.list <- list()
 setErrors.list <- list()
@@ -774,7 +774,7 @@ animint(
       data=predictions))
 ```
 
-## Chapter summary and exercises {#Ch12-exercises}
+## Chapter summary and exercises {#ch12-exercises}
 
 We used ggplots to visualize the Support Vector Machine model for
 binary classification. We used animint and interactivity to show how
@@ -792,7 +792,7 @@ Exercises:
 * Use `color` and `color_off` parameters to change the appearance of
   the `geom_tile` when selected or not, as explained in [Chapter 6,
   section Specifying how selection state is
-  displayed](/Ch06#display-selection-state).
+  displayed](/ch06#display-selection-state).
 
-Next, [Chapter 13](/Ch13) explains how to
+Next, [Chapter 13](/ch13) explains how to
 visualize the Poisson regression model.

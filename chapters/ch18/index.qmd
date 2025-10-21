@@ -1,9 +1,9 @@
 # Neural networks
 
 ```{r setup, echo=FALSE}
-knitr::opts_chunk$set(fig.path="Ch18-figures/")
+knitr::opts_chunk$set(fig.path="ch18-figures/")
 if(FALSE){
-  knitr::knit("Ch18-neural-networks.Rmd")
+  knitr::knit("ch18-neural-networks.Rmd")
 }
 ```
 
@@ -573,7 +573,7 @@ with an interactive plot where you can click the loss plot to select
 an iteration of gradient descent, for which the corresponding decision
 boundary is shown on the predictions plot.
 
-```{r Ch18-nnet-vs-linear}
+```{r ch18-nnet-vs-linear}
 n.subtrain <- sum(is.set.list$subtrain)
 loss.dt[, n.set := ifelse(
   set=="subtrain", n.subtrain, sim.row-n.subtrain
@@ -645,7 +645,7 @@ animint(
     coord_equal())
 ```
 
-## Chapter summary and exercises {#Ch18-exercises}
+## Chapter summary and exercises {#ch18-exercises}
 
 Exercises:
 
@@ -667,6 +667,6 @@ Exercises:
   constant step size, and then create a visualization which compares
   the two approaches in terms of min validation loss.
 
-Next, [Chapter 99](/Ch99) explains some R
+Next, [Chapter 99](/ch99) explains some R
 programming idioms that are generally useful for interactive data
 visualization design.
