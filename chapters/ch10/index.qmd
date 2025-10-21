@@ -796,7 +796,7 @@ The first `geom_point()` shows the predictions on the grid points in the backgro
 fread("Ch10vizfolds/geom8_point_plot2_chunk_common.tsv")
 ```
 
-And each of the other TSV files for this geom can therefore omit there two columns, for example:
+And each of the other TSV files for this geom can therefore omit these two columns, for example:
 
 ```{r}
 fread("Ch10vizfolds/geom8_point_plot2_chunk1.tsv")
@@ -840,7 +840,7 @@ Exercises:
   `showSelected=c(selectorNameColumn="selectorValueColumn")` (as
   explained in [Chapter 14](/Ch14)) or two
   `geom_text`, each with a different showSelected parameter.
-* The probability column of the show.grid data table is the predicted
+* The probability column of the `show.grid` data table is the predicted
   probability of class 1. How would you re-design the visualization to
   show the predicted probability rather than the predicted class at
   each grid point? The main challenge is that probability is a numeric
@@ -853,9 +853,9 @@ Exercises:
   validation and train sets change based on the selected value of
   `n.folds`.
 * So far, the feature space plots only showed model predictions and
-  errors for the entire train data set (validation.fold==0). Create a
+  errors for the entire train data set (`validation.fold==0`). Create a
   re-design which includes a new plot or facet for selecting
-  validation.fold, and a facetted feature space plot (one facet for
+  `validation.fold`, and a facetted feature space plot (one facet for
   train set, one facet for validation set). 
 
 Next, [Chapter 11](/Ch11) explains how to visualize the
