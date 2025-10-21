@@ -210,7 +210,8 @@ counts.per.month <- counts.dt[, let(
 ][
 , next01.POSIXct := as.POSIXct(strptime(next01.str, "%Y-%m-%d"))
 ][
-, days.in.month := as.integer(round(difftime(next01.POSIXct,month01.POSIXct,units="days")))
+, days.in.month := as.integer(round(difftime(
+  next01.POSIXct, month01.POSIXct, units="days")))
 ][]
 counts.per.month[days < days.in.month, {
   list(location, month, days, days.in.month)
@@ -312,7 +313,9 @@ ggplot()+
   theme(panel.margin=grid::unit(0, "cm"))+
   facet_wrap("month")+
   geom_text(aes(15, 25, label=month), data=accidents.per.month)+
-  scale_fill_manual(values=severity.colors, breaks=rev(names(severity.colors)))+
+  scale_fill_manual(
+    values=severity.colors,
+    breaks=rev(names(severity.colors)))+
   scale_x_continuous("day of the month", breaks=c(1, 10, 20, 30))+
   geom_point(aes(
     day.of.the.month, accident.i, fill=severity),
