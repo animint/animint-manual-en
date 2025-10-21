@@ -110,7 +110,7 @@ knitr:
     R.options:
       animint2.chromote_sleep_seconds: 3
       width: 80
-      datatable.print.nrows: 10
+      datatable.print.nrows: 5
       datatable.print.topn: 2
       datatable.print.class: false
       datatable.print.keys: false
