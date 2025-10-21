@@ -225,7 +225,8 @@ path). The two geoms share a common definition of the `x`, `y`, and
 this sketch into R code.
 
 ```{r ch02-two-layer-viz}
-world_bank_before_1975 <- subset(world_bank, 1970 <= year & year <= 1975)
+world_bank_before_1975 <- subset(
+  world_bank, 1970 <= year & year <= 1975)
 two.layers <- scatter+
   geom_path(aes(
     x=life.expectancy, 

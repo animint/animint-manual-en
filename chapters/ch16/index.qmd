@@ -62,7 +62,9 @@ regions with and without breakpoints. These data are available as
 `intreg$annotations` and are plotted below.
 
 ```{r annotations}
-breakpoint.colors <- c("1breakpoint"="#ff7d7d", "0breakpoints"='#f6f4bf')
+breakpoint.colors <- c(
+  "1breakpoint"="#ff7d7d",
+  "0breakpoints"='#f6f4bf')
 gg.ann <- gg.signals+
   scale_fill_manual(values=breakpoint.colors)+
   geom_tallrect(aes(
