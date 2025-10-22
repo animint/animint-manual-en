@@ -4,34 +4,33 @@
 knitr::opts_chunk$set(fig.path="ch03-figures/")
 ```
 
-This chapter explains showSelected, one of the two main keywords that
+This chapter explains `showSelected`, one of the two main keywords that
 animint introduces for interactive data visualization. After reading
 this chapter, you will be able to
 
-* Use the showSelected keyword in your plot sketches to specify geoms
+* Use the `showSelected` keyword in your plot sketches to specify geoms
   for which only a subset of data should be plotted at any time.
 * Use selection menus in animint to change the subset of plotted data.
 * Specify smooth transitions between data subsets using the duration
   option and key aesthetic.
 * Create animated data visualizations using the time option.
 
-## Sketching with showSelected {#sketching-with-showSelected}
+## Sketching with `showSelected` {#sketching-with-showSelected}
 
-In this section, we will explain how the showSelected keyword can be
-used in plot sketches. The showSelected keyword specifies a variable
+In this section, we will explain how the `showSelected` keyword can be
+used in plot sketches. The `showSelected` keyword specifies a variable
 to use for subsetting the data before plotting. Each geom in a data
 visualization has its own data set, and its own definition of
-showSelected variables. That means different geoms can specify
-different data sets and showSelected keywords to show different data
+`showSelected` variables. That means different geoms can specify
+different data sets and `showSelected` keywords to show different data
 subsets.
 
-In fact, we have already used the showSelected keyword, which was
+In fact, we have already used the `showSelected` keyword, which was
 automatically created by the interactive legends that we created in
 the previous two chapters. For example, consider the sketch below of
-the
-[Keeling Curve data visualization from Chapter 1](/ch01#large-data).
+the [Keeling Curve data visualization from Chapter 1](/#large-data).
 
-![CO2 data viz](ch03-viz-co2.png)
+![Sketch of data visualization of carbon dioxide over time](ch03-viz-co2.png)
 
 The sketch above includes `showSelected=month` for the `geom_point`,
 meaning that it should show the subset of data for the selected
@@ -42,7 +41,7 @@ months. In contrast, since the `geom_line` does not include
 As another example, consider the sketch below of the first WorldBank
 data visualization from Chapter 2.
 
-![WorldBank data viz with showSelected](ch03-viz-showSelectedColor.png)
+![Sketch of WorldBank data visualization with `showSelected`](ch03-viz-showSelectedColor.png)
 
 The sketch above specifies `showSelected=region` for the `geom_point`,
 meaning that it should show the subset of data for the selected
@@ -50,16 +49,16 @@ regions.
 
 Note that the code we used in chapter 2 did not explicitly specify
 `showSelected=region`. Instead, we specified `aes(color=region)`, and
-animint automatically assigned a showSelected keyword. In general, animint will assign
-a showSelected keyword for each variable that is used in a
+animint automatically assigned a `showSelected` keyword. In general, animint will assign
+a `showSelected` keyword for each variable that is used in a
 categorical legend.
 
-However, the showSelected keyword is not limited to use with
-categorical legends. You can use showSelected keywords for any data
+However, the `showSelected` keyword is not limited to use with
+categorical legends. You can use `showSelected` keywords for any data
 variables you like, by explicitly specifying the variable names in the
-showSelected argument of the geom. 
+`showSelected` argument of the geom. 
 
-Each variable that is used with showSelected is treated by
+Each variable that is used with `showSelected` is treated by
 animint as a *selection variable*. For example, the Keeling Curve data
 viz has one selection variable (month), and so does the WorldBank data
 viz (region). For each selection variable, animint keeps track of the
@@ -77,7 +76,7 @@ visualization of the World Bank data that has selection variables for
 Consider the following sketch which adds a `showSelected` variable,
 and changes the data set. 
 
-![WorldBank data viz with showSelected](ch03-viz-scatter.png)
+![Sketch of WorldBank data visualization with `showSelected`](ch03-viz-scatter.png)
 
 Note that there are two `showSelected` variables, `region` and
 `year`. Also note that the data is specified as all years (but only
