@@ -12,7 +12,7 @@ The first seven chapters should be read sequentially, since they give
 a step by step guide to interactive data visualization using
 `animint2`.
 
-This chapter gives an overview of data analysis and visualization.
+Starting in the [Motivation section](#motivation) below, this first chapter gives an overview of data analysis and visualization.
 It provides motivation and a theoretical foundation for the other chapters, and should be especially useful for readers who are completely new to data analysis.
 It introduces the method of data visualization prototyping using sketches, without introducing R code.
 
@@ -51,8 +51,8 @@ improvements, for those who would like to contribute to `animint2`.
 ### Examples {#examples}
 
 The remaining chapters can be read in any order, since each
-chapter explains how to make data visualizations for a particular data
-set. 
+chapter explains how to make data visualizations for a particular data set
+or statistical algorithm.
 
 [Chapter 8](ch08) explains how to create a multi-panel interactive World Bank
 data visualization.
@@ -268,8 +268,7 @@ collected the first frequent regular data on atmospheric CO2. The
 general increasing trend can be explained by considering the chemical
 process of combustion, which converts oxygen to CO2. Keeling noted
 that "the observed rate of increase is nearly that to be expected from
-the combustion of fossil fuel" (REF: The Concentration and Isotopic
-Abundances of Carbon Dioxide in the Atmosphere, Keeling 1960).
+the combustion of fossil fuel" [@keeling1960concentration].
 
 The data visualization also reveals the interesting seasonal trend
 that attains a local maximum each May and a local minimum each
