@@ -160,7 +160,7 @@ gg.vjust <- gg.lines+
 gg.vjust+ggtitle("R graphics devices respect aes(vjust)")
 ```
 
-Note how both hjust and vjust are respected in the static ggplot
+Note how both `hjust` and `vjust` are respected in the static ggplot
 above. In contrast, consider the animint below. The left plot should
 be the same as the ggplot above, but there are clear differences in
 terms of vertical placement of the text elements. 
@@ -168,26 +168,26 @@ terms of vertical placement of the text elements.
 ```{r ch07-viz-just}
 (viz.just <- animint(
   vjust=gg.vjust+
-    ggtitle("animint does not support aes(vjust)"),
+    ggtitle("geom_text does not support aes(vjust)"),
   workaround=gg.lines+
-    ggtitle("workaround: no aes(vjust), add to y")+
+    ggtitle("workarounds: add to y or geom_label_aligned")+
     geom_text(aes(
       hjust, vjust + (0.5-vjust)*0.03 - 0.01,
       label="qwerty", hjust=hjust),
-      data=text.df)))
+      data=text.df)+
+    geom_label_aligned(aes(
+      hjust+0.25, vjust, label="qwerty", hjust=hjust, vjust=vjust),
+      data=text.df,
+      alignment="horizontal")))
 ```
 
-The workaround in animint is shown in the right panel above. You can
-adjust the vertical position `y` values of the text elements for which
-you would have used `vjust`.
+The workarounds in animint are shown in the right panel above.
 
-It is possible to implement `vjust` support for `geom_text` in animint, but we haven't
-yet had time to work on it. If you would like to implement it, we
-would be more than happy to accept a Pull Request. We already have an
+* Adjust the vertical position `y` values of the text elements for which you would have used `vjust`.
+* Use the new `geom_label_aligned`, which does support `vjust`. For an example, please read [Chapter 8](/ch08).
+
+It is possible to implement `vjust` support for `geom_text` in animint, but we haven't yet had time to work on it. If you would like to implement it, we would be more than happy to accept a Pull Request. We already have an
 [issue explaining how to implement it](https://github.com/tdhock/animint/issues/148).
-
-Another work-around is to use the new `geom_label_aligned`, which does support `vjust`.
-For an example, please read [Chapter 8](/ch08).
 
 ## Order the plots on the page {#order-plots}
 
