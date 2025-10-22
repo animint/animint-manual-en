@@ -31,7 +31,7 @@ tasks (axes, panels, legends).
 
 To overcome the disadvantages of these general plotting systems,
 charting packages such as `lattice` were developed
-([Sarkar, 2008](http://lmdvr.r-forge.r-project.org/figures/figures.html)). Such
+[@sarkar2008lattice]. Such
 packages have several pre-defined chart types, and provide a dedicated
 function for creating each chart type. For example, `lattice` provides
 the `bwplot` function for making box and whisker plots.
@@ -42,10 +42,10 @@ The disadvantage is the set of pre-defined chart types, which means that it is n
 Newer plotting systems based on the grammar of graphics are situated between these two extremes.
 Wilkinson proposed the grammar of graphics
 in order to describe and create a large class of plots
-([Wilkinson, 2005](http://www.springer.com/us/book/9780387245447?wt_mc=GoogleBooks.GoogleBooks.3.EN&token=gbgen#otherversion=9780387286952)).
+[@wilkinson2006grammar].
 Wickham later implemented several ideas from the grammar of graphics in the
 `ggplot2` R package
-([Wickham, 2009](https://www.amazon.com/dp/0387981403/ref=cm_sw_su_dp?tag=ggplot2-20)).
+[@wickham2009ggplot2].
 The `ggplot2` package has several advantages with respect to previous plotting systems.
 
 * Like general plotting systems, and unlike `lattice`, `ggplot2` imposes few limitations on the types of plots that can be created (there are no pre-defined chart types).
