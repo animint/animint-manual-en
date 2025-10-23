@@ -29,12 +29,7 @@ We begin by generating two input features, `x1` and `x2`.
 library(data.table)
 N <- 50
 set.seed(1)
-getInput <- function(){
-  c(#rnorm(N, sd=0.3),
-    runif(N, -1, 1),
-    runif(N, -1, 1)    
-    )
-}
+getInput <- function()runif(2*N, -1, 1)
 data.dt <- data.table(
   x1=getInput(),
   x2=getInput())
@@ -76,11 +71,7 @@ ggplot()+
 ```
 
 In particular, we assume that the label `y` is negative (-1) if
-`x1.sq + noise < threshold`, and positive (1) otherwise. The plot below
-visualizes the scores and labels, as a function of the input feature
-`x1`. It also shows the true score function in black. Of course, we
-would not be able to make this visualization with real data (only the
-labels are known in real data, not the scores).
+`x1.sq + noise < threshold`, and positive (1) otherwise.
 
 ```{r}
 data.dt[
@@ -91,10 +82,23 @@ data.dt[
 , y := factor(y.num)
 ]
 table(data.dt$y)
-scores <- data.table(x1=seq(-1, 1, l=101))[
+```
+
+The table above shows the label distribution in the data.
+Below we compute a grid of `x1` values, with corresponding score values `f`.
+
+```{r}
+(scores <- data.table(x1=seq(-1, 1, l=101))[
 , x1.sq := x1^2
 ][
-, f := x1.sq ]
+, f := x1.sq ][])
+```
+
+The table above will be used to draw the true score function below in black.
+Below we visualize the scores and labels, as a function of the input feature `x1`.
+Of course, we would not be able to make this visualization with real data (only the labels are known in real data, not the scores).
+
+```{r}
 x1.boundaries <- data.table(
   boundary=c(1, -1)*sqrt(true.decision.boundary))
 ggplot()+
@@ -113,9 +117,13 @@ ggplot()+
     data=data.dt)
 ```
 
-The plot below shows the scores and labels, as a function of the
-squared feature `x1.sq`. It is clear that the score function that we
-want to learn is linear in `x1.sq`.
+Above we see a plot of the data in the original `x1` feature space:
+
+* the data are colored dots,
+* the score function `f` is a black curve, and
+* the decision boundaries are vertical black lines.
+
+The plot below shows the scores and labels, as a function of the squared feature `x1.sq`.
 
 ```{r}
 x1sq.boundary <- data.table(boundary=true.decision.boundary)
@@ -134,8 +142,11 @@ ggplot()+
     data=data.dt)
 ```
 
-Next, we visualize the labels in the two-dimensional squared feature
-space. It is clear that the decision boundary is linear in this space.
+The output above shows the transformed feature space, in which there is now only one vertical decision boundary line (instead of two).
+Also it is clear that the score function that we want to learn is linear in `x1.sq`: the previous black curve for `f` is now a line.
+The goal of the support vector machine is to learn this score function given the data points.
+
+Next, we visualize the labels in the two-dimensional squared feature space.
 
 ```{r}
 ggplot()+
@@ -152,8 +163,9 @@ ggplot()+
     data=data.dt)
 ```
 
-The plot below shows the input feature space (`x1` and `x2`). It is
-clear that the decision boundary is non-linear in `x1`.
+In the figure above, it is clear that the decision boundary is linear in this space.
+
+The plot below shows the input feature space (`x1` and `x2`).
 
 ```{r}
 ggplot()+
@@ -170,80 +182,117 @@ ggplot()+
     data=data.dt)
 ```
 
-The animint below uses `clickSelects` to show which points in the
-input and squared space correspond. We just need to create an
-`data.i` variable that has a unique ID for each data point.
+In the figure above, we see two decision boundary lines, which indicate negative labels for small absolute values of `x1`, and positive labels otherwise.
+This means that the function to learn is non-linear in `x1`.
+
+## Interactive visualization of correspondence {#correspondence}
+
+The goal of this section is to create an animint which uses `clickSelects` to show which points in the input and squared space correspond.
+We first need to create a `data.i` variable which is a unique ID for each data point.
+
+```{r}
+data.dt[, data.i := 1:.N]
+```
+
+Then we define a helper function which adds `y.var` to a data table.
+This is an example of the [addColumn then facet idiom](/ch99#addColumn-then-facet).
+
+```{r}
+YVAR <- function(dt, y.var)data.table(dt)[, let(
+  y.var = factor(y.var, c("x2", "x2.sq", "f")))]
+```
+
+We use the function above to construct the ggplots below, which begin with non-clickable geoms that we want to show in the background.
+
+```{r}
+(gg.input <- ggplot()+
+   ylab("")+
+   facet_grid(y.var ~ ., scales="free")+
+   geom_vline(aes(
+     xintercept=boundary),
+     color="grey50",
+     data=x1.boundaries)+
+   geom_line(aes(
+     x1, f),
+     data=YVAR(scores, "f")))
+```
+
+The plot above shows the true score function and decision boundaries in the original `x1` feature space.
+
+```{r}
+(gg.square <- ggplot()+
+   ylab("")+
+   facet_grid(y.var ~ ., scales="free")+
+   geom_vline(aes(
+     xintercept=boundary),
+     color="grey50",
+     data=x1sq.boundary)+
+   geom_line(aes(
+     x1.sq, f),
+     data=YVAR(scores, "f")))
+```
+
+The plot above shows the true score function and decision boundary in the squared `x1.sq` feature space.
+
+Next, we add points to represent the data in the original feature space.
+
+```{r}
+input.points <- rbind(
+  YVAR(data.dt, "x2")[, y.val := x2],
+  YVAR(data.dt, "f")[, y.val := f.noise])
+point.size <- 4
+(gg.input.point <- gg.input+
+  geom_point(aes(
+    x1, y.val, fill=y),
+    clickSelects="data.i",
+    shape=21,
+    color_off=NA,
+    color="black",
+    size=point.size,
+    data=input.points))
+```
+
+The figure above shows the noise feature `x2` in the top facet, and the score function `f` in the bottom facet.
+Below we do the same for the squared feature space.
+
+```{r}
+square.points <- rbind(
+  YVAR(data.dt, "x2.sq")[, y.val := x2.sq],
+  YVAR(data.dt, "f")[, y.val := f.noise])
+(gg.square.point <- gg.square+
+  geom_point(aes(
+    x1.sq, y.val, fill=y),
+    clickSelects="data.i",
+    shape=21,
+    color_off=NA,
+    color="black",
+    size=point.size,
+    data=square.points))
+```
+
+The figure above shows the squared noise feature `x2.sq` in the top facet, and the score function `f` in the bottom facet.
+Below we combine the two ggplots into an animint.
 
 ```{r, ch12-viz-simple}
-data.dt[, data.i := 1:.N]
-YVAR <- function(dt, y.var){
-  dt$y.var <- factor(y.var, c("x2", "x2.sq", "f"))
-  dt
-}
-animint(
-  input=ggplot()+
+(viz.correspondence <- animint(
+  input=gg.input.point+
     ggtitle("input feature space")+
-    theme_bw()+
-    theme(panel.margin=grid::unit(0, "lines"))+
-    facet_grid(y.var ~ ., scales="free")+
-    scale_x_continuous(breaks=seq(-1, 1, by=0.2))+
-    ylab("")+
-    guides(color="none")+
-    geom_vline(aes(
-      xintercept=boundary),
-      color="grey50",
-      data=x1.boundaries)+
-    geom_point(aes(
-      x1, x2, color=y),
-      clickSelects="data.i",
-      size=4,
-      alpha=0.7,
-      data=YVAR(data.dt, "x2"))+
-    geom_line(aes(
-      x1, f),
-      data=YVAR(scores, "f"))+
-    geom_point(aes(
-      x1, f.noise, color=y),
-      clickSelects="data.i",
-      size=4,
-      alpha=0.7,
-      data=YVAR(data.dt, "f")),
-  square=ggplot()+
-    ggtitle("squared feature space")+
-    theme_bw()+
-    theme(panel.margin=grid::unit(0, "lines"))+
-    facet_grid(y.var ~ ., scales="free")+
-    ylab("")+
-    scale_x_continuous(breaks=seq(0, 1, by=0.2))+
-    geom_vline(aes(
-      xintercept=boundary),
-      color="grey50",
-      data=x1sq.boundary)+
-    geom_point(aes(
-      x1.sq, x2.sq, color=y),
-      clickSelects="data.i",
-      size=4,
-      alpha=0.7,
-      data=YVAR(data.dt, "x2.sq"))+
-    geom_line(aes(
-      x1.sq, f),
-      data=YVAR(scores, "f"))+
-    geom_point(aes(
-      x1.sq, f.noise, color=y),
-      clickSelects="data.i",
-      size=4,
-      alpha=0.7,
-      data=YVAR(data.dt, "f")))
+    guides(fill="none"),
+  square=gg.square.point+
+    ggtitle("squared feature space")))
 ```
 
 Note how we used two multi-panel plots with the
 [addColumn then facet](/ch99#addColumn-then-facet) idiom,
 rather than creating four separate plots. This emphasizes the fact
 that some plots/facets have a common `x1` or `x1.sq` axis. Note that
-we also hid the color legend in the first plot, since it is sufficient
-to just have one color legend.
+we also hid the fill legend in the first plot, since it is sufficient
+to just have one fill legend.
 
-## Linear SVM {#linear-svm}
+## Linear SVM, static plots {#linear-svm}
+
+In this section we explain how to visualize the linear support vector machine.
+First we divide the data into half subtrain, half validation.
 
 ```{r}
 train.i <- 1:N
@@ -253,31 +302,38 @@ data.dt[
   train.i, set := "subtrain"
 ]
 table(data.dt$set)
-subtrain.dt <- data.dt[set=="subtrain",]
+```
+
+The output above shows that there are 50 subtrain data and 50 validation data.
+The subtrain data will be used as input to the SVM solver for a given cost parameter, and the validation data will be used to select the best cost hyper-parameter.
+The plot below visualizes each set in its own panel.
+
+```{r}
 ggplot()+
-  theme_bw()+
-  theme(panel.margin=grid::unit(0, "lines"))+
   facet_grid(set ~ .)+
   geom_vline(aes(
     xintercept=boundary),
     color="grey50",
     data=x1.boundaries)+
-  scale_y_continuous(breaks=seq(-1, 1, by=0.2))+
-  scale_x_continuous(breaks=seq(-1, 1, by=0.2))+
   geom_point(aes(
     x1, x2, color=y),
     data=data.dt)
 ```
 
-We begin by fitting a linear SVM to the train data in the squared
-feature space, and visualizing the true labels `y` along with the
-predicted labels `pred.y`.
+We begin by fitting a linear SVM to the subtrain data in the squared feature space.
 
 ```{r}
 library(kernlab)
+subtrain.dt <- data.dt[set=="subtrain"]
 squared.mat <- subtrain.dt[, cbind(x1.sq, x2.sq)]
 y.vec <- subtrain.dt$y
-fit <- ksvm(squared.mat, y.vec, kernel="vanilladot")
+(fit <- ksvm(squared.mat, y.vec, kernel="vanilladot"))
+```
+
+The output above indicates the SVM was fit using a linear kernel with cost=1.
+Next, we visualize the true labels `y` along with the predicted labels `pred.y`.
+
+```{r}
 subtrain.dt$pred.y <- predict(fit)
 ggplot()+
   geom_point(aes(
@@ -288,9 +344,9 @@ ggplot()+
     data=subtrain.dt)
 ```
 
-It is clear from the plot above that there are several mis-classified
-train data points. In the plot below we visualize the decision
-boundary and margin.
+It is clear from the plot above that there are several mis-classified subtrain data points.
+Next, we want to visualize the decision boundary and margin.
+To do that, we first define a function which demonstrates how to compute predicted scores for the SVM.
 
 ```{r}
 predF <- function(fit, X){
@@ -309,14 +365,26 @@ predF <- function(fit, X){
     xmatrix(fit)[[1]],
     coef(fit)[[1]])-b(fit)
 }
+data.table(
+  predict=predict(fit, squared.mat, type="dec"),
+  predF=predF(fit, squared.mat))
+```
+
+The code above first uses `scale()` and then `kernelMult()` to compute predicted values.
+The output above shows that this computation is consistent with the output from `predict()`.
+Next, we use the prediction function on a grid of values in the squared feature space.
+
+```{r}
 xsq.vec <- seq(0, 1, l=41)
-grid.sq.dt <- data.table(expand.grid(
-  x1.sq=xsq.vec,
-  x2.sq=xsq.vec
-))[
-, pred.f := predF(fit, cbind(x1.sq, x2.sq))]
+(grid.sq.dt <- CJ(x1.sq=xsq.vec, x2.sq=xsq.vec)[
+, pred.f := predF(fit, cbind(x1.sq, x2.sq))][])
+```
+
+The output above is a table of grid points with corresponding predicted values, which we use as input to `geom_contour()` below.
+
+```{r}
 subtrain.dt[, train.error := ifelse(y==pred.y, "correct", "error")]
-ggplot()+
+(gg.contour <- ggplot()+
   theme_bw()+
   scale_color_manual(values=c(error="black", correct=NA))+
   geom_point(aes(
@@ -338,23 +406,20 @@ ggplot()+
     breaks=c(-1, 1),
     color="black",
     linetype="dashed",
-    data=grid.sq.dt)
+    data=grid.sq.dt))
 ```
 
 The plot above shows the true decision boundary using a grey
-`vline`. It also uses `geom_contour` to display the decision boundary
+`vline`. It also uses `geom_contour()` to display the decision boundary
 (solid black line, predicted score 0) and the margin (dashed black
 line, predicted score -1 and 1). Since the decision boundary and
-margin are linear in this space, we can also use `geom_abline` to
+margin are linear in this space, we can also use `geom_abline()` to
 display them. To do that we need to do some math, and work out the
 equations for the slope and intercepts of those lines (as a function
 of the learned bias `b(fit)` and `weight.vec`, as well as the scale
-parameters `mu` and `sigma`).
+parameters `mu` and `sigma`). First, we verify that this computation of the linear SVM predicted values is consistent.
 
 ```{r}
-## The equation of the margin lines is x2 = m2 + s2/w2[c+b+w1*m1/s1]
-## -s2*w1/(w2*s1)*x1 for c=1 and -1. x is input feature, m is mean, s
-## is scale, w is learned weight.
 fit.sc <- scaling(fit)$x.scale
 if(is.null(fit.sc)){
   fit.sc <- list(
@@ -368,53 +433,62 @@ predF.linear <- function(fit, X){
   X.sc <- scale(X, mu, sigma)
   X.sc %*% weight.vec - b(fit)
 }
-abline.dt <- data.table(
+data.table(
+  predict=predict(fit, squared.mat, type="dec"),
+  predF.linear=predF.linear(fit, squared.mat))
+```
+
+Above we see that the two columns have the same values, which indicates that our definition of `predF.linear()` is correct.
+To derive the linear equations for the decision boundary and margin lines, we solve the equation `f(x)=c` for `x2` as a function of `x1` (since `x2` is plotted on the vertical axis, and `x1` is on the horizontal).
+The equation of these lines is therefore `x2 = m2 + s2/w2[c+b+w1*m1/s1]-s2*w1/(w2*s1)*x1`, where
+
+* `x` is the squared input feature vector,
+* `m` is the mean vector,
+* `s` is the scale vector,
+* `w` is the learned weight vector,
+* each of these vectors has two components (suffix 1 and 2 above),
+* `c` is -1 or 1 for the margin lines, and 0 for the decision boundary.
+
+Below we convert that equation to R code.
+
+```{r}
+(abline.dt <- data.table(
   y=factor(c(-1,0,1)),
   boundary=c("margin", "decision", "margin"),
   intercept=mu[2]+sigma[2]/weight.vec[2]*(
     c(-1, 0, 1)+b(fit)+weight.vec[1]*mu[1]/sigma[1]),
-  slope=-weight.vec[1]*sigma[2]/(weight.vec[2]*sigma[1]))
-ggplot()+
-  theme_bw()+
+  slope=-weight.vec[1]*sigma[2]/(weight.vec[2]*sigma[1])))
+```
+
+The table above has three rows, one for each line that we want to draw for the level curves of the predicted values from the linear SVM.
+Below we add these to the previous plot using `geom_abline()`.
+
+```{r}
+gg.contour+
   scale_linetype_manual(values=c(margin="dashed", decision="solid"))+
   geom_abline(aes(
     slope=slope, intercept=intercept, linetype=boundary),
     color="green",
+	alpha=0.5,
     size=1,
-    data=abline.dt)+
-  geom_point(aes(
-    x1.sq, x2.sq, color=y),
-    shape=21,
-    fill=NA,
-    size=4,
-    data=subtrain.dt)+
-  geom_contour(aes(
-    x1.sq, x2.sq, z=pred.f),
-    breaks=0,
-    color="black",
-    data=grid.sq.dt)+
-  geom_contour(aes(
-    x1.sq, x2.sq, z=pred.f),
-    breaks=c(-1, 1),
-    color="black",
-    linetype="dashed",
-    data=grid.sq.dt)
+    data=abline.dt)
 ```
 
 The plot above confirms that our computation of the slope and
 intercepts (green lines) agrees with the contours (black lines). In
-the plot below, we show the learned `alpha` coefficients, and add a
-`geom_segment` to visualize the slack.
+the plot below, we show the learned `alpha` coefficients of the kernel
+function, and add a `geom_segment()` to visualize the slack.
 
 ```{r}
 subtrain.dt[, alpha := 0]
 train.row.vec <- as.integer(rownames(xmatrix(fit)[[1]]))
 subtrain.dt[train.row.vec, alpha := kernlab::alpha(fit)[[1]] ]
-subtrain.dt[, status := ifelse(
+subtrain.dt[, status := fcase(
   alpha==0, "alpha=0",
-  ifelse(alpha==1, "alpha=C", "0<alpha<C"))]
+  alpha==1, "alpha=C",
+  default="0<alpha<C")]
 slack.slope <- weight.vec[2]*sigma[1]/(weight.vec[1]*sigma[2])
-slack.dt <- subtrain.dt[alpha==1,]
+slack.dt <- subtrain.dt[alpha==1]
 slack.join <- abline.dt[slack.dt, on=list(y)]
 slack.join[, x1.sq.margin := (
   x2.sq-slack.slope*x1.sq-intercept)/(slope-slack.slope)]
@@ -499,11 +573,20 @@ ggplot()+
     data=subtrain.dt)
 ```
 
-The goal below will be to make an animint that shows
+The figure above shows the SVM in the original feature space.
+The level curves in black show that the learned decision function is non-linear in the original space (even though it was a linear SVM in the squared feature space).
+This is not a typical usage of SVM, since we would typically want to fit a non-linear kernel to the original space (which implicitly computes a linear function in a higher dimensional space that we do not need to explicitly compute).
+We fit the linear SVM in the squared feature space in order to demonstrate how it generates a non-linear function in the original space.
+
+## Linear SVM, interactive plots {#linear-svm-interacive}
+
+Next, the goal below will be to make an animint that shows
 how the decision boundary, margin, and slack change as a function of
 the cost parameter.
+The code below is a for loop over cost parameter values.
+In each iteration of the for loop, we use the code in the previous section, with the [list of data tables idiom](/ch99#list-of-data-tables).
 
-```{r ch12-viz-linear}
+```{r}
 modelInfo.list <- list()
 predictions.list <- list()
 slackSegs.list <- list()
@@ -539,9 +622,6 @@ for(cost.param in round(10^seq(-1, 1, by=cost.by),1)){
   subtrain.dt[, status := ifelse(
     alpha==0, "alpha=0",
     ifelse(alpha==cost.param, "alpha=C", "0<alpha<C"))]
-  ## The equation of the margin lines is x2 = m2 + s2/w2[c+b+w1*m1/s1]
-  ## -s2*w1/(w2*s1)*x1 for c=1 and -1. x is input feature, m is mean, s
-  ## is scale, w is learned weight.
   slack.slope <- weight.vec[2]*sigma[1]/(weight.vec[1]*sigma[2])
   abline.dt <- data.table(
     y=factor(c(-1,0,1)),
@@ -571,8 +651,19 @@ inputBoundaries <- do.call(rbind, inputBoundaries.list)
 predictions <- do.call(rbind, predictions.list)
 slackSegs <- do.call(rbind, slackSegs.list)
 modelLines <- do.call(rbind, modelLines.list)
-modelInfo <- do.call(rbind, modelInfo.list)
 setErrors <- do.call(rbind, setErrors.list)
+(modelInfo <- do.call(rbind, modelInfo.list))
+```
+
+The output above is a table with one row per cost parameter considered, and columns for different properties of the model.
+
+* `slack` is the amount of hinge error.
+* `norm` is the norm of the learned weight vector.
+* `margin` is the width of the tube between the two margin lines.
+
+Below we convert these data into a form more useful for plotting.
+
+```{r}
 modelInfo.tall <- melt(modelInfo, id.vars="cost.param")
 grid.sq.dt$boundary <- "true"
 setErrors$variable <- "errors"
@@ -584,97 +675,131 @@ set.label.select <- data.table(
   set=c("validation", "subtrain"),
   hjust=c(1, 0))
 set.labels <- setErrors[set.label.select, on=list(cost.param, set)]
-viz.linear.svm <- animint(
-  selectModel=ggplot()+
-    ggtitle("Select regularization parameter")+
-    scale_x_continuous(limits=c(-1.5, 1.5))+
-    geom_tallrect(aes(
-      xmin=log10(cost.param)-cost.by/2,
-      xmax=log10(cost.param)+cost.by/2),
-      clickSelects="cost.param",
-      alpha=0.5,
-      data=modelInfo)+
-    theme_bw()+
-    facet_grid(variable ~ ., scales="free")+
-    geom_line(aes(
-      log10(cost.param), errors,
-      group=set, color=set),
-      data=setErrors)+
-    geom_text(aes(
-      log10(cost.param), errors-1, label=set,
-      hjust=hjust,
-      color=set),
-      data=set.labels)+
-    guides(color="none")+
-    geom_line(aes(
-      log10(cost.param), log10(value)),
-      data=modelInfo.tall),
-  inputSpace=ggplot()+
-    ggtitle("Input space features")+
-    scale_fill_manual(values=sv.colors, breaks=names(sv.colors))+
-    geom_vline(aes(
-      xintercept=boundary),
-      color="violet",
-      data=x1.boundaries)+
-    guides(color="none", fill="none", linetype="none")+
-    scale_linetype_manual(values=c(
-      "-1"="dashed",
-      "0"="solid",
-      "1"="dashed"))+
-    geom_path(aes(
-      x1, x2,
-      group=path.i,
-      linetype=level.fac),
-      showSelected=c("boundary", "cost.param"),
-      color="black",
-      data=inputBoundaries)+
-    geom_point(aes(
-      x1, x2, fill=status),
-      showSelected=c("status", "y", "data.i", "cost.param"),
-      size=5,
-      color="grey",
-      data=predictions)+
-    geom_point(aes(
-      x1, x2, color=y, fill=status),
-      showSelected=c("cost.param", "status", "y"),
-      clickSelects="data.i",
-      size=3,
-      data=predictions),
-  kernelSpace=ggplot()+
-    ggtitle("Kernel space features")+
-    geom_vline(aes(
-      xintercept=boundary), color="violet",
-      data=x1sq.boundary)+
-    ##coord_cartesian(xlim=c(0, 1), ylim=c(0, 1))+
-    geom_abline(aes(
-      slope=slope, intercept=intercept, linetype=boundary),
-      showSelected="cost.param",
-      color="black",
-      data=modelLines)+
-    scale_linetype_manual(values=c(
-      decision="solid",
-      margin="dashed",
-      true="solid"))+
-    geom_point(aes(
-      x1.sq, x2.sq, fill=status),
-      showSelected=c("data.i", "cost.param"),
-      size=5,
-      color="grey",
-      data=predictions)+
-    geom_point(aes(
-      x1.sq, x2.sq, color=y, fill=status),
-      clickSelects="data.i",
-      showSelected="cost.param",
-      size=3,
-      data=predictions)+
-    scale_fill_manual(values=sv.colors, breaks=names(sv.colors))+
-    geom_segment(aes(
-      x1.sq, x2.sq, 
-      xend=x1.sq.margin, yend=x2.sq.margin),
-      showSelected=c("cost.param", "boundary"),
-      color="grey",
-      data=slackSegs))
-viz.linear.svm
+```
+
+We begin the data visualization with a plot for selecting the regularization.
+
+```{r}
+(gg.select.reg <- ggplot()+
+  ggtitle("Select regularization parameter")+
+  scale_x_continuous(limits=c(-1.5, 1.5))+
+  theme_bw()+
+  facet_grid(variable ~ ., scales="free")+
+  geom_line(aes(
+    log10(cost.param), errors,
+    group=set, color=set),
+    data=setErrors)+
+  geom_text(aes(
+    log10(cost.param), errors-1, label=set,
+    hjust=hjust,
+    color=set),
+    data=set.labels)+
+  guides(color="none")+
+  geom_line(aes(
+    log10(cost.param), log10(value)),
+    data=modelInfo.tall)+
+  geom_tallrect(aes(
+    xmin=log10(cost.param)-cost.by/2,
+    xmax=log10(cost.param)+cost.by/2),
+    clickSelects="cost.param",
+    alpha=0.5,
+    data=modelInfo))
+```
+
+The figure above shows a plot of various properties on the Y axis, versus the cost parameter on the X axis.
+Next, we create an input space plot in the code below.
+
+```{r}
+gg.linear.input <- ggplot()+
+  theme_bw()+
+  ggtitle("Input space features")+
+  scale_fill_manual(values=sv.colors, breaks=names(sv.colors))+
+  geom_vline(aes(
+    xintercept=boundary),
+    color="violet",
+    data=x1.boundaries)+
+  guides(color="none", fill="none", linetype="none")+
+  scale_linetype_manual(values=c(
+    "-1"="dashed",
+    "0"="solid",
+    "1"="dashed"))+
+  geom_path(aes(
+    x1, x2,
+    group=path.i,
+    linetype=level.fac),
+    showSelected=c("boundary", "cost.param"),
+    color="black",
+    data=inputBoundaries)+
+  geom_point(aes(
+    x1, x2, fill=status),
+    showSelected=c("status", "y", "data.i", "cost.param"),
+    shape=21,
+    size=5,
+    color="black",
+    data=predictions)+
+  geom_point(aes(
+    x1, x2, color=y, fill=status),
+    showSelected=c("cost.param", "status", "y"),
+    clickSelects="data.i",
+    shape=21,
+    size=3,
+    data=predictions)
+gg.linear.input+facet_wrap("cost.param")
+```
+
+The static visualization above shows different cost values in different panels (whereas in the animint they will be shown using interactivity).
+We create a similar plot for the squared feature space in the code below.
+
+```{r}
+gg.linear.square <- ggplot()+
+  theme_bw()+
+  ggtitle("Kernel space features")+
+  geom_vline(aes(
+    xintercept=boundary), color="violet",
+    data=x1sq.boundary)+
+  ##coord_equal(xlim=c(0,1), ylim=c(0,1))+
+  geom_abline(aes(
+    slope=slope, intercept=intercept, linetype=boundary),
+    showSelected="cost.param",
+    color="black",
+    data=modelLines)+
+  scale_linetype_manual(values=c(
+    decision="solid",
+    margin="dashed",
+    true="solid"))+
+  geom_segment(aes(
+    x1.sq, x2.sq,
+    xend=x1.sq.margin, yend=x2.sq.margin),
+    showSelected=c("cost.param", "boundary"),
+    color="grey",
+    data=slackSegs)+
+  geom_point(aes(
+    x1.sq, x2.sq, fill=status),
+    showSelected=c("data.i", "cost.param"),
+    shape=21,
+    size=5,
+    color="black",
+    data=predictions)+
+  geom_point(aes(
+    x1.sq, x2.sq, color=y, fill=status),
+    clickSelects="data.i",
+    showSelected="cost.param",
+    shape=21,
+    size=3,
+    data=predictions)+
+  scale_fill_manual(values=sv.colors, breaks=names(sv.colors))+
+  coord_equal()
+gg.linear.square+facet_wrap("cost.param")
+```
+
+Above we see plots of the squared feature space, with one panel per cost value.
+Below we combine the previous ggplots into an animint.
+
+```{r ch12-viz-linear}
+(viz.linear.svm <- animint(
+  selectModel=gg.select.reg,
+  inputSpace=gg.linear.input,
+  kernelSpace=gg.linear.square))
 ```
 
 ## Non-linear polynomial kernel SVM {#nonlinear-polynomial-kernel-svm}
@@ -683,6 +808,7 @@ In the previous section we fit a linear kernel in the squared feature
 space, which resulted in learning a function which is non-linear in
 terms of the original feature space. In this section we directly fit a
 non-linear polynomial kernel in the original space.
+The code below includes for loops over two hyper-parameters: cost and kernel (polynomial kernel degree).
 
 ```{r ch12-viz-poly}
 predictions.list <- list()
@@ -720,7 +846,13 @@ for(cost.param in 10^seq(-1, 3, by=cost.by)){
 }
 inputBoundaries <- do.call(rbind, inputBoundaries.list)
 predictions <- do.call(rbind, predictions.list)
-setErrors <- do.call(rbind, setErrors.list)
+(setErrors <- do.call(rbind, setErrors.list))
+```
+
+The output above shows a table with one row per hyper-parameter combination and set (subtrain or validation).
+Below we visualize these data using two linked plots.
+
+```{r}
 validationErrors <- setErrors[set=="validation"]
 validationErrors$select <- "degree"
 setErrors$select <- "cost"
@@ -775,6 +907,12 @@ animint(
       data=predictions))
 ```
 
+Above we see two linked plots:
+
+* On the left bottom we can select the polynomial kernel degree.
+* On the left top we can select the cost parameter.
+* On the right the corresponding data and boundaries are shown.
+
 ## Chapter summary and exercises {#ch12-exercises}
 
 We used ggplots to visualize the Support Vector Machine model for
@@ -784,7 +922,10 @@ hyper-parameters.
 
 Exercises:
 
+* For `viz.correspondence`, add X scales with breaks that emphasize the correspondence between the original and squared feature space (-0.5 and 0.5 squared make 0.25, etc).
 * Use [HTML table layout](/ch06#html-table-layout) for [`viz.linear.svm`](#linear-svm), so that the two feature space plots appear beside each other, and the "Select regularization parameter" plot appears above or below.
+* For `viz.linear.svm`, change color scales so that subtrain/validation in the Select regularization parameter plot have different colors from `y` in the other plots.
+* For `viz.linear.svm`, add `coord_equal(xlim=c(0,1), ylim=c(0,1))` and observe that the grey slack line segments are no longer correctly represented, because some values beyond the limits are clipped to the limits. Fix this by doing the clipping yourself in a new data set for the `geom_segment()` in which the values are inside the limits, and correctly represented. Hint: use linear equations, solve for x=0 or y=0 to find the (x,y) coordinates of the points on the limits.
 * Use `rbfdot` as the kernel function. Compute subtrain and validation error,
   then add a new panel to the "select hyper parameters" plot.
 * Default scales use the same two colors for the **y** and
