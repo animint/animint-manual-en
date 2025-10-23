@@ -17,5 +17,5 @@ jobs:
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
           packages: knitr
-      - name: Render book
+      - name: Test width
         run: R --vanilla < test-width.R

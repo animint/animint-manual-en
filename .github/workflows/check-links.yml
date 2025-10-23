@@ -17,5 +17,5 @@ jobs:
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
           packages: nc
-      - name: Render book
+      - name: Test links
         run: R --vanilla < test-links.R
