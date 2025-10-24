@@ -32,9 +32,9 @@ the [Keeling Curve data visualization from Chapter 1](/#large-data).
 
 ![Sketch of data visualization of carbon dioxide over time](ch03-viz-co2.png)
 
-The sketch above includes `showSelected=month` for the `geom_point`,
+The sketch above includes `showSelected=month` for the `geom_point()`,
 meaning that it should show the subset of data for the selected
-months. In contrast, since the `geom_line` does not include
+months. In contrast, since the `geom_line()` does not include
 `showSelected` keywords, it always shows the entire data set
 (regardless of the selected months).
 
@@ -43,7 +43,7 @@ data visualization from Chapter 2.
 
 ![Sketch of WorldBank data visualization with `showSelected`](ch03-viz-showSelectedColor.png)
 
-The sketch above specifies `showSelected=region` for the `geom_point`,
+The sketch above specifies `showSelected=region` for the `geom_point()`,
 meaning that it should show the subset of data for the selected
 regions.
 
@@ -141,15 +141,15 @@ year that you selected.
 
 **Multi-layer exercise:** Add another geom to this interactive
 scatterplot. As in [Chapter 2](/ch02#multi-layer), you can
-use a `geom_text` to show the name of each country (easy), or a
-`geom_text` to show the selected year (medium), or a `geom_path` to
+use a `geom_text()` to show the name of each country (easy), or a
+`geom_text()` to show the selected year (medium), or a `geom_path()` to
 show the previous 5 years of data (hard). Hint: make sure to specify
 `showSelected=year` for all geoms.
 
 **Multi-plot exercise:** Add a time series plot to the data viz
 above. As in [Chapter 2](../ch02/ch02-ggplot2.html#multi-plot), you can use a
-`geom_line` to show the fertility rate for each country over all
-years. Add a `geom_vline` with `showSelected=year` to highlight the
+`geom_line()` to show the fertility rate for each country over all
+years. Add a `geom_vline()` with `showSelected=year` to highlight the
 currently selected year.
 
 ## Transitions: the duration option and key aesthetic {#duration-key}
@@ -236,7 +236,7 @@ In general the `key` aesthetic should be specified for all geoms that
 use `showSelected` with a variable that appears in the `duration`
 option. In this example, we used the `duration` option to specify a
 smooth transition for the `year` variable. Since we use
-`showSelected=year` in the `geom_point`, we also specified the `key`
+`showSelected=year` in the `geom_point()`, we also specified the `key`
 aesthetic for this geom.
 
 ## Animation: the time option {#animation-time}
@@ -266,8 +266,8 @@ Exercises:
 * Make an improved version of `viz.aligned` from the previous
   chapter. Instead of fixing the year at 1975, use
   `showSelected=year` so that the user can select a year. Add
-  geoms that show the selected year: a `geom_text` on the scatterplot,
-  and a `geom_vline` on the time series.
+  geoms that show the selected year: a `geom_text()` on the scatterplot,
+  and a `geom_vline()` on the time series.
 * Translate one of the
   [animation package examples](https://yihui.name/animation/examples/)
   to an animint. Hint: in the code for the animation package there is

@@ -82,10 +82,10 @@ prob.mass+
   facet_wrap("poisson.mean")
 ```
 
-Note that we used `alpha=0.6` with `geom_tallrect`, which means that
+Note that we used `alpha=0.6` with `geom_tallrect()`, which means that
 the tallrect for the selected mean has 0.6 opacity, and the other
 tallrects have 0.1 opacity. Note also that we use `color="red"` and
-`size=5` with `geom_point` so that it is easier to see the points on a
+`size=5` with `geom_point()` so that it is easier to see the points on a
 grey background, and to hover the cursor over the points to see the
 tooltip. We next create an interactive version with animint.
 
@@ -150,11 +150,11 @@ animint(
 ```
 
 Note how we used `addPanel` to add a `panel` variable to all the data
-sets for each geom except `geom_tallrect`. Using `panel` as a facet
+sets for each geom except `geom_tallrect()`. Using `panel` as a facet
 variable has the effect of drawing each geom in only one panel, except
-the `geom_tallrect` which is drawn in each panel.
+the `geom_tallrect()` which is drawn in each panel.
 
-Note that we also used a `geom_hline` to show 0.99, the cumulative
+Note that we also used a `geom_hline()` to show 0.99, the cumulative
 distribution function threshold that was used to determine the set of
 points to plot for each Poisson distribution. This is an example of
 "show your arbitrary choices," one of the general principles of
@@ -347,7 +347,7 @@ Exercises:
   repetition. To avoid that repetition, create a new data viz which
   uses a single geom with a larger data set. For example, the red
   points in the two panels of the first plot could be defined using
-  one `geom_point` with a larger data set (Hint: use
+  one `geom_point()` with a larger data set (Hint: use
   `data.table::melt` with `measure.vars=c("cum.prob", "probability")`.
 * Create a similar sequence of data visualizations for the
   [Binomial regression](https://en.wikipedia.org/wiki/Binomial_regression)

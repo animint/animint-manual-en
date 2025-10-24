@@ -15,7 +15,7 @@ chapter, you will understand how to
   relying on the `stat_*` functions in `ggplot2`.
 * Add data one at a time to a multiple selection variable set, rather
   than using a rectangular selection brush.
-* Avoid using `vjust` and labels with multiple lines in `geom_text`.
+* Avoid using `vjust` and labels with multiple lines in `geom_text()`.
 * Order the plots on the page.
 * Avoid using some unsupported `theme` options.
 * Use facets with multiple variables per axis.
@@ -38,7 +38,7 @@ fixed axes make it easy to understand how the data changes along with
 the `time` variable. 
 
 There are some situations where it would be useful to have axes that
-interactively update. One example is when different showSelected
+interactively update. One example is when different `showSelected`
 subsets have very different values for variables that are shown with
 an axis or legend. In this case it would be useful to have interactive
 axes that update and change along with the data. We have experimental
@@ -113,7 +113,7 @@ ggidentity <- ggplot() +
 ggidentity+facet_grid(facet ~ ., labeller=label_both)
 ```
 
-Note how we used `geom_segment` instead of `geom_bar`, but their appearance is similar.
+Note how we used `geom_segment()` instead of `geom_bar()`, but their appearance is similar.
 
 ```{r ch07-viz-identity}
 animint(
@@ -133,14 +133,14 @@ multiple selection set. Use the
 [selector.types](/ch04#selector-types-option) option
 to declare a multiple selection variable.
 
-## Adjust y instead of using vjust with `geom_text` {#vjust}
+## Adjust `y` instead of using `vjust` with `geom_text()` {#vjust}
 
 For horizontal text alignment, animint supports using `hjust` in R
 with the most common values: 0 for left alignment, 0.5 for middle
 alignment, and 1 for right alignment. Animint translates these three
 `hjust` values to the `text-anchor` property in the rendered data viz.
 
-However, animint `geom_text` does not support vertical text alignment using
+However, animint `geom_text()` does not support vertical text alignment using
 `vjust` in R, because there is no property that can be used for
 vertical text alignment in SVG. 
 
@@ -184,9 +184,9 @@ terms of vertical placement of the text elements.
 The workarounds in animint are shown in the right panel above.
 
 * Adjust the vertical position `y` values of the text elements for which you would have used `vjust`.
-* Use the new `geom_label_aligned`, which does support `vjust`. For an example, please read [Chapter 8](/ch08).
+* Use the new `geom_label_aligned()`, which does support `vjust`. For an example, please read [Chapter 8](/ch08).
 
-It is possible to implement `vjust` support for `geom_text` in animint, but we haven't yet had time to work on it. If you would like to implement it, we would be more than happy to accept a Pull Request. We already have an
+It is possible to implement `vjust` support for `geom_text()` in animint, but we haven't yet had time to work on it. If you would like to implement it, we would be more than happy to accept a Pull Request. We already have an
 [issue explaining how to implement it](https://github.com/tdhock/animint/issues/148).
 
 ## Order the plots on the page {#order-plots}
@@ -217,7 +217,7 @@ an animint,
 ## Avoid line breaks in text labels {#line-breaks}
 
 When rendering a ggplot using regular R graphics devices, using a line
-break or newline `\n` in a `geom_text` label results in multiple lines
+break or newline `\n` in a `geom_text()` label results in multiple lines
 of text on the plot.
 
 ```{r}
@@ -234,12 +234,12 @@ However, animint only supports drawing the first line of text.
 animint(gg.return)
 ```
 
-It would be nice to support multiple lines in `geom_text` labels, but
+It would be nice to support multiple lines in `geom_text()` labels, but
 we have not yet had time to implement that. However, we have
 [an issue](https://github.com/tdhock/animint/issues/149), and would be
 willing to accept a Pull Request which implements that. 
 
-Until then, the workaround is to use one `geom_text` layer for each
+Until then, the workaround is to use one `geom_text()` layer for each
 line of text that you want to display:
 
 ```{r ch07-viz-two-lines}
@@ -354,7 +354,7 @@ explained several workarounds.
 Exercises:
 
 * Make a facetted ggplot with `stat_bin` that will not work with
-  animint when the facet variable is instead used as a showSelected
+  animint when the facet variable is instead used as a `showSelected`
   variable. Compute the stat yourself for each facet, and use
   `stat_identity` to make it work with animint.
 * Make a ggplot which displays fine using `facet_grid(. ~ var, scales="free")` 

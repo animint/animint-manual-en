@@ -286,8 +286,8 @@ Exercises:
 
 * Add a title to each plot.
 * Add a size legend to the first plot (black points larger than red), so that we can see when red and black have the same value.
-* Add a `geom_hline` to emphasize the loss=0 value in the second plot.
-* Add a `geom_hline` to emphasize the stopping threshold in the first
+* Add a `geom_hline()` to emphasize the loss=0 value in the second plot.
+* Add a `geom_hline()` to emphasize the stopping threshold in the first
   plot.
 * Turn off one of the two legends, to save space.
 * How to specify smooth transitions between iterations?

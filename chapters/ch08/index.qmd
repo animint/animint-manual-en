@@ -87,14 +87,14 @@ TS.FERT <- function(df)FACETS(df, "Fertility rate", "Years")
 ## First time series plot {#first-ts}
 
 First we define a data set with one row for each year, which we will
-use for selecting years using a `geom_tallrect` in the background.
+use for selecting years using a `geom_tallrect()` in the background.
 
 ```{r}
 years <- unique(not.na[, .(year)])
 ```
 
-We define the ggplot with a `geom_tallrect` in the background, and a
-`geom_line` for the time series.
+We define the ggplot with a `geom_tallrect()` in the background, and a
+`geom_line()` for the time series.
 
 ```{r}
 line_alpha <- 3/5
@@ -165,11 +165,11 @@ animint(ts.scatter)
 Note that single selection is used by default for both year and country.
 
 * The selected year is shown as a grey rectangle on the right.
-* The selected country is shown with more opacity in the `geom_point` on the left, and in the `geom_line` on the right.
+* The selected country is shown with more opacity in the `geom_point()` on the left, and in the `geom_line()` on the right.
 
 **Exercise:** how would you further emphasize the selected year and country?
 Hint: you can modify the `alpha_off` parameter from the default of `0.5` to a smaller value, like `0.2`.
-Try using `color_off`, which can not be used in combination with `aes(color)`, so try using `aes(fill)` instead in the `geom_point`.
+Try using `color_off`, which can not be used in combination with `aes(color)`, so try using `aes(fill)` instead in the `geom_point()`.
 
 ## Adding another time series facet {#add-ts}
 
@@ -190,7 +190,7 @@ scatter.both
 ```
 
 Note in the code above that `TS.FERT` was used to specify facet columns `top` and `side`.
-A final touch is to add text labels to the time series, using `geom_label_aligned`, which is new in `animint2` (it is not in `ggplot2`).
+A final touch is to add text labels to the time series, using `geom_label_aligned()`, which is new in `animint2` (it is not in `ggplot2`).
 It is a text label that adjusts its position to avoid overlaps with other labels with the same `y` value (in horizontal alignment).
 The code below first creates a data set with the extreme values of `year`, and then uses that with `alignment="horizontal"`.
 
@@ -245,9 +245,9 @@ Exercises:
 * Simplify the code by using `make_*()` instead of `geom_*()` for `tallrect` and `widerect`.
 * The X axis for fertility rate shows default breaks 2.5, 5.0, 7.5.
   Change these to 2, 4, 6, 8. Hint: use `breaks` argument of `scale_x_continuous`.
-* Since no smooth transition has been specified for `country`, the text labels appear and disappear instantaneously when the set of selected countries is modified. Try adding a smooth transition, by adding the global `duration` option, and by adding `aes(key)` to the `geom_label_aligned`. Hint: since there are two labels for each country, the key should depend on both `year` and `country`.
+* Since no smooth transition has been specified for `country`, the text labels appear and disappear instantaneously when the set of selected countries is modified. Try adding a smooth transition, by adding the global `duration` option, and by adding `aes(key)` to the `geom_label_aligned()`. Hint: since there are two labels for each country, the key should depend on both `year` and `country`.
 * Make it so that clicking a country label de-selects the corresponding country.
-* Add text labels to the time series plot on the right, with names for each country, using `geom_label_aligned(alignment="vertical")`.
+* Add text labels to the time series plot on the right, with names for each country, using the `alignment="vertical"` argument to `geom_label_aligned()`.
   Each label should appear only when the country is selected, and should disappear after clicking on the label.
 * Add a text label to the scatterplot to indicate the selected year.
 * Add text labels to the scatterplot, with names for each country.

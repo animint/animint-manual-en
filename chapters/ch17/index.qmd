@@ -76,7 +76,7 @@ gg.centers
 ```
 
 Above we displayed the two data sets (cluster centers and data) using
-two instances of `geom_point`. Below we compute the distance between
+two instances of `geom_point()`. Below we compute the distance between
 each data point and each cluster center,
 
 ```{r}
@@ -85,7 +85,7 @@ pairs.dt <- data.table(expand.grid(
   data.i=1:nrow(data.mat)))
 ```
 
-These can be visualized via a `geom_point`,
+These can be visualized via a `geom_point()`,
 
 ```{r}
 seg.dt <- pairs.dt[, data.table(

@@ -933,7 +933,7 @@ Exercises:
   **set** legends, which could be confusing. Change the colors in one
   of the two legends so that they are different.
 * Use `color` and `color_off` parameters to change the appearance of
-  the `geom_tile` when selected or not, as explained in [Chapter 6,
+  the `geom_tile()` when selected or not, as explained in [Chapter 6,
   section Specifying how selection state is
   displayed](/ch06#display-selection-state).
 

@@ -201,7 +201,7 @@ plot in order to select the model.
 ## Interactive figures for one signal {#interactive-one}
 
 We will create an interactive figure for one signal by adding a
-`geom_tallrect` with `clickSelects=segments` to the plot above:
+`geom_tallrect()` with `clickSelects=segments` to the plot above:
 
 ```{r selectionClick}
 interactive.selection <- gg.selection+
@@ -336,7 +336,7 @@ Now that you know how to visualize each of the seven parts of the
 
 Exercises:
 
-* Add a `geom_text` which shows the currently selected signal name at
+* Add a `geom_text()` which shows the currently selected signal name at
   the top of the plot, in `interactive.models` in the first animint
   above.
 * Make an animint with two plots that shows the data set that

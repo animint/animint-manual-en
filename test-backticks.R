@@ -12,11 +12,12 @@ for(qmd in qmd.files){
     geom.lines <- c("`geom_text`","geom_text","geom_text()","`geom_text()`")
   }
   bad.lines <- c(
-    grep("[^`](?:clickSelects|showSelected)", qmd.text, value=TRUE),
+    grep("[^-#`](?:clickSelects|showSelected)", qmd.text, value=TRUE),
     grep("geom_[^(]+\\(\\)`", geom.lines, value=TRUE, perl=TRUE, invert=TRUE))
   if(length(bad.lines)){
     violations[[qmd]] <- bad.lines
   }
 }
 print(violations)
+
 q(status=length(violations))
