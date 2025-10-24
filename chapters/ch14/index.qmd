@@ -37,7 +37,7 @@ Above we see that `PSJ` is a list of several lists and data frames.
 
 The section below computes some common data that we will use in two data visualizations below.
 
-```{r ch14-setup-data}
+```{r}
 library(data.table)
 (res.error <- data.table(PSJ$error.total.chunk))
 ```
@@ -196,7 +196,7 @@ system.time({
 The output above shows that the initial definition is fast.
 Rendering this preliminary (incomplete) data viz in the code below is also fast.
 
-	```{r ch14-viz-for-construct}
+```{r ch14-viz-for}
 before <- Sys.time()
 viz.for
 cat(Sys.time()-before, "seconds\n")
@@ -266,7 +266,7 @@ Note the timing of the code above. It takes several seconds just to
 evaluate the R code that defines this data viz, since it has so many
 geoms. Next, we compile the data visualization.
 
-```{r ch14-for-compile}
+```{r}
 print(timing.for.compile <- system.time({
   animint2dir(viz.for, "ch14-for")
 }))
@@ -431,7 +431,7 @@ print(timing.named.construct <- system.time({
 It is clear that it takes much less time to evaluate the R code above
 which uses the named clickSelects/showSelected. We compile it below.
 
-```{r ch14-named-compile}
+```{r}
 print(timing.named.compile <- system.time({
   animint2dir(viz.named, "ch14-named")
 }))
