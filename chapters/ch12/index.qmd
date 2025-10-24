@@ -787,8 +787,7 @@ gg.linear.square <- ggplot()+
     shape=21,
     size=3,
     data=predictions)+
-  scale_fill_manual(values=sv.colors, breaks=names(sv.colors))+
-  coord_equal()
+  scale_fill_manual(values=sv.colors, breaks=names(sv.colors))
 gg.linear.square+facet_wrap("cost.param")
 ```
 
@@ -798,8 +797,10 @@ Below we combine the previous ggplots into an animint.
 ```{r ch12-viz-linear}
 (viz.linear.svm <- animint(
   selectModel=gg.select.reg,
-  inputSpace=gg.linear.input,
-  kernelSpace=gg.linear.square))
+  inputSpace=gg.linear.input+
+    theme_animint(last_in_row=TRUE),
+  kernelSpace=gg.linear.square+
+    theme_animint(width=700, colspan=2)))
 ```
 
 ## Non-linear polynomial kernel SVM {#nonlinear-polynomial-kernel-svm}
