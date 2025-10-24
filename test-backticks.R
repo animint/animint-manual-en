@@ -1,0 +1,17 @@
+qmd.files <- c(
+  Sys.glob("chapters/*qmd"),
+  Sys.glob("chapters/*/index.qmd"))
+violations <- list()
+for(qmd in qmd.files){
+  qmd.lines <- readLines(qmd)
+  is.fence <- grepl("```", qmd.lines)
+  is.text <- (cumsum(is.fence) %% 2)==0
+  qmd.text <- qmd.lines[is.text]
+  bad.lines <- grep(
+    "[^`](?:clickSelects|showSelected)", qmd.text, value=TRUE)
+  if(length(bad.lines)){
+    violations[[qmd]] <- bad.lines
+  }
+}
+print(violations)
+q(status=length(violations))
