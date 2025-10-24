@@ -171,7 +171,7 @@ The `aes` function is called with names for visual properties (`x`,
 `y`, `color`) and values for the corresponding data variables
 (`life.expectancy`, `fertility.rate`, `region`). This mapping is
 applied to the variables in the `world_bank_1975` data table, in order
-to create the visual properties of the `geom_point`. The ggplot was
+to create the visual properties of the `geom_point()`. The ggplot was
 saved as the `scatter` object, which when printed on the R command
 line shows the plot on a graphics device. Note that we automatically
 have a `region` color legend.
@@ -214,7 +214,7 @@ variables like `lending` are best shown using point `color` or `fill`.
 
 Multi-layer data visualization is useful when you want to display
 several different geoms or data sets in the same plot. For example,
-consider the following sketch which adds a `geom_path` to the previous
+consider the following sketch which adds a `geom_path()` to the previous
 data visualization.
 
 ![Sketch of multi-layer visualization using World Bank data](ch02-two-layer-viz.png)
@@ -245,11 +245,11 @@ are in fact lists of ggplots and options.
 
 The plot above shows a data visualization with 2 geoms/layers: 
 
-* the `geom_point` shows the life expectancy, fertility rate, and
+* the `geom_point()` shows the life expectancy, fertility rate, and
   region of all countries in 1975.
-* the `geom_path` shows the same variables for the previous 5 years.
+* the `geom_path()` shows the same variables for the previous 5 years.
 
-The addition of the `geom_path` shows how the countries changed over
+The addition of the `geom_path()` shows how the countries changed over
 time. In particular, it shows that most countries moved to the right
 and down, meaning higher life expectancy and lower fertility
 rate. However, there are some exceptions. For example, the two East
@@ -414,8 +414,8 @@ add.x.var <- function(df, x.var){
 ```
 
 The data visualization above contains a single ggplot with two panels
-and three layers. The left panel shows the `geom_point` and
-`geom_path`, and the right panel shows the `geom_line`. The panels
+and three layers. The left panel shows the `geom_point()` and
+`geom_path()`, and the right panel shows the `geom_line()`. The panels
 have a shared axis for fertility rate, which ensures that the lines in
 the time series panel can be directly compared with the points and
 paths in the scatterplot panel.
@@ -457,8 +457,8 @@ For example, consider the sketch below.
 Note that the three panels plot the same two geoms (point and
 path). Since `facet=show.year`, and there are three panels shown, we
 will need to create data tables which have three values for the
-`show.year` variable. The `geom_point` has data for just 3 years, and
-the `geom_path` has data for 15 years (but 3 values of
+`show.year` variable. The `geom_point()` has data for just 3 years, and
+the `geom_path()` has data for 15 years (but 3 values of
 `show.year`). The code below creates these two data sets for three
 years of the `world_bank` data set.
 
@@ -531,7 +531,7 @@ Exercises:
 * What are the three main advantages of `ggplot2` relative to previous
   plotting systems such as `grid` and `lattice`?
 * What is the purpose of multi-layer graphics?
-* Create a version of `viz.two.layers` with `aes(tooltip)` computed based on the min/max values of the data shown by the `geom_path`. Hint: for each country in `world_bank_before_1975`, compute a text string to use for `aes(tooltip)`. One way to do this is via `data.table(world_bank_before_1975)[, .(tooltip=sprintf(...)), by=country]`.
+* Create a version of `viz.two.layers` with `aes(tooltip)` computed based on the min/max values of the data shown by the `geom_path()`. Hint: for each country in `world_bank_before_1975`, compute a text string to use for `aes(tooltip)`. One way to do this is via `data.table(world_bank_before_1975)[, .(tooltip=sprintf(...)), by=country]`.
 * What are the two different reasons for creating multi-panel
   graphics? Which of these two types is more useful with interactivity?
 * Let us define "A < B" to mean that "one B can contain several A."

@@ -83,7 +83,7 @@ ggplot()+
   scale_color_manual(values=c("TRUE"="grey", "FALSE"="black"))
 ```
 
-Plotting with `geom_point` makes it easy to see the difference between
+Plotting with `geom_point()` makes it easy to see the difference between
 zeros and missing values.
 
 We will compute a summary of all accidents per month in this time
@@ -398,7 +398,7 @@ mtl.map
 ```
 
 The plot below shows the time period that each counter was in
-operation. Note that we use `geom_tallrect` with `clickSelects` to
+operation. Note that we use `geom_tallrect()` with `clickSelects` to
 select the month.
 
 ```{r}

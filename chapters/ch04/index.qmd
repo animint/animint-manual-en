@@ -2,46 +2,43 @@
 title: The `clickSelects` keyword
 ---
 
-
 ```{r setup, echo=FALSE}
 knitr::opts_chunk$set(fig.path="ch04-figures/")
 ```
 
-This chapter explains clickSelects, one of the two main keywords that
+This chapter explains `clickSelects`, one of the two main keywords that
 animint introduces for interactive data visualization. The
 clickSelects keyword specifies a geom for which clicking updates a
 selection variable. Each geom in a data visualization has its own data
-set, and its own definition of the clickSelects keyword. So clicking
+set, and its own definition of the `clickSelects` keyword. So clicking
 on different geoms can change different selection variables.
 
 After reading this chapter, you will be able to
 
-* Understand how interactive legends implicitly use clickSelects.
-* Use the clickSelects keyword in your plot sketches.
-* Translate your plot sketches with clickSelects into R code.
-* Use the `selector.types` option to specify multiple selection
-  variables.
+* Understand how interactive legends implicitly use `clickSelects`.
+* Use the `clickSelects` keyword in your plot sketches.
+* Translate your plot sketches with `clickSelects` into R code.
+* Use the `selector.types` option to specify multiple selection variables.
   
-## Interactive legends implicitly use clickSelects {#implicit-clickSelects}
+## Interactive legends implicitly use `clickSelects` {#implicit-clickSelects}
 
-In this section, we will explain how the clickSelects keyword is
+In this section, we will explain how the `clickSelects` keyword is
 implicitly used in interactive legends. If you have read the previous
-chapters, you have already implicitly used clickSelects, which was
+chapters, you have already implicitly used `clickSelects`, which was
 automatically created for the interactive legends in the previous
 chapters. For example, consider the sketch of the World Bank data viz
 from the last chapter.
 
-![Sketch of World Bank data visualization with clickSelects](ch04-legend-clickSelects.png)
+![Sketch of World Bank data visualization with `clickSelects`](ch04-legend-clickSelects.png)
 
 Since the legend has `clickSelects=region`, clicking an entry of that
 legend updates the `region` selection variable. Note that animint
 automatically makes every discrete legend interactive, so you do not
 need to explicitly specify `clickSelects=region` for the legend. In
-fact, when we specified `color=region` for the `geom_point`, animint2
+fact, when we specified `color=region` for the `geom_point()`, `animint2`
 does two things automatically:
 
-* `showSelected=region` is assigned to the same
-  `geom_point`.
+* `showSelected=region` is assigned to the same `geom_point()`.
 * `clickSelects=region` is assigned to the color legend.
 
 Note that `clickSelects` keywords are not limited to interactive
@@ -51,7 +48,7 @@ geom. In the next section we will give several examples of how
 `clickSelects` can be used in combination with `showSelected` to create
 interactive data visualizations.
 
-## Use clickSelects to identify points on a scatterplot {#clickSelects-keyword}
+## Use `clickSelects` to identify points on a scatterplot {#clickSelects-keyword}
 
 The goal of this section is to create the following visualization of
 the World Bank data.
@@ -111,8 +108,8 @@ animint(
 
 The data visualization above shows the currently selected country name in
 the selection menu, but it would be better to show it as a text label
-on the scatterplot. We can do that by adding a `geom_text` layer with
-two showSelected variables:
+on the scatterplot. We can do that by adding a `geom_text()` with
+two `showSelected` variables:
 
 ```{r ch04-viz-text}
 viz.text <- viz.scatter
@@ -145,7 +142,7 @@ the `help` and `title` params of each geom.
 As explained in the last chapter, any variable specified using the
 `showSelected` argument of a geom is treated as an interactive variable. In the
 example above, we specified two `showSelected` variables for the
-`geom_text`. This means to only draw a text label for the rows of the
+`geom_text()`. This means to only draw a text label for the rows of the
 `WorldBank` data set that match the current values of both selection
 variables. Since each combination of `country` and `year` has one row
 in these data, only one text label will be shown at a time.
@@ -156,7 +153,7 @@ clicking the North America legend entry). You should see the point
 disappear, but the text stay displayed. 
 
 **Exercise:** how can you get the text to disappear along with the
-point? Hint: you need to add a keyword to the `geom_text`.
+point? Hint: you need to add a keyword to the `geom_text()`.
 
 In the last chapter, we introduced the terms "direct manipulation" and
 "indirect manipulation" to describe interactions with legends and
@@ -245,7 +242,7 @@ text labels are rendered on top of the data points.
 
 **Exercise:** Re-make the data viz above so that clicking a text label
   removes that country from the selection set. Hint: you need to add
-  a `clickSelects` keyword to the `geom_text`.
+  a `clickSelects` keyword to the `geom_text()`.
 
 Note that in the data viz above, the year variable can only be changed
 via the selection menu.
@@ -261,7 +258,7 @@ clicked to change the selected year.
 
 ![Sketch of World Bank data visualization with time series](ch04-ggplot-time-series-plot.png)
 
-Note that the sketch above includes `geom_tallrect`, a new geom
+Note that the sketch above includes `geom_tallrect()`, a new geom
 introduced in animint. It is "tall" because it occupies the entire
 vertical space of the plot, and thus only requires definition of its
 horizontal limits via the `xmin` and `xmax` aesthetics. Specifying
@@ -302,8 +299,8 @@ viz.timeSeries
   `time` option,
   [as explained in Chapter 3](/ch03#animation-time).
 
-**Multi-layer exercise:** add a `geom_text` that shows the current
-  year on the scatterplot. Add a `geom_path` that shows data for the
+**Multi-layer exercise:** add a `geom_text()` that shows the current
+  year on the scatterplot. Add a `geom_path()` that shows data for the
   previous 5 years.
   
 ## Selecting a year on a time series facet {#time-series-facet}
@@ -369,13 +366,13 @@ The two geoms defined above occupy a new facet for the `"year"`
 value of the `x.var` variable (defined by the `add.x.var`
 function). Since these two geoms have different definitions of
 `clickSelects`, clicking each geom will update the plot in a different
-way. Note that for the `geom_line` we specify `size=3`, which means a
+way. Note that for the `geom_line()` we specify `size=3`, which means a
 line stroke width of 3 pixels. In general it is a good idea to
 increase the size of geoms with `clickSelects`, to make them easier to
 click.
 
-Also note that we specified `alpha=0.5` for the `geom_tallrect` and
-`alpha=0.6` for the `geom_line`. Since both of these geoms define
+Also note that we specified `alpha=0.5` for the `geom_tallrect()` and
+`alpha=0.6` for the `geom_line()`. Since both of these geoms define
 `clickSelects`, some plotted lines and tallrect will be selected, and
 others will not be selected. The alpha values in R code specify the
 opacity of the selected objects, and other objects will have an
@@ -401,9 +398,9 @@ and time series using animint.
 
 The interactive data viz above contains a new panel with lines that
 show a fertility rate time series over all years. Since we specified
-`clickSelects=country` for the `geom_line`, clicking a line updates
+`clickSelects=country` for the `geom_line()`, clicking a line updates
 the set of selected countries. Since we specified `clickSelects=year`
-for the `geom_tallrect`, clicking on a tallrect updates the selected
+for the `geom_tallrect()`, clicking on a tallrect updates the selected
 year. 
 
 **Exercise:** add `time`, `duration`, `first`, and `selector.types`
@@ -427,19 +424,18 @@ Exercises:
   clicking data with `clickSelects`. Order these three techniques in
   terms from most to least direct manipulation. Which technique is
   preferable in what circumstances?
-* When `geom_point(clickSelects=something, alpha=0.75)` is rendered
-  with the usual R graphics device, how much opacity/transparency is
+* When `alpha=0.75` is used with `geom_point()` on the usual R graphics device, how much opacity/transparency is
   present for all data points? When `animint2` renders the same geom,
   some points will be selected and others not. What is the
   opacity/transparency of selected points? What is the
   opacity/transparency of points which are not selected?
 * Add `aes(size=population)` to the points in the World Bank
   scatterplot. Is the size legend interactive? Why?
-* Add a `geom_text` to the World Bank scatterplot that shows the
+* Add a `geom_text()` to the World Bank scatterplot that shows the
   selected year.
-* Add a `geom_text` to the World Bank time series to show the names of
+* Add a `geom_text()` to the World Bank time series to show the names of
   the selected countries.
-* Add a `geom_path` to the World Bank scatterplot to show data for the
+* Add a `geom_path()` to the World Bank scatterplot to show data for the
   last 5 years.
 * Use the `time` option to make an animated version of `viz.facets`.
 * Use `help` and `title` params for each geom in `viz.facets`, to make

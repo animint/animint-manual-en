@@ -78,8 +78,8 @@ small box appear with the country name and population for that data
 point.
 
 Note that a tooltip of the form "variable value" is specified by
-default for each geom with `aes(clickSelects)`. For example a geom
-with `aes(clickSelects=year)` shows the default tooltip "year
+default for each geom with `clickSelects`. For example a geom
+with `clickSelects="year"` shows the default tooltip "year
 1984" for an observation with year 1984. You can change this
 default by explicitly specifying `aes(tooltip)`.
 
@@ -296,7 +296,7 @@ There are several new geoms in `animint2`, with respect to the geoms that are pr
 
 ### Tall and wide rectangles for selection {#tall-wide-rect}
 
-Tall and wide rectangles are special cases of `geom_rect` which by default cover the entire Y/X range.
+Tall and wide rectangles are special cases of `geom_rect()` which by default cover the entire Y/X range.
 
 * `geom_tallrect()` covers the entire Y range, and was first introduced in [Chapter 4](/ch04).
 * `geom_widerect()` covers the entire X range, and is discussed in [Chapter 8](/ch08).
@@ -341,7 +341,7 @@ of the `chunk_vars` variables. More selection variables specified in
 a smaller size.
 
 The `chunk_vars` option should be specified as an argument to a
-`geom_*` function, and its value should be a character vector of
+`geom_*()` function, and its value should be a character vector of
 selection variable names. When `chunk_vars=character(0)`, a character
 vector of length zero, all of the data is stored in a single TSV
 file. When `chunk_vars` is set to all of the `showSelected` variable
@@ -404,8 +404,8 @@ errorPlot <- ggplot()+
 errorPlot
 ```
 
-The plot above includes a `geom_tallrect` with `clickSelects=segments`
-and a `geom_line` with `clickSelects=bases.per.probe`. It will be used
+The plot above includes a `geom_tallrect()` with `clickSelects=segments`
+and a `geom_line()` with `clickSelects=bases.per.probe`. It will be used
 to select the data and model in the plot below.
 
 ```{r ch06-signalPlot}
@@ -447,7 +447,7 @@ these facets will be shown.
 Click the "Show download status table" button, and you should see
 counts of chunks (TSV files). Note that `geom6_vline_signal` has only
 1 chunk, since `chunk_vars=character()` is specified for the
-`geom_vline` in the R code above. If another value of `chunk_vars` was
+`geom_vline()` in the R code above. If another value of `chunk_vars` was
 specified, it would create a different number of TSV files, but the
 appearance of the data viz should be the same.
 
@@ -548,7 +548,7 @@ for(selector.name in paste0("selector", 1:20, "value")){
 
 That method is bad since it is slow to construct `viz`, and the
 compiled viz potentially takes up a lot of disk space since there is
-at least one TSV file created for each `geom_point`. The preferable
+at least one TSV file created for each `geom_point()`. The preferable
 method is to use a named character vector for `clickSelects`. The
 names should be used to indicate the column that contains the selector
 variable name. For example:
@@ -671,11 +671,11 @@ animint(
     year=1980))
 ```
 
-In the code above, we specify `help` for `geom_point`, which controls
+In the code above, we specify `help` for `geom_point()`, which controls
 the sub-text which is displayed for that geom, after clicking the
 "Start Tour" button at the bottom of the data visualization. After
 clicking the "Next" button, we can see the `title` that was specified
-in the code, shown at the top of the tour window, for the `geom_text`.
+in the code, shown at the top of the tour window, for the `geom_text()`.
 This mechanism can be used to provide extra helpful information for
 the users of your data visualization, so they can more easily
 understand what is displayed, and what interactions are possible.
@@ -913,7 +913,7 @@ not you would like to render a selection menu via
 with two exceptions:
 
 * data-driven selection variables that are defined using [named
-  clickSelects/showSelected
+  `clickSelects` and `showSelected`
   variables](../ch06/ch06-other.html#data-driven-selectors).
 * selection variables that have a lot of values (they are slow to
   render).
@@ -931,7 +931,7 @@ observation, geom, plot, and global level.
 Exercises:
 
 * Create other versions of `viz.chunk.vars` with different values of
-  `chunk_vars` for the `geom_point` and `geom_segment`. How does the
+  `chunk_vars` for the `geom_point()` and `geom_segment()`. How does the
   choice of `chunk_vars` affect the appearance of the visualization?
   The disk space? The loading time?
 

@@ -260,7 +260,7 @@ there are two different set legends in the previous animint
 (linetype=set in the first path plot, and color=set in the second
 residual plot). It would be easier for the reader to decode if the set
 variable had just one mapping. So in the re-design below we replace
-the `geom_point` in the second plot with a `geom_segment` with
+the `geom_point()` in the second plot with a `geom_segment()` with
 `linetype=set`.
 
 Second, we have replaced the single tallrect in the first plot with
@@ -271,7 +271,7 @@ specify a `duration` for the `arclength` variable, and the same
 grey tallrect. The second tallrect has `clickSelects=arclength` and so
 clicking it has the effect of changing the selected value of
 `arclength`. We specify a another data set with more rows, and use the
-[named clickSelects/showSelected variables](/ch06#data-driven-selectors) to
+[named `clickSelects` and `showSelected` variables](/ch06#data-driven-selectors) to
 indicate that `arclength` should also be used as a `showSelected`
 variable.
 
@@ -363,12 +363,12 @@ the regularization parameter.
 Exercises:
 
 * Re-make this data viz, including the same visual effect for the
-  tallrects, using only one `geom_tallrect`. Hint: create another data
+  tallrects, using only one `geom_tallrect()`. Hint: create another data
   set with `expand.grid(arclength.click=arclength,
   arclength.show=arclength)`, as in the definition of the
-  `make_tallrect_or_widerect` function.
+  `make_tallrect_or_widerect()` function.
 * Add another scatterplot that shows predicted values versus response,
-  with a `geom_abline` in the background to indicate perfect
+  with a `geom_abline()` in the background to indicate perfect
   prediction.
 * How would the error curves look if other train/validation splits
   were chosen?  Perform 4-fold cross-validation and add a plot that

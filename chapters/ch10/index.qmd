@@ -29,9 +29,9 @@ Figure consists of two plots:
 Left: mis-classification error curves, as a function of the number of
 neighbors.
   
-  * `geom_line` and `geom_point` for the error curves.
-  * `geom_linerange` for error bars of the validation error curve.
-  * `geom_hline` for the Bayes error.
+  * `geom_line()` and `geom_point()` for the error curves.
+  * `geom_linerange()` for error bars of the validation error curve.
+  * `geom_hline()` for the Bayes error.
   * x = neighbors.
   * y = percent error.
   * color = error type.
@@ -39,11 +39,11 @@ neighbors.
 Right: data and decision boundaries in the two-dimensional input
 feature space.
   
-  * `geom_point` for the data points.
-  * `geom_point` for the classification predictions on the grid in the
+  * `geom_point()` for the data points.
+  * `geom_point()` for the classification predictions on the grid in the
     background.
-  * `geom_path` for the decision boundaries.
-  * `geom_text` for the train/test/Bayes error rates.
+  * `geom_path()` for the decision boundaries.
+  * `geom_text()` for the train/test/Bayes error rates.
 
 ### Plot of mis-classification error curves {#static-error}
 
@@ -420,12 +420,12 @@ classifier.
 We begin with a re-design of the error curves plot.
 
 Note the following changes:
-* add a selector for the number of neighbors (`geom_tallrect`).
-* change the Bayes decision boundary from `geom_hline` with a legend
-  entry, to a `geom_segment` with a text label.
+* add a selector for the number of neighbors, using `geom_tallrect()`.
+* change the Bayes decision boundary from `geom_hline()` with a legend
+  entry, to a `geom_segment()` with a text label.
 * add a linetype legend to distinguish error rates from the Bayes and
   KNN models.
-* change the error bars (`geom_linerange`) to error bands (`geom_ribbon`).
+* change the error bars with `geom_linerange()` to error bands with `geom_ribbon()`.
 
 The only new data that we need to define are the endpoints of the
 segment that we will use to plot the Bayes decision boundary. Note
@@ -451,9 +451,9 @@ other.error$classifier <- "KNN"
 ```
 
 We re-define the plot of the error curves below. Note that 
-* We use showSelected in `geom_text` and `geom_ribbon`, so that they will
+* We use `showSelected` in `geom_text()` and `geom_ribbon()`, so that they will
   be hidden when the interactive legends are clicked.
-* We use clickSelects in `geom_tallrect`, to select the number of
+* We use `clickSelects` in `geom_tallrect()`, to select the number of
   neighbors. Clickable geoms should be last (top layer) so that they
   are not obscured by non-clickable geoms (bottom layers).
 
@@ -519,9 +519,8 @@ errorPlot
 Next, we focus on a re-design of the feature space plot. In the
 previous section we considered only the subset of data from the model
 with 7 neighbors. Our re-design includes the following changes:
-* We use neighbors as a showSelected variable.
-* We add a legend to show which training data points are
-  mis-classified.
+* We use neighbors as a `showSelected` variable.
+* We add a legend to show which training data points are mis-classified.
 * We use equal spaced coordinates so that visual distance (pixels) is
   the same as the Euclidean distance in the feature space.
 
@@ -543,7 +542,7 @@ show.grid <- boundary.grid[!on.text(V1, V2)]
 ```
 
 Instead of showing the number of neighbors in the plot title, below we
-create a `geom_text` element that will be updated based on the number of
+create a `geom_text()` element that will be updated based on the number of
 selected neighbors.
 
 ```{r}
@@ -561,8 +560,7 @@ other.error[, V2.bottom := rep(
   text.V2.bottom + text.height * 1:2, l=.N)]
 ```
 
-Below we re-define the Bayes error data without a neighbors column, so
-that it appears in each showSelected subset.
+Below we re-define the Bayes error data without a neighbors column, so that it appears in each `showSelected` subset.
 
 ```{r}
 Bayes.error <- data.table(
@@ -570,7 +568,7 @@ Bayes.error <- data.table(
   error.prop=0.21)
 ```
 
-Finally, we re-define the ggplot, using neighbors as a showSelected
+Finally, we re-define the ggplot, using neighbors as a `showSelected`
 variable in the point, path, and text geoms.
 
 ```{r}
@@ -767,7 +765,7 @@ errorPlotNew <- ggplot()+
 ```
 
 The code below previews the new error curve plot, adding an additional
-facet for the showSelected variable.
+facet for the `showSelected` variable.
 
 ```{r}
 errorPlotNew+facet_grid(facet ~ n.folds, scales="free")
@@ -836,10 +834,10 @@ Exercises:
 
 * Make it so that text error rates in the bottom left of the second
   plot are hidden after clicking the legend entries for Bayes, train,
-  test. Hint: you can either use one `geom_text` with
+  test. Hint: you can either use one `geom_text()` with
   `showSelected=c(selectorNameColumn="selectorValueColumn")` (as
   explained in [Chapter 14](/ch14)) or two
-  `geom_text`, each with a different showSelected parameter.
+  `geom_text()`, each with a different `showSelected` parameter.
 * The probability column of the `show.grid` data table is the predicted
   probability of class 1. How would you re-design the visualization to
   show the predicted probability rather than the predicted class at

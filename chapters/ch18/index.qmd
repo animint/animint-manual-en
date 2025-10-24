@@ -15,8 +15,8 @@ Chapter outline:
 * We begin by simulating and visualizing some 2d data for binary
   classification.
 * We then show how a classification function in 2d can be visualized
-  by computing predictions on a grid, and then using `geom_tile` or
-  `geom_path` with contour lines.
+  by computing predictions on a grid, and then using `geom_tile()` or
+  `geom_path()` with contour lines.
 * We compute linear model predictions, and gradient descent updates,
   using a simple automatic differentiation (auto-grad) system.
 * We end by implementing gradient descent for a neural network, and

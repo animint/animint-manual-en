@@ -22,17 +22,17 @@ of plotting using ggplots and `animint2`, and should be most useful for
 readers who have never used `ggplot2`. It explains how standard ggplots
 can be rendered on web pages using `animint2`.
 
-[Chapter 3](ch03) introduces showSelected, one of
+[Chapter 3](ch03) introduces `showSelected`, one of
 the two main keywords that `animint2` introduces for interactive data
 visualization design. Chapter 3 begins by explaining selection
 variables, which provide the mechanism of interaction in
-`animint2`. Chapter 3 then explains how the showSelected keyword makes it
+`animint2`. Chapter 3 then explains how the `showSelected` keyword makes it
 possible to plot data subsets. Chapter 3 also explains how to use
 smooth transitions and animation.
 
-[Chapter 4](ch04) introduces clickSelects, the other
+[Chapter 4](ch04) introduces `clickSelects`, the other
 main keyword that `animint2` introduces for interactive data
-visualization design. The clickSelects keyword makes it possible for
+visualization design. The `clickSelects` keyword makes it possible for
 the user to change a selection variable by directly clicking on a plot
 element.
 
@@ -73,7 +73,7 @@ machines (SVM), a machine learning model for binary classification.
 interactive visualization that explains the Poisson regression model.
 
 [Chapter 14](ch14) shows an example of how to create
-data-driven selectors using named clickSelects/showSelects in an
+data-driven selectors using named `clickSelects` and `showSelected` in an
 interactive visualization of a peak detection model.
 
 [Chapter 15](ch15) explains how to create an interactive
