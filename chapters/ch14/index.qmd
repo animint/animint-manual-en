@@ -33,9 +33,9 @@ sapply(PSJ, class)
 
 Above we see that `PSJ` is a list of several lists and data frames.
 
-## Compute data to plot {#compute-data-to-plot}
+## Explore `PSJ` data with static ggplots {#explore-data-with-static-ggplots}
 
-We begin by a plot of some genomic ChIP-seq data, which are sequential data that take large values when there is an active area (typically actively transcribed genes.)
+We begin by a plot of some genomic ChIP-seq data, which are sequential data that take large values when there is an active area (typically actively transcribed genes).
 In the code below we use show each sample in a separate panel.
 
 ```{r}
@@ -180,17 +180,18 @@ modelSelection.labels <- unique(all.modelSelection[, data.table(
      label=sprintf(
        "%.1f kb in problem %s",
        (problemEnd-problemStart)/1e3, problem.name)),
-     showSelected=c("problem.name", "bases.per.problem"),
+     showSelected=c("bases.per.problem", "problem.name"),
      data=data.frame(modelSelection.labels, variable="peaks"))+
-   ggtitle("select number of samples with peak in problem")+
    ylab("")+
    facet_grid(variable ~ ., scales="free"))
 ```
 
-## Define data viz using for loops {#define-using-for-loops}
+The figure above shows `errors` (top panel) and `peaks` (bottom panel) as a function of `log(penalty)`. Again this static version is overplotted; interactivity will be used so that this figure is readable (only shows the subset of data corresponding to the selected values of `bases.per.problem` and `problem.name`).
 
-In this section, we construct a data viz using a for loop, which is sub-optimal, but we show it for comparison.
-We begin by creating an initial animint.
+## Interactive data visualization (incomplete) {#incomplete}
+
+In this section, we combine the ggplots from the previous section into a linked interactive data visualization.
+The code below uses `theme_animint()` to attach some display options to the previous coverage plot, and adds the `first` option to specify what data subsets should be displayed first.
 
 ```{r}
 timing.incomplete.construct <- system.time({
@@ -208,13 +209,13 @@ timing.incomplete.construct <- system.time({
 })
 ```
 
-The output above shows that the initial definition is fast.
+The timing output above shows that the initial definition is fast.
 Rendering this preliminary (incomplete) data viz in the code below is also fast.
 
 ```{r ch14incomplete}
-before <- Sys.time()
+before.incomplete <- Sys.time()
 viz.incomplete
-cat(incomplete.elapsed <- Sys.time()-before, "seconds\n")
+cat(elapsed.incomplete <- Sys.time()-before.incomplete, "seconds\n")
 ```
 
 We see a data visualization above with three plots.
@@ -223,7 +224,10 @@ We see a data visualization above with three plots.
 * Clicking the bottom left plot selects problem size, which updates the problems displayed on top.
 * The bottom right plot shows the number of peaks and errors as a function of penalty (larger for fewer peaks).
 
-The visualization above is incomplete. We would like to add
+## Add interactivity using for loops {#define-using-for-loops}
+
+In this section, we add layers to the previous ggplots using a for loop, which is sub-optimal, but we show it for comparison with the better approach (named `clickSelects` and `showSelected`) which is presented in the next section.
+The visualization in the previous section is incomplete. We would like to add
 
 * rectangles in the bottom left plot which would allow us to select the number of peaks predicted in the given problem.
 * segments and rectangles in the top plot which would show the predicted peaks and label errors.
@@ -235,6 +239,8 @@ So in this for loop we add a few layers with `clickSelects="problem.dot"` or `sh
 ```{r}
 viz.first <- viz.incomplete
 viz.first$first <- c(viz.incomplete$first, PSJ$first)
+viz.first$modelSelection <- viz.first$modelSelection+
+  ggtitle("select number of samples with peak in problem")
 print(timing.for.construct <- system.time({
   viz.for <- viz.first
   viz.for$title <- "PSJ with for loops"
@@ -268,22 +274,23 @@ print(timing.for.construct <- system.time({
 }))
 ```
 
-Note the timing of the code above, just to
-evaluate the R code that defines this data viz, since it has so many
-geoms. Next, we compile the data visualization.
+Note the timing of the code above, which just evaluates the R code that defines this data viz. Next, we compile the data visualization.
 
-```{r}
-print(timing.for.compile <- system.time({
-  animint2dir(viz.for, "ch14-for")
-}))
+```{r ch14for}
+before.for <- Sys.time()
+viz.for
+cat(elapsed.for <- Sys.time()-before.for, "seconds\n")
 ```
 
-Note that the compilation takes several seconds, since there are so
-many geoms. The data viz can be viewed on
-[ch14-for/index.html](ch14-for). In the next section we
-will create the same data viz, but more efficiently.
+Note that the compilation takes several seconds, since there are so many geoms (click Show download status table to see all of them).
+Compared to the data visualization from the previous section, this one has
 
-## Define data viz using named clickSelects/showSelected {#define-using-named}
+* blue segments that appear in the top coverage data plot, to indicate predicted peaks.
+* selection rectangles that can be clicked in the bottom right plot, to change the number of samples with a peak in the selected problem.
+
+In the next section we will create the same data viz, but more efficiently.
+
+## Add interactivity using named `clickSelects` and `showSelected` {#define-using-named}
 
 In this section we use named clickSelects/showSelected to create a
 more efficient version of the previous data visualization. In general,
@@ -322,27 +329,23 @@ print(timing.named.construct <- system.time({
 }))
 ```
 
-It is clear that it takes much less time to evaluate the R code above
-which uses the named clickSelects/showSelected. We compile it below.
+It is clear that it takes much less time to evaluate the R code above which uses the named clickSelects/showSelected. We compile it below.
 
-```{r}
-print(timing.named.compile <- system.time({
-  animint2dir(viz.named, "ch14-named")
-}))
+```{r ch14named}
+before.named <- Sys.time()
+viz.named
+cat(elapsed.named <- Sys.time()-before.named, "seconds\n")
 ```
 
-The animint produced above can be viewed on
-[ch14-named/index.html](ch14-named). Note that it
-should appear to be the same as the other data viz above. The timings
-above show that named clickSelects/showSelected are much faster
-than for loops, in both the definition and compilation steps.
+The animint produced above should appear to be the same as the other data viz from the previous section.
+The timings above show that named clickSelects/showSelected are much faster than for loops, in both the definition and compilation steps.
 
 ## Disk usage comparison {#disk-usage}
 
 In this section we compute the disk usage of both methods.
 
 ```{r}
-viz.dirs.vec <- c("ch14incomplete", "ch14-for", "ch14-named")
+viz.dirs.vec <- c("ch14incomplete", "ch14for", "ch14named")
 viz.dirs.text <- paste(viz.dirs.vec, collapse=" ")
 (cmd <- paste("du -ks", viz.dirs.text))
 (kb.dt <- fread(cmd=cmd, col.names=c("kilobytes", "path")))
@@ -364,10 +367,10 @@ data.table(
     timing.incomplete.construct[["elapsed"]],
     timing.for.construct[["elapsed"]],
     timing.named.construct[["elapsed"]]),
-  compile.seconds=c(
-    incomplete.elapsed,
-    timing.for.compile[["elapsed"]],
-    timing.named.compile[["elapsed"]]))
+  compile.seconds=as.numeric(c(
+    elapsed.incomplete,
+    elapsed.for,
+    elapsed.named)))
 ```
 
 It is clear from the table above that named `clickSelects` and `showSelected` are more efficient in both respects, and should be used instead of for loops.
