@@ -272,7 +272,7 @@ Exercises:
   viz above, iteration=16 was the last one that resulted in a decrease
   in error (iterations 17-20 resulted in no decrease). Modify the code
   so that it stops iterating if there is no decrease in error.
-* Current viz has only one animation frame (showSelected subset) per
+* Current viz has only one animation frame (`showSelected` subset) per
   iteration (the mean shown is before it is updated). Add another
   animation frame that shows the mean after the update.
 * Add interactive segments that show the distance from each data point

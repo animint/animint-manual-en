@@ -365,7 +365,7 @@ Exercises:
   to select the number of segments for each signal. For each signal in
   the facetted plot of the data, show the currently selected model for
   that signal (there should be a separate selection variable for each
-  signal -- you can use named clickSelects/showSelected as explained in
+  signal -- you can use named `clickSelects` and `showSelected` as explained in
   [Chapter 14](/ch14)). The result should look
   something
   [like this](https://rcdata.nau.edu/genomic-ml/animint-gallery/2016-11-10-Max-margin-supervised-penalty-learning-for-peak-detection-in-ChIP-seq-data/index.html).

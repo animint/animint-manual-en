@@ -354,5 +354,5 @@ Exercises:
   model.
 
 Next, [Chapter 14](/ch14) explains how to use the
-named clickSelects/showSelected to visualize the PeakSegJoint
-machine learning model with data-driven selector variables.
+named `clickSelects` and `showSelected` to visualize the `PeakSegJoint`
+segmentation model with data-driven selector variables.

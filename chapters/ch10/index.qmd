@@ -451,9 +451,9 @@ other.error$classifier <- "KNN"
 ```
 
 We re-define the plot of the error curves below. Note that 
-* We use showSelected in `geom_text` and `geom_ribbon`, so that they will
+* We use `showSelected` in `geom_text()` and `geom_ribbon()`, so that they will
   be hidden when the interactive legends are clicked.
-* We use clickSelects in `geom_tallrect`, to select the number of
+* We use `clickSelects` in `geom_tallrect()`, to select the number of
   neighbors. Clickable geoms should be last (top layer) so that they
   are not obscured by non-clickable geoms (bottom layers).
 
