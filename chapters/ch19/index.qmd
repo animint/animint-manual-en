@@ -20,17 +20,17 @@ sim_dt <- CJ(
   sd=seq(0.1, 1, by=sd_by),
   sample=seq(0, 9)
 )[, let(
+  true_tile=sprintf("offset=%.1f sd=%.1f", true_offset, sd),
   condition = sample %% 2,
   i = sample %/% 2
 )][, let(
   Condition = factor(condition, 0:1, c("zero","offset")),
-  sim = rnorm(.N, true_offset*condition, sd)
+  value = rnorm(.N, true_offset*condition, sd)
 )][]
 
 sim_wide <- dcast(
   sim_dt,
-  true_offset + sd + repetition + i ~ Condition,
-  value.var="sim")
+  true_tile + true_offset + sd + repetition + i ~ Condition)
 sim_p <- sim_wide[, {
   t.result <- t.test(zero, offset, var.equal=TRUE)
   with(t.result, data.table(
@@ -38,7 +38,7 @@ sim_p <- sim_wide[, {
     mean_zero=estimate[1],
     mean_offset=estimate[2]
   ))
-}, by=.(true_offset, sd, repetition)]
+}, by=.(true_tile, true_offset, sd, repetition)]
 
 sim_p[, let(
   diff_means = mean_offset-mean_zero,
@@ -49,48 +49,80 @@ library(animint2)
 ggplot()+
   geom_point(aes(
     diff_means, neg.log10.p, fill=true_offset, color=sd),
-    shape=21,
     data=sim_p)+
   scale_fill_gradient2()+
   scale_color_gradient(low="white", high="black")+
   theme_bw()
 
-myround <- function(x, bin_size=1, offset=0)round((x+offset)/bin_size)*bin_size
-tile_dt <- sim_p[, let(
+myround <- function(x, bin_size=1, offset=0)
+  round((x+offset)/bin_size)*bin_size
+volcano_tile_dt <- sim_p[, let(
   round_diff_means=myround(diff_means),
-  round_neg.log10.p=myround(neg.log10.p)
+  round_neg.log10.p=myround(neg.log10.p, offset=0.5)
+)][, let(
+  volcano_tile=sprintf("diff_means=%s -log10(p)=%s",round_diff_means,round_neg.log10.p),
+  rel_diff_means=diff_means-round_diff_means,
+  rel_neg.log10.p=neg.log10.p-round_neg.log10.p
 )][, .(
   tests=.N
-), by=.(round_diff_means, round_neg.log10.p)]
-ggplot()+
+), by=.(volcano_tile, round_diff_means, round_neg.log10.p)]
+gg.volcano.tiles <- ggplot()+
   geom_tile(aes(
     round_diff_means, round_neg.log10.p, fill=log10(tests)),
-    data=tile_dt)+
+    color="grey",
+    data=volcano_tile_dt)+
+  geom_tile(aes(
+    round_diff_means, round_neg.log10.p),
+    clickSelects="volcano_tile",
+    color="green",
+    fill="transparent",
+    data=volcano_tile_dt)+
   scale_fill_gradient(low="white",high="black")+
   theme_bw()
+gg.volcano.tiles
+
+animint(
+  volcanoTiles=gg.volcano.tiles,
+  volcanoZoom=ggplot()+
+  geom_point(aes(
+    rel_diff_means, rel_neg.log10.p, fill=true_offset, color=sd),
+    showSelected="volcano_tile",
+    data=sim_p)+
+  scale_fill_gradient2()+
+  scale_color_gradient(low="white", high="black")+
+  theme_bw())
 
 sim_p_means <- melt(
   sim_p,
   measure.vars=measure(Condition, pattern="mean_(.*)"))
-sim_stats <- dcast(
+sim_true_tiles <- dcast(
   sim_p,
-  true_offset + sd ~ .,
+  true_tile + true_offset + sd ~ .,
   mean,
   value.var=c("diff_means", "neg.log10.p"))
 
 width <- offset_by*0.4
 height <- sd_by*0.45
-animint(
-  tiles=ggplot()+
-    scale_fill_gradient2()+
-    scale_color_gradient(low="white", high="black")+
-    theme_bw()+
-    theme_animint(width=1000)+
-    geom_rect(aes(
-      xmin=true_offset-width, xmax=true_offset+width,
-      ymin=sd-height, ymax=sd+height,
-      fill=diff_means, color=neg.log10.p),
-      data=sim_stats))
+gg.true.tiles <- ggplot()+
+  scale_fill_gradient2(breaks=c(3,0,-3))+
+  scale_color_gradient(
+    guide=guide_legend(override.aes=list(fill='white')),
+    low="white", high="black", breaks=c(9,5,1))+
+  theme_bw()+
+  theme_animint(width=800, height=200, last_in_row=TRUE)+
+  geom_rect(aes(
+    xmin=true_offset-width, xmax=true_offset+width,
+    ymin=sd-height, ymax=sd+height,
+    fill=diff_means, color=neg.log10.p),
+    data=sim_true_tiles)+
+  geom_rect(aes(
+    xmin=true_offset-width, xmax=true_offset+width,
+    ymin=sd-height, ymax=sd+height),
+    fill="transparent",
+    color="green",
+    clickSelects="true_tile",
+    data=sim_true_tiles)
+gg.true.tiles
 
 ## Type I error rate analysis.
 sim_p[true_offset==0]
@@ -110,9 +142,53 @@ ggplot()+
     xend=repetition, yend=mean_offset),
     data=one_tile_p)+
   geom_point(aes(
-    repetition, sim, color=Condition, fill=what),
+    repetition, -Inf),
+    fill="black",
+    data=one_tile_p[significant==TRUE])+
+  geom_point(aes(
+    repetition, value, color=Condition, fill=what),
     data=data.table(one_tile_sim, what="data"))+
   scale_fill_manual(values=c(
-    data=NA,
-    mean="black"))
+    data="transparent",
+    mean="black"))+
+  scale_linetype_manual(values=c(
+    "TRUE"="solid",
+    "FALSE"="dotted"))
+
+only_significant <- sim_p[significant==TRUE]
+animint(
+  tiles=gg.true.tiles,
+  zoom=ggplot()+
+    theme_bw()+
+    theme_animint(width=800)+
+    geom_point(aes(
+      repetition, value, color=Condition, fill=what),
+      showSelected="true_tile",
+      data=data.table(sim_dt, what="data"))+
+    geom_point(aes(
+      repetition, value, color=Condition, fill=what),
+      showSelected="true_tile",
+      data=data.table(sim_p_means, what="mean"))+
+    geom_point(aes(
+      repetition, -Inf, size=significant),
+      fill="black",
+      showSelected="true_tile",
+      data=only_significant)+
+    geom_segment(aes(
+      repetition, mean_zero,
+      size=significant,
+      xend=repetition, yend=mean_offset),
+      showSelected="true_tile",
+      data=only_significant)+
+    scale_fill_manual(values=c(
+      data="transparent",
+      mean="black"))+
+    scale_size_manual(values=c(
+      "TRUE"=2))
+)
+
 ```
+
+Exercises
+
+* Add `aes(tooltip)` to `gg.true.tiles` to show values of `neg.log10.p` and `diff_means`.
