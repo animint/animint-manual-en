@@ -80,18 +80,22 @@ gg.volcano.tiles <- ggplot()+
   scale_fill_gradient(low="white",high="black")+
   theme_bw()
 gg.volcano.tiles
+```
 
+```{r ch19-viz-volcano}
 animint(
   volcanoTiles=gg.volcano.tiles,
   volcanoZoom=ggplot()+
-  geom_point(aes(
-    rel_diff_means, rel_neg.log10.p, fill=true_offset, color=sd),
-    showSelected="volcano_tile",
-    data=sim_p)+
-  scale_fill_gradient2()+
-  scale_color_gradient(low="white", high="black")+
-  theme_bw())
+    geom_point(aes(
+      rel_diff_means, rel_neg.log10.p, fill=true_offset, color=sd),
+      showSelected="volcano_tile",
+      data=sim_p)+
+    scale_fill_gradient2()+
+    scale_color_gradient(low="white", high="black")+
+    theme_bw())
+```
 
+```{r}
 sim_p_means <- melt(
   sim_p,
   measure.vars=measure(Condition, pattern="mean_(.*)"))
@@ -123,11 +127,9 @@ gg.true.tiles <- ggplot()+
     clickSelects="true_tile",
     data=sim_true_tiles)
 gg.true.tiles
+```
 
-## Type I error rate analysis.
-sim_p[true_offset==0]
-
-## zoom to one tile.
+```{r}
 to <- 0
 one_tile_means <- sim_p_means[true_offset==to & sd==0.1]
 one_tile_p <- sim_p[true_offset==to & sd==0.1]
@@ -154,7 +156,10 @@ ggplot()+
   scale_linetype_manual(values=c(
     "TRUE"="solid",
     "FALSE"="dotted"))
+```
 
+
+```{r ch19-viz-true-tiles}
 only_significant <- sim_p[significant==TRUE]
 animint(
   tiles=gg.true.tiles,
@@ -186,7 +191,6 @@ animint(
     scale_size_manual(values=c(
       "TRUE"=2))
 )
-
 ```
 
 Exercises
