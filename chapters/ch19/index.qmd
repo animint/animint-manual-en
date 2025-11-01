@@ -46,7 +46,9 @@ offset_by <- 0.1
 sd_by <- 0.1
 set.seed(1)
 (sim_dt <- CJ(
-  true_offset=round(seq(-3, 3, by=offset_by), ceiling(-log10(offset_by))),
+  true_offset=round(
+    seq(-3, 3, by=offset_by),
+    ceiling(-log10(offset_by))),
   sd=seq(0.1, 1, by=sd_by),
   sample=seq(0, 9),
   trial=seq_len(100)
@@ -110,7 +112,7 @@ Next, we add columns for the volcano plot:
 sim_p[, let(
   diff_means = mean_offset - mean_zero,
   neg.log10.p = -log10(p.value)
-)][]
+)]
 ```
 
 Next, we draw the volcano plot:
@@ -141,9 +143,9 @@ Finally, the plot above is overplotted, meaning we are unable to see all of the 
 ## Fix overplotting by heatmap and zoom {#fix-overplotting-heatmap-zoom}
 
 In this section, we show how the previous volcano plot can be revised to show more detail, using a heatmap linked to a zoomed scatterplot.
-To begin, define the helper function below, which is used to add `round_*` and `rel_*` columns which we will use to define heat map tiles.
+To begin, we define the `round_rel()` function below, which is used to add `round_*` and `rel_*` columns which we will use to define heat map tiles.
 
-* `round_*` columns have been rounded to the nearest integer, and are used to define the heat map tile `x` and `y` positions..
+* `round_*` columns have been rounded to the nearest integer, and are used to define the heat map tile `x` and `y` positions.
 * `rel_*` columns will be used for `x` and `y` positions in the zoomed display, and are units relative to the corresponding `round_*` values.
 
 ```{r}
@@ -191,6 +193,7 @@ The code below combines the volcano heat map with a zoomed scatterplot, using th
 (viz.volcano <- animint(
   volcanoTiles=gg.volcano.tiles+
     ggtitle("Click to select volcano tile")+
+    theme_animint(width=300, rowspan=1)+
     geom_tile(aes(
       round_diff_means, round_neg.log10.p),
       clickSelects="volcano_tile",
@@ -212,6 +215,8 @@ Above, after clicking the heat map on the left, the data shown in the right plot
 
 ## Visualizing grid of simulations {#viz-grid-simulations}
 
+In this section, we create a new visualization to reveal details of each simulation parameter combination.
+
 ```{r}
 sim_p_means <- melt(
   sim_p,
@@ -224,6 +229,8 @@ sim_true_tiles <- dcast(
 width <- offset_by*0.4
 height <- sd_by*0.45
 gg.true.tiles <- ggplot()+
+  scale_x_continuous("True offset")+
+  scale_y_continuous("Standard deviation")+
   scale_fill_gradient2(breaks=c(3,0,-3))+
   scale_color_gradient(
     guide=guide_legend(override.aes=list(fill='white')),
@@ -234,13 +241,6 @@ gg.true.tiles <- ggplot()+
     xmin=true_offset-width, xmax=true_offset+width,
     ymin=sd-height, ymax=sd+height,
     fill=diff_means, color=neg.log10.p),
-    data=sim_true_tiles)+
-  geom_rect(aes(
-    xmin=true_offset-width, xmax=true_offset+width,
-    ymin=sd-height, ymax=sd+height),
-    fill="transparent",
-    color="green",
-    clickSelects="true_tile",
     data=sim_true_tiles)
 gg.true.tiles
 ```
@@ -280,7 +280,14 @@ ggplot()+
 only_significant <- sim_p[significant==TRUE]
 (viz.parameters <- animint(
   tiles=gg.true.tiles+
-    ggtitle("Click to select simulation parameters"),
+    ggtitle("Click to select simulation parameters")+
+    geom_rect(aes(
+      xmin=true_offset-width, xmax=true_offset+width,
+      ymin=sd-height, ymax=sd+height),
+      fill="transparent",
+      color="green",
+      clickSelects="true_tile",
+      data=sim_true_tiles),
   zoom=ggplot()+
     ggtitle("Zoom to selected simulation parameters")+
     theme_bw()+
@@ -318,9 +325,10 @@ Exercises:
 * In `viz.volcano`, when clicking on one of the bottom `volcanoTiles`, we see only have of the space occupied in `volcanoZoom`. To fix this, and have all of the space occupied, go back to the definition of `round_neg.log10.p`, and use the `offset=0.5` argument in `myround()`.
 * In `viz.volcano`, add `aes(tooltip)` to `volcanoTiles` to show how many points are in each heat map tile.
 * Note how two `geom_tile()` were used in `viz.volcano`, and two `geom_rect()` were used in `viz.parameters`. The first geom uses color and fill to visualize the data, whereas the second geom uses `fill="transparent"` with `color="green"` for selection. Try a re-design with only one geom, which only uses `aes(fill)` and instead uses `color` as a geom parameter. What are the disadvantages of the approach using only one geom?
+* In `viz.parameters`, add `geom_hline()` to emphasize the selected value of the true offset.
 * Add graphical elements to `gg.volcano` to emphasize the traditional P-value threshold of 0.05: `geom_hline()` can show the threshold, and `geom_text()` can show how many tests fall above or below the threshold (use text like "1500 tests not significant").
 * Add `aes(tooltip)` to `gg.true.tiles` to show values of `neg.log10.p` and `diff_means`.
 
-Next, [Chapter 99](/ch99) explains some R
+Next, [the appendix](/ch99) explains some R
 programming idioms that are generally useful for interactive data
 visualization design.
