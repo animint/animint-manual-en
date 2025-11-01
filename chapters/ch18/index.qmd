@@ -667,6 +667,5 @@ Exercises:
   constant step size, and then create a visualization which compares
   the two approaches in terms of min validation loss.
 
-Next, [Chapter 99](/ch99) explains some R
-programming idioms that are generally useful for interactive data
-visualization design.
+Next, [Chapter 19](/ch19) explains how to visualize P-values, including how to work around overplotting, using a heat map linked to a zoomed scatter plot.
+.

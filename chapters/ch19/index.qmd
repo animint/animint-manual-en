@@ -325,3 +325,7 @@ Exercises:
 * Note how two `geom_tile()` were used in `viz.volcano`, and two `geom_rect()` were used in `viz.parameters`. The first geom uses color and fill to visualize the data, whereas the second geom uses `fill="transparent"` with `color="green"` for selection. Try a re-design with only one geom, which only uses `aes(fill)` and instead uses `color` as a geom parameter. What are the disadvantages of the approach using only one geom?
 * Add graphical elements to `gg.volcano` to emphasize the traditional P-value threshold of 0.05: `geom_hline()` can show the threshold, and `geom_text()` can show how many tests fall above or below the threshold (use text like "1500 tests not significant").
 * Add `aes(tooltip)` to `gg.true.tiles` to show values of `neg.log10.p` and `diff_means`.
+
+Next, [Chapter 99](/ch99) explains some R
+programming idioms that are generally useful for interactive data
+visualization design.
