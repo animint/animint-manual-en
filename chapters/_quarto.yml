@@ -46,6 +46,7 @@ book:
         - ch16/index.qmd
         - ch17/index.qmd
         - ch18/index.qmd
+        - ch19/index.qmd
   appendices:
     - ch99/index.qmd
     - contribute.qmd

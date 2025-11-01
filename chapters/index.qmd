@@ -89,6 +89,8 @@ interactive visualization of the k-means clustering algorithm.
 interactive visualization of the gradient descent algorithm for
 learning neural network weight matrices.
 
+[Chapter 19](ch19) explains how to visualize P-values, including how to work around overplotting, using a heat map linked to a zoomed scatter plot.
+
 ### Appendices {#appendices}
 
 [Useful idioms](ch99) contains detailed explanations of several R code idioms that are used throughout this manual.
