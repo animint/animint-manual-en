@@ -7,93 +7,215 @@ if(FALSE){
 }
 ```
 
-In this chapter we will explore several data visualizations of P-values.
+In this chapter we will explore several data visualizations related to [P-values](https://en.wikipedia.org/wiki/P-value):
+
+* we begin by explaining the concept of a P-value.
+* we simulate some data for two-sample T-testing.
+* we show how to create a volcano plot to summarize a set of P-values.
+* we explain how to convert an overplotted scatterplot into a linked heat map and zoomed scatterplot.
+* we end with another heat map of simulated parameter values, with a linked plot which shows the simulated data.
+
+## What is a P-value? {#what-is-p-value}
+
+A P-value is used to measure significance of a statistical test.
+P-values can be used in a wide range of tests, but a typical application is testing for difference between two conditions:
+
+* in a medical experiment, does the treatment do better than the control? For example, with a weight loss drug, we would be interested to know if the treatment group weight is significantly less than the control group weight. Say we have 10 people assigned to the control group, and 15 people assigned to the treatment group. Then we could compute a P-value using an un-paired one-sided T-test to evaluate statistical significance (un-paired because each person in the treatment group does not have a corresponding member in the control group).
+* in a machine learning experiment, is the neural network more accurate than the linear model? For example, consider image classification. if we did 5-fold cross-validation, we would have 5 measures of test accuracy for each of the two learning algorithms (neural network and linear model). Then we could compute a P-value using a paired one-sided T-test to evaluate statistical significance (paired because the fold 1 test accuracy for the linear model has a corresponding fold 1 test accuracy for the neural network, etc).
+
+After computing the measurements (weight of each person or test accuracy of each machine learning algorithm), we can use them as input to `t.test()`, which will compute a P-value (smaller for a more significant difference).
+To understand the P-value, we must first adopt the *null hypothesis*: we assume there is no difference between the conditions.
+Then, the P-value of the test is defined as the probability that we observe a difference as large as the given measurements, or larger.
+Since under the null hypothesis, there is no difference, it is extremely unlikely to see large differences, so that is why small P-values are more significant.
+
+## Simulated data {#p-value-simulated-data}
+
+We begin by simulating data for use with `t.test()`.
+Our simulation has four parameters:
+
+* `true_offset` is the true difference between conditions,
+* `sd` is the standard deviation of the simulated data,
+* `sample` is a sample number (half of samples in one condition, half in the other),
+* `trial` is the number of times that we repeat the experiment (for each offset and standard deviation).
+
+The code below uses `CJ()` to define the values of each parameter:
 
 ```{r}
 library(data.table)
-set.seed(1)
 offset_by <- 0.1
 sd_by <- 0.1
-sim_dt <- CJ(
-  repetition=seq_len(100),
+set.seed(1)
+(sim_dt <- CJ(
   true_offset=seq(-3, 3, by=offset_by),
   sd=seq(0.1, 1, by=sd_by),
-  sample=seq(0, 9)
+  sample=seq(0, 9),
+  trial=seq_len(100)
 )[, let(
-  true_tile=sprintf("offset=%.1f sd=%.1f", true_offset, sd),
   condition = sample %% 2,
-  i = sample %/% 2
+  pair = sample %/% 2
 )][, let(
-  Condition = factor(condition, 0:1, c("zero","offset")),
   value = rnorm(.N, true_offset*condition, sd)
-)][]
+)][])
 
-sim_wide <- dcast(
+```
+
+The result above shows several hundred thousand rows, one for each simulated random normal `value` (with mean depending on `true_offset` and `condition`).
+
+## T-test and volcano plot {#t-test-and-volcano-plot}
+
+In this section we compute T-test results and visualize them using a volcano plot.
+First, we add columns which we will use for visualization:
+
+* `true_tile` is a text string for selecting a combination of one offset and one standard deviation.
+* `Condition` is a string indicating the condition (either `zero` or `offset`).
+
+```{r}
+sim_dt[, let(
+  true_tile=sprintf("offset=%.1f sd=%.1f", true_offset, sd),
+  Condition = ifelse(condition, "zero", "offset")
+)]
+```
+
+Next, we do a reshape to obtain a table with a column for each condition (`zero` and `offset`).
+
+```{r}
+(sim_wide <- dcast(
   sim_dt,
-  true_tile + true_offset + sd + repetition + i ~ Condition)
-sim_p <- sim_wide[, {
+  true_tile + true_offset + sd + trial + pair ~ Condition))
+```
+
+The output above shows a table with half as many rows as the previous table.
+The code below computes a T-test for each repetition of the simulation:
+
+```{r}
+(sim_p <- sim_wide[, {
   t.result <- t.test(zero, offset, var.equal=TRUE)
   with(t.result, data.table(
     p.value,
     mean_zero=estimate[1],
     mean_offset=estimate[2]
   ))
-}, by=.(true_tile, true_offset, sd, repetition)]
+}, by=.(true_tile, true_offset, sd, trial)])
+```
 
+The output above has one row for each T-test, and columns for mean difference (`mean_zero`) and `p.value`.
+Since there are ten samples per trial, there are ten times fewer rows than the original simulated data table.
+Each trial involves a T-test of 5 control/zero samples, versus 5 treatment/offset samples.
+Next, we add columns for the volcano plot:
+
+* `diff_means` is the difference between means of the two conditions, sometimes called the "effect size."
+* `neg.log10.p` is the negative log-transformed P-value (larger for more significant).
+
+```{r}
 sim_p[, let(
   diff_means = mean_offset-mean_zero,
-  neg.log10.p=-log10(p.value),
-  significant=p.value<0.05
+  neg.log10.p=-log10(p.value)
 )][]
+```
+
+Next, we draw the volcano plot:
+
+* X axis shows the difference between conditions (effect size).
+* Y axis shows negative log P-value.
+
+```{r}
 library(animint2)
-ggplot()+
+(gg.volcano <- ggplot()+
   geom_point(aes(
     diff_means, neg.log10.p, fill=true_offset, color=sd),
     data=sim_p)+
   scale_fill_gradient2()+
   scale_color_gradient(low="white", high="black")+
-  theme_bw()
+  theme_bw())
+```
 
+The static graphic above shows one dot per T-test result.
+Dots close to the origin (0,0) represent tests which did not yield a significant difference, whereas dots with large Y values represent significant differences.
+It also includes `fill=true_offset` and `color=sd` so we can see how the simulation parameters affect the volcano plot:
+
+* Larger `sd` values appear at the bottom (more variance makes it more difficult to detect a difference).
+* Darker colors appear near the left/right edges (larger true offsets tend to result in larger computed differences in means).
+
+Finally, the plot above is overplotted, meaning we are unable to see all of the details, because there are too many data points plotted on top of one another.
+
+## Fix overplotting by heatmap and zoom {#fix-overplotting-heatmap-zoom}
+
+In this section, we show how the previous volcano plot can be revised to show more detail, using a heatmap linked to a zoomed scatterplot.
+To begin, we add `round_*` columns which we will use to define heat map tiles.
+
+```{r}
 myround <- function(x, bin_size=1, offset=0)
   round((x+offset)/bin_size)*bin_size
-volcano_tile_dt <- sim_p[, let(
+sim_p[, let(
   round_diff_means=myround(diff_means),
-  round_neg.log10.p=myround(neg.log10.p, offset=0.5)
-)][, let(
-  volcano_tile=sprintf("diff_means=%s -log10(p)=%s",round_diff_means,round_neg.log10.p),
+  round_neg.log10.p=myround(neg.log10.p)
+)][]
+```
+
+The output above shows a table with `round_*` columns that have been rounded to the nearest integer.
+Next, we define columns:
+
+* `volcano_tile` is a text string combination of `round_*` variables, which will be used for selection.
+* `rel_*` columns will be used for zoomed display, and are units relative to the corresponding `round_*` values.
+
+```{r}
+sim_p[, let(
+  volcano_tile=sprintf(
+    "diff_means=%s -log10(p)=%s",
+    round_diff_means, round_neg.log10.p),
   rel_diff_means=diff_means-round_diff_means,
   rel_neg.log10.p=neg.log10.p-round_neg.log10.p
-)][, .(
+)]
+```
+
+Next, we compute a table with one row per tile in the heat map we will display.
+
+```{r}
+(volcano_tile_dt <- sim_p[, .(
   tests=.N
-), by=.(volcano_tile, round_diff_means, round_neg.log10.p)]
-gg.volcano.tiles <- ggplot()+
+), by=.(volcano_tile, round_diff_means, round_neg.log10.p)])
+```
+
+The output above shows one row per heat map tile, with the `tests` column indicating how many points appear in the corresponding area of the volcano plot.
+Below we create the volcano heat map.
+
+```{r}
+(gg.volcano.tiles <- ggplot()+
   geom_tile(aes(
     round_diff_means, round_neg.log10.p, fill=log10(tests)),
     color="grey",
     data=volcano_tile_dt)+
-  geom_tile(aes(
-    round_diff_means, round_neg.log10.p),
-    clickSelects="volcano_tile",
-    color="green",
-    fill="transparent",
-    data=volcano_tile_dt)+
   scale_fill_gradient(low="white",high="black")+
-  theme_bw()
-gg.volcano.tiles
+  theme_bw())
 ```
 
+The output above is a heat map, with darker regions showing areas of the volcano plot which have more test results.
+The code below combines the volcano heat map with a zoomed scatterplot, using the `volcano_tile` selector to link them.
+
 ```{r ch19-viz-volcano}
-animint(
-  volcanoTiles=gg.volcano.tiles,
+(viz.volcano <- animint(
+  volcanoTiles=gg.volcano.tiles+
+    ggtitle("Click to select volcano tile")+
+    geom_tile(aes(
+      round_diff_means, round_neg.log10.p),
+      clickSelects="volcano_tile",
+      color="green",
+      fill="transparent",
+      data=volcano_tile_dt),
   volcanoZoom=ggplot()+
+    ggtitle("Zoom to selected volcano tile")+
     geom_point(aes(
       rel_diff_means, rel_neg.log10.p, fill=true_offset, color=sd),
       showSelected="volcano_tile",
       data=sim_p)+
     scale_fill_gradient2()+
     scale_color_gradient(low="white", high="black")+
-    theme_bw())
+    theme_bw()))
 ```
+
+Above, after clicking the heat map on the left, the data shown in the right plot changes.
+
+## Visualizing grid of simulations {#viz-grid-simulations}
 
 ```{r}
 sim_p_means <- melt(
@@ -104,7 +226,6 @@ sim_true_tiles <- dcast(
   true_tile + true_offset + sd ~ .,
   mean,
   value.var=c("diff_means", "neg.log10.p"))
-
 width <- offset_by*0.4
 height <- sd_by*0.45
 gg.true.tiles <- ggplot()+
@@ -131,24 +252,25 @@ gg.true.tiles
 
 ```{r}
 to <- 0
+sim_p[, let(significant=p.value<0.05)]
 one_tile_means <- sim_p_means[true_offset==to & sd==0.1]
 one_tile_p <- sim_p[true_offset==to & sd==0.1]
 one_tile_sim <- sim_dt[true_offset==to & sd==0.1]
 ggplot()+
   geom_point(aes(
-    repetition, value, color=Condition, fill=what),
+    trial, value, color=Condition, fill=what),
     data=data.table(one_tile_means, what="mean"))+
   geom_segment(aes(
-    repetition, mean_zero,
+    trial, mean_zero,
     linetype=significant,
-    xend=repetition, yend=mean_offset),
+    xend=trial, yend=mean_offset),
     data=one_tile_p)+
   geom_point(aes(
-    repetition, -Inf),
+    trial, -Inf),
     fill="black",
     data=one_tile_p[significant==TRUE])+
   geom_point(aes(
-    repetition, value, color=Condition, fill=what),
+    trial, value, color=Condition, fill=what),
     data=data.table(one_tile_sim, what="data"))+
   scale_fill_manual(values=c(
     data="transparent",
@@ -161,38 +283,45 @@ ggplot()+
 
 ```{r ch19-viz-true-tiles}
 only_significant <- sim_p[significant==TRUE]
-animint(
-  tiles=gg.true.tiles,
+(viz.parameters <- animint(
+  tiles=gg.true.tiles+
+    ggtitle("Click to select simulation parameters"),
   zoom=ggplot()+
+    ggtitle("Zoom to selected simulation parameters")+
     theme_bw()+
-    theme_animint(width=800)+
+    theme_animint(width=800, height=300)+
     geom_point(aes(
-      repetition, value, color=Condition, fill=what),
+      trial, value, color=Condition, fill=what),
       showSelected="true_tile",
       data=data.table(sim_dt, what="data"))+
     geom_point(aes(
-      repetition, value, color=Condition, fill=what),
+      trial, value, color=Condition, fill=what),
       showSelected="true_tile",
       data=data.table(sim_p_means, what="mean"))+
     geom_point(aes(
-      repetition, -Inf, size=significant),
+      trial, -Inf, size=significant),
       fill="black",
       showSelected="true_tile",
       data=only_significant)+
     geom_segment(aes(
-      repetition, mean_zero,
+      trial, mean_zero,
       size=significant,
-      xend=repetition, yend=mean_offset),
+      xend=trial, yend=mean_offset),
       showSelected="true_tile",
       data=only_significant)+
     scale_fill_manual(values=c(
       data="transparent",
       mean="black"))+
     scale_size_manual(values=c(
-      "TRUE"=2))
-)
+      "TRUE"=2))))
 ```
 
-Exercises
+## Chapter summary and exercises {#ch19-exercises}
 
+Exercises:
+
+* In `viz.volcano`, when clicking on one of the bottom `volcanoTiles`, we see only have of the space occupied in `volcanoZoom`. To fix this, and have all of the space occupied, go back to the definition of `round_neg.log10.p`, and use the `offset=0.5` argument in `myround()`.
+* In `viz.volcano`, add `aes(tooltip)` to `volcanoTiles` to show how many points are in each heat map tile.
+* Note how two `geom_tile()` were used in `viz.volcano`, and two `geom_rect()` were used in `viz.parameters`. The first geom uses color and fill to visualize the data, whereas the second geom uses `fill="transparent"` with `color="green"` for selection. Try a re-design with only one geom, which only uses `aes(fill)` and instead uses `color` as a geom parameter. What are the disadvantages of the approach using only one geom?
+* Add graphical elements to `gg.volcano` to emphasize the traditional P-value threshold of 0.05: `geom_hline()` can show the threshold, and `geom_text()` can show how many tests fall above or below the threshold (use text like "1500 tests not significant").
 * Add `aes(tooltip)` to `gg.true.tiles` to show values of `neg.log10.p` and `diff_means`.
