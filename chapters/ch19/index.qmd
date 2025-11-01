@@ -46,7 +46,7 @@ offset_by <- 0.1
 sd_by <- 0.1
 set.seed(1)
 (sim_dt <- CJ(
-  true_offset=seq(-3, 3, by=offset_by),
+  true_offset=round(seq(-3, 3, by=offset_by), ceiling(-log10(offset_by))),
   sd=seq(0.1, 1, by=sd_by),
   sample=seq(0, 9),
   trial=seq_len(100)
@@ -71,7 +71,7 @@ First, we add columns which we will use for visualization:
 
 ```{r}
 sim_dt[, let(
-  true_tile=sprintf("offset=%.1f sd=%.1f", true_offset, sd),
+  true_tile=paste(true_offset, sd),
   Condition = ifelse(condition, "zero", "offset")
 )]
 ```
@@ -108,8 +108,8 @@ Next, we add columns for the volcano plot:
 
 ```{r}
 sim_p[, let(
-  diff_means = mean_offset-mean_zero,
-  neg.log10.p=-log10(p.value)
+  diff_means = mean_offset - mean_zero,
+  neg.log10.p = -log10(p.value)
 )][]
 ```
 
@@ -141,31 +141,26 @@ Finally, the plot above is overplotted, meaning we are unable to see all of the 
 ## Fix overplotting by heatmap and zoom {#fix-overplotting-heatmap-zoom}
 
 In this section, we show how the previous volcano plot can be revised to show more detail, using a heatmap linked to a zoomed scatterplot.
-To begin, we add `round_*` columns which we will use to define heat map tiles.
+To begin, define the helper function below, which is used to add `round_*` and `rel_*` columns which we will use to define heat map tiles.
+
+* `round_*` columns have been rounded to the nearest integer, and are used to define the heat map tile `x` and `y` positions..
+* `rel_*` columns will be used for `x` and `y` positions in the zoomed display, and are units relative to the corresponding `round_*` values.
 
 ```{r}
-myround <- function(x, bin_size=1, offset=0)
-  round((x+offset)/bin_size)*bin_size
-sim_p[, let(
-  round_diff_means=myround(diff_means),
-  round_neg.log10.p=myround(neg.log10.p)
-)][]
+round_rel <- function(DT, col_name, bin_size=1, offset=0){
+  value <- DT[[col_name]]
+  round_value <- round((value+offset)/bin_size)*bin_size
+  DT[, paste0(c("round","rel"), "_", col_name) := list(
+    round_value, value-round_value)]
+}
+round_rel(sim_p, "diff_means")
+round_rel(sim_p, "neg.log10.p")
 ```
 
-The output above shows a table with `round_*` columns that have been rounded to the nearest integer.
-Next, we define columns:
-
-* `volcano_tile` is a text string combination of `round_*` variables, which will be used for selection.
-* `rel_*` columns will be used for zoomed display, and are units relative to the corresponding `round_*` values.
+Next, we define `volcano_tile`, a text string combination of `round_*` variables, which will be used for selection.
 
 ```{r}
-sim_p[, let(
-  volcano_tile=sprintf(
-    "diff_means=%s -log10(p)=%s",
-    round_diff_means, round_neg.log10.p),
-  rel_diff_means=diff_means-round_diff_means,
-  rel_neg.log10.p=neg.log10.p-round_neg.log10.p
-)]
+sim_p[, volcano_tile := paste(round_diff_means, round_neg.log10.p)]
 ```
 
 Next, we compute a table with one row per tile in the heat map we will display.
