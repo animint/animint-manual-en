@@ -65,7 +65,8 @@ The result above shows several hundred thousand rows, one for each simulated ran
 
 ## T-test and volcano plot {#t-test-and-volcano-plot}
 
-In this section we compute T-test results and visualize them using a volcano plot.
+In this section we compute T-test results and visualize them using a volcano plot, which is a plot of negative log P-values versus estimated effect sizes.
+The test result visualization is called a volcano plot because the typical distribution of points resembles a volcano erupting from the origin upwards to the left and right.
 First, we add columns which we will use for visualization:
 
 * `true_tile` is a text string for selecting a combination of one offset and one standard deviation.
@@ -74,7 +75,7 @@ First, we add columns which we will use for visualization:
 ```{r}
 sim_dt[, let(
   true_tile=paste(true_offset, sd),
-  Condition = ifelse(condition, "zero", "offset")
+  Condition = ifelse(condition, "offset", "zero")
 )]
 ```
 
@@ -140,9 +141,9 @@ It also includes `fill=true_offset` and `color=sd` so we can see how the simulat
 
 Finally, the plot above is overplotted, meaning we are unable to see all of the details, because there are too many data points plotted on top of one another.
 
-## Fix overplotting by heatmap and zoom {#fix-overplotting-heatmap-zoom}
+## Fix overplotting by heat map and zoom {#fix-overplotting-heatmap-zoom}
 
-In this section, we show how the previous volcano plot can be revised to show more detail, using a heatmap linked to a zoomed scatterplot.
+In this section, we show how the previous volcano plot can be revised to show more detail, using a heat map linked to a zoomed scatterplot.
 To begin, we define the `round_rel()` function below, which is used to add `round_*` and `rel_*` columns which we will use to define heat map tiles.
 
 * `round_*` columns have been rounded to the nearest integer, and are used to define the heat map tile `x` and `y` positions.
@@ -216,19 +217,23 @@ Above, after clicking the heat map on the left, the data shown in the right plot
 ## Visualizing grid of simulations {#viz-grid-simulations}
 
 In this section, we create a new visualization to reveal details of each simulation parameter combination.
+First, in the code below, we compute the mean effect size (`diff_means`) and negative log P-value (`neg.log10.p`), over all 100 repetitions of each parameter combination.
 
 ```{r}
-sim_p_means <- melt(
-  sim_p,
-  measure.vars=measure(Condition, pattern="mean_(.*)"))
-sim_true_tiles <- dcast(
+(sim_true_tiles <- dcast(
   sim_p,
   true_tile + true_offset + sd ~ .,
   mean,
-  value.var=c("diff_means", "neg.log10.p"))
+  value.var=c("diff_means", "neg.log10.p")))
+```
+
+The output above has one row per combination of simulation parameters (`true_offset` and `sd`).
+We use the code below to visualize this grid of parameter combinations.
+
+```{r}
 width <- offset_by*0.4
 height <- sd_by*0.45
-gg.true.tiles <- ggplot()+
+(gg.true.tiles <- ggplot()+
   scale_x_continuous("True offset")+
   scale_y_continuous("Standard deviation")+
   scale_fill_gradient2(breaks=c(3,0,-3))+
@@ -236,51 +241,79 @@ gg.true.tiles <- ggplot()+
     guide=guide_legend(override.aes=list(fill='white')),
     low="white", high="black", breaks=c(9,5,1))+
   theme_bw()+
-  theme_animint(width=800, height=200, last_in_row=TRUE)+
   geom_rect(aes(
     xmin=true_offset-width, xmax=true_offset+width,
     ymin=sd-height, ymax=sd+height,
     fill=diff_means, color=neg.log10.p),
-    data=sim_true_tiles)
-gg.true.tiles
+    data=sim_true_tiles))
 ```
+
+The figure above shows a rectangle for each simulation parameter combination.
+It is clear that:
+
+* the estimated effect size (`fill=diff_means`) is consistent with the true offset (X axis).
+* the more significant P-values (large `neg.log10.p`) are associated with small standard deviation parameters (because the signal to noise ratio is larger).
+
+We will create a linked plot that shows details of the simulations for each parameter combination.
+First we prototype the details plots by examining a subset:
 
 ```{r}
-to <- 0
-sim_p[, let(significant=p.value<0.05)]
-one_tile_means <- sim_p_means[true_offset==to & sd==0.1]
-one_tile_p <- sim_p[true_offset==to & sd==0.1]
-one_tile_sim <- sim_dt[true_offset==to & sd==0.1]
-ggplot()+
-  geom_point(aes(
-    trial, value, color=Condition, fill=what),
-    data=data.table(one_tile_means, what="mean"))+
-  geom_segment(aes(
-    trial, mean_zero,
-    linetype=significant,
-    xend=trial, yend=mean_offset),
-    data=one_tile_p)+
-  geom_point(aes(
-    trial, -Inf),
-    fill="black",
-    data=one_tile_p[significant==TRUE])+
-  geom_point(aes(
-    trial, value, color=Condition, fill=what),
-    data=data.table(one_tile_sim, what="data"))+
-  scale_fill_manual(values=c(
-    data="transparent",
-    mean="black"))+
-  scale_linetype_manual(values=c(
-    "TRUE"="solid",
-    "FALSE"="dotted"))
+some <- function(DT)DT[true_offset %in% c(0,2) & sd == 1]
+gg.true.tiles+
+  geom_rect(aes(
+    xmin=true_offset-width, xmax=true_offset+width,
+    ymin=sd-height, ymax=sd+height),
+    color="green",
+    fill=NA,
+    data=some(sim_true_tiles))
 ```
 
+The figure above shows two rectangles emphasized with a green outline, for which we create a facetted non-interactive plot using the code below.
+
+```{r}
+(gg.some.values <- ggplot()+
+  facet_grid(true_offset ~ ., labeller=label_both)+
+  geom_point(aes(
+    trial, value, color=Condition),
+    data=some(sim_dt)))
+```
+
+The figure above shows a panel for each of the two parameter combinations emphasized in the previous plot.
+The X axis represents `trial`, which ranges from 1 to 100, each one with different random values simulated using the same assumptions (`true_offset=0` or 2).
+The T-test is used to determine if there is any difference in means, between the two conditions.
+
+* When `true_offset=0`, there is no difference between the two conditions, so the T-test should have a small effect size, and a large P-value.
+* When `true_offset=2`, there is a larger difference between the two conditions, so the T-test should have a larger effect size, and a small P-value.
+
+The code below creates a new `significant` column which indicates if the test rejects the null hypothesis at the traditional threshold of 5%.
+
+```{r}
+sim_p[, significant := p.value < 0.05]
+```
+
+The code below adds a new `geom_point()` to emphasize the trials which showed a significant difference at the 5% level.
+
+```{r}
+only_significant <- sim_p[significant==TRUE]
+gg.some.values+
+  geom_point(aes(
+    trial, -Inf, fill=significant),
+    data=some(only_significant))+
+  scale_fill_manual(values=c("TRUE"="black"))
+```
+
+The figure above shows a black dot for each trial with a significant difference.
+
+* For `true_offset=0`, we see that there are `r nrow(some(only_significant)[true_offset==0])` trials with a significant difference, even though there is no difference in the true means in the simulation. This number of false positives is consistent with the 5% P-value threshold (type I error rate) that we used to define significance.
+* For `true_offset=2`, we see that `r nrow(some(only_significant)[true_offset!=0])` of the trials are significant, even though there is a true difference in means. The estimated power (true positive rate) is therefore `r some(sim_p)[true_offset!=0, paste0(100*mean(significant),"%")]` and the type II error rate (false negative rate) is therefore `r some(sim_p)[true_offset!=0, paste0(100*mean(1-significant),"%")]`.
+
+Below we create a visualization which links the overview heat map to the details scatter plot, by replacing `facet_grid(true_offset ~ .)` in the code above, with `showSelected="true_offset"` in the code below.
 
 ```{r ch19-viz-true-tiles}
-only_significant <- sim_p[significant==TRUE]
 (viz.parameters <- animint(
   tiles=gg.true.tiles+
     ggtitle("Click to select simulation parameters")+
+    theme_animint(width=800, height=200, last_in_row=TRUE)+
     geom_rect(aes(
       xmin=true_offset-width, xmax=true_offset+width,
       ymin=sd-height, ymax=sd+height),
@@ -293,32 +326,25 @@ only_significant <- sim_p[significant==TRUE]
     theme_bw()+
     theme_animint(width=800, height=300)+
     geom_point(aes(
-      trial, value, color=Condition, fill=what),
+      trial, value, color=Condition),
+      fill=NA,
       showSelected="true_tile",
-      data=data.table(sim_dt, what="data"))+
+      data=sim_dt)+
     geom_point(aes(
-      trial, value, color=Condition, fill=what),
-      showSelected="true_tile",
-      data=data.table(sim_p_means, what="mean"))+
-    geom_point(aes(
-      trial, -Inf, size=significant),
-      fill="black",
+      trial, -Inf, fill=significant),
       showSelected="true_tile",
       data=only_significant)+
-    geom_segment(aes(
-      trial, mean_zero,
-      size=significant,
-      xend=trial, yend=mean_offset),
-      showSelected="true_tile",
-      data=only_significant)+
-    scale_fill_manual(values=c(
-      data="transparent",
-      mean="black"))+
-    scale_size_manual(values=c(
-      "TRUE"=2))))
+    scale_fill_manual(values=c("TRUE"="black"))))
 ```
 
+In the visualization above, you can click on the top plot to select a simulation parameter combination.
+The 100 trials for the selected parameter combination are shown in the bottom plot.
+
 ## Chapter summary and exercises {#ch19-exercises}
+
+We have created several data visualizations using simulations to illustrate P-values.
+Since there were too many T-tests to show on the volcano plot, we instead used a heat map linked to a zoomed scatter plot.
+We also showed how to link a heat map of parameter combinations to a scatter plot which shows details of the corresponding values in the simulations.
 
 Exercises:
 
@@ -326,8 +352,13 @@ Exercises:
 * In `viz.volcano`, add `aes(tooltip)` to `volcanoTiles` to show how many points are in each heat map tile.
 * Note how two `geom_tile()` were used in `viz.volcano`, and two `geom_rect()` were used in `viz.parameters`. The first geom uses color and fill to visualize the data, whereas the second geom uses `fill="transparent"` with `color="green"` for selection. Try a re-design with only one geom, which only uses `aes(fill)` and instead uses `color` as a geom parameter. What are the disadvantages of the approach using only one geom?
 * In `viz.parameters`, add `geom_hline()` to emphasize the selected value of the true offset.
-* Add graphical elements to `gg.volcano` to emphasize the traditional P-value threshold of 0.05: `geom_hline()` can show the threshold, and `geom_text()` can show how many tests fall above or below the threshold (use text like "1500 tests not significant").
+* In `viz.parameters$zoom`, add `geom_segment()` to represent the difference between means in each trial, using `aes(linetype=signficant)` to show which differences are significant at the traditional P-value threshold of `0.05`.
+* In `viz.parameters$zoom`, add `geom_point()` to represent the mean in each trial and condition. Hint: you can either add two instances of `geom_point()`, or one `geom_point()` with a longer data table created via `melt(sim_p, measure.vars=measure(Condition, sep="mean_(.*)"))`.
+* Add graphical elements to `gg.volcano` to emphasize the traditional P-value threshold of `0.05`: `geom_hline()` can show the threshold, and `geom_text()` can show how many tests fall above or below the threshold (use text like "1500 tests not significant").
 * Add `aes(tooltip)` to `gg.true.tiles` to show values of `neg.log10.p` and `diff_means`.
+* Combine `viz.volcano` with `viz.parameters` to create a new data visualization with four linked plots. Different kinds of interactions are possible:
+  * In `volcanoZoom`, use `clickSelects="true_tile"` so that interactivity can be used to map volcano plot points back into the simulation parameter space. Add green dots with `showSelected="true_tile"` to `volcanoTiles` to show where the 100 trials for the selected parameter combination appear in volcano plot space.
+  * Create a new selection variable that is a unique combination of `true_tile` and `trial`, then use it for `clickSelects` in both `volcanoZoom` and `viz.parameters$zoom`, so that we can see a correspondence between a point in volcano space, and a trial in the parameter zoom details plot.
 
 Next, [the appendix](/ch99) explains some R
 programming idioms that are generally useful for interactive data
