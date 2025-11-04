@@ -50,6 +50,7 @@ book:
   appendices:
     - ch99/index.qmd
     - contribute.qmd
+    - references.qmd
 
 bibliography: refs.bib
 
