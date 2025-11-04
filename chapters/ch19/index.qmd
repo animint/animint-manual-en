@@ -280,7 +280,7 @@ The figure above shows two rectangles emphasized with a green outline, for which
 ```
 
 The figure above shows a panel for each of the two parameter combinations emphasized in the previous plot.
-The X axis represents `trial`, which ranges from 1 to 100, each one with different random values simulated using the same assumptions (`true_offset=0` or 2).
+The X axis represents `trial`, which ranges from 1 to 100, each one with different random values simulated using the same assumptions (`true_offset=0` or `2`).
 The T-test is used to determine if there is any difference in means, between the two conditions.
 
 * When `true_offset=0`, there is no difference between the two conditions, so the T-test should have a small effect size, and a large P-value.
@@ -306,15 +306,15 @@ gg.some.values+
 The figure above shows a black dot for each trial with a significant difference.
 
 * For `true_offset=0`, we see that there are `r nrow(some(only_significant)[true_offset==0])` trials with a significant difference, even though there is no difference in the true means in the simulation. This number of false positives is consistent with the 5% P-value threshold (type I error rate) that we used to define significance.
-* For `true_offset=2`, we see that `r nrow(some(only_significant)[true_offset!=0])` of the trials are significant, even though there is a true difference in means. The estimated power (true positive rate) is therefore `r some(sim_p)[true_offset!=0, paste0(100*mean(significant),"%")]` and the type II error rate (false negative rate) is therefore `r some(sim_p)[true_offset!=0, paste0(100*mean(1-significant),"%")]`.
+* For `true_offset=2`, we see that only `r nrow(some(only_significant)[true_offset!=0])` of the trials are significant, even though there is a true difference in means. The estimated power (true positive rate) is therefore `r some(sim_p)[true_offset!=0, paste0(100*mean(significant),"%")]` and the type II error rate (false negative rate) is therefore `r some(sim_p)[true_offset!=0, paste0(100*mean(1-significant),"%")]`.
 
-Below we create a visualization which links the overview heat map to the details scatter plot, by replacing `facet_grid(true_offset ~ .)` in the code above, with `showSelected="true_offset"` in the code below.
+Below we create a visualization which links the overview heat map to the details scatter plot, by replacing `facet_grid(true_offset ~ .)` in the code above, with `showSelected="true_tile"` in the code below.
 
 ```{r ch19-viz-true-tiles}
 (viz.parameters <- animint(
   tiles=gg.true.tiles+
     ggtitle("Click to select simulation parameters")+
-    theme_animint(width=800, height=200, last_in_row=TRUE)+
+    theme_animint(width=800, height=250, last_in_row=TRUE)+
     geom_rect(aes(
       xmin=true_offset-width, xmax=true_offset+width,
       ymin=sd-height, ymax=sd+height),
@@ -357,6 +357,8 @@ Exercises:
 * In `viz.parameters$zoom`, add `geom_point()` to represent the mean in each trial and condition. Hint: you can either add two instances of `geom_point()`, or one `geom_point()` with a longer data table created via `melt(sim_p, measure.vars=measure(Condition, sep="mean_(.*)"))`.
 * Add graphical elements to `gg.volcano` to emphasize the traditional P-value threshold of `0.05`: `geom_hline()` can show the threshold, and `geom_text()` can show how many tests fall above or below the threshold (use text like "1500 tests not significant").
 * Add `aes(tooltip)` to `gg.true.tiles` to show values of `neg.log10.p` and `diff_means`.
+* Add animation to `viz.parameters` so that we see a new parameter combination every second.
+* Add `first` option to `viz.parameters` so that the first selection we see is the same as one of the parameter combinations shown in the static facetted plot.
 * Combine `viz.volcano` with `viz.parameters` to create a new data visualization with four linked plots. Different kinds of interactions are possible:
   * In `volcanoZoom`, use `clickSelects="true_tile"` so that interactivity can be used to map volcano plot points back into the simulation parameter space. Add green dots with `showSelected="true_tile"` to `volcanoTiles` to show where the 100 trials for the selected parameter combination appear in volcano plot space.
   * Create a new selection variable that is a unique combination of `true_tile` and `trial`, then use it for `clickSelects` in both `volcanoZoom` and `viz.parameters$zoom`, so that we can see a correspondence between a point in volcano space, and a trial in the parameter zoom details plot.
