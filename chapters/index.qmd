@@ -125,8 +125,8 @@ either on paper or on a computer. Anybody can create data, just by
 systematically writing things down. Typically, data are created in
 order to help answer a specific question, and are organized into
 tables with rows for observations and columns for variables or
-different types of information. The word "data" is the plural form of
-"datum," which we use to refer to one observation/row of a data
+different types of information. The word "data" comes from Latin,
+its plural form "datum," refers to one observation/row of a data
 table. We use the term "data set" to refer to a subset of
 observations/rows, or the entire data table.
 
@@ -148,7 +148,8 @@ questions based on everyday experiences:
   assign patients to receive either the new or old treatment. The
   doctor would then create a data table with a row for each patient,
   and several columns: years the patient has smoked, treatment type
-  (new or old), patient age at treatment, patient age at death.
+  (new or old), patient age at treatment, patient age at death, 
+  tumoral marker measurement, ect.
 
 We define "data analysis" as the process of answering these questions
 by converting the raw data table into other, more comprehensible
@@ -258,7 +259,9 @@ ggplot()+
     data=co2.details)+
   geom_point(aes(
     year.month.POSIXct, ppm, color=month),
-    data=extremes)
+    data=extremes)+
+  xlab("Time of measurement")+
+  ylab("Atmospheric carbon dioxide (parts per million)")
 ```
 
 The static data visualization shows that CO2 concentrations increased
