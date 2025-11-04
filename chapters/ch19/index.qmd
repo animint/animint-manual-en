@@ -206,6 +206,7 @@ The code below combines the volcano heat map with a zoomed scatterplot, using th
     geom_point(aes(
       rel_diff_means, rel_neg.log10.p, fill=true_offset, color=sd),
       showSelected="volcano_tile",
+      size=3,
       data=sim_p)+
     scale_fill_gradient2()+
     scale_color_gradient(low="white", high="black")+
