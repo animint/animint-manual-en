@@ -149,7 +149,7 @@ questions based on everyday experiences:
   doctor would then create a data table with a row for each patient,
   and several columns: years the patient has smoked, treatment type
   (new or old), patient age at treatment, patient age at death, 
-  tumoral marker measurement, ect.
+  tumoral marker measurement, etc.
 
 We define "data analysis" as the process of answering these questions
 by converting the raw data table into other, more comprehensible
