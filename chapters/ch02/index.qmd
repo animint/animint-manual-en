@@ -92,7 +92,7 @@ To install an even more recent development version of `animint2` from GitHub,
 ```{r installGitHub}
 if(!requireNamespace("animint2")){
   if(!requireNamespace("remotes"))install.packages("remotes")
-  remotes::install_github("tdhock/animint2")
+  remotes::install_github("animint/animint2")
 }
 ```
 
