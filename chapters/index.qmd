@@ -61,7 +61,7 @@ data visualization.
 
 [Chapter 10](ch10) explains how to create an
 interactive re-design of the nearest neighbors data visualization from
-the Elements of Statistical Learning book by Hastie et al.
+the Elements of Statistical Learning book [@Hastie2009].
 
 [Chapter 11](ch11) shows a data visualization that explains the Lasso, a
 machine learning model for regularized regression.
