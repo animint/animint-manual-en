@@ -174,7 +174,7 @@ applied to the variables in the `world_bank_1975` data table, in order
 to create the visual properties of the `geom_point()`. The ggplot was
 saved as the `scatter` object, which when printed on the R command
 line shows the plot on a graphics device. Note that we automatically
-have a `region` color legend.
+have a `Region` color legend.
 
 ## Rendering ggplots on web pages using animint {#rendering-with-animint}
 
