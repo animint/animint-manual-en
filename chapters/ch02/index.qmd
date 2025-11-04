@@ -271,7 +271,7 @@ individual countries. That type of interaction can be achieved using
 the `showSelected` and `clickSelects` parameters, which we explain in
 Chapters 3-4.
 
-**Exercise:** Re-make this data visualization using `aes(tooltip)`, which is a new feature in `animint2` (not present in `ggplot2`), and is discussed in [Chapter 5](/ch06#new-aesthetics).
+**Exercise:** Re-make this data visualization using `aes(tooltip)`, which is a new feature in `animint2` (not present in `ggplot2`), and is discussed in [Chapter 6](/ch06#aes-tooltip).
 Set `aes(tooltip=country)` so that the country name will be visible when you hover the cursor over the corresponding geom.
 
 Next, we move on to discuss a major strength of animint: data visualization with multiple linked plots.
