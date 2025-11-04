@@ -382,7 +382,6 @@ scatterPlotStatic <- ggplot()+
     V1, V2, color=label),
     fill=NA,
     size=3,
-    shape=21,
     data=show.points)+
   geom_text(aes(
     text.V1.error, V2.bottom, label=paste(set, "Error:")),
@@ -597,7 +596,6 @@ scatterPlot <- ggplot()+
     fill=prediction),
     showSelected="neighbors",
     size=3,
-    shape=21,
     data=show.points)+
   scale_fill_manual(values=c(error="black", correct="transparent"))+
   geom_text(aes(

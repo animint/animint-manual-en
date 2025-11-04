@@ -149,7 +149,6 @@ ggplot()+
   geom_point(aes(
     V1, V2, fill=label.fac),
     color="black",
-    shape=21,
     data=sim.dt)+
   coord_equal()
 ```
@@ -188,7 +187,6 @@ ggplot()+
   geom_point(aes(
     V1, V2, fill=label.fac),
     color="black",
-    shape=21,
     data=sim.dt)+
   coord_equal()
 ```
@@ -524,7 +522,6 @@ ggplot()+
     data=loss.tall)+
   geom_point(aes(
     iteration, value, fill=set),
-    shape=21,
     color="black",
     data=min.dt)
 ```
@@ -557,7 +554,6 @@ ggplot()+
   scale_fill_gradient2()+
   geom_point(aes(
     V1, V2, color=prediction, fill=label/2),
-    shape=21,
     size=2,
     data=some.err)+
   scale_color_manual(
@@ -598,7 +594,6 @@ animint(
       data=loss.tall)+
     geom_point(aes(
       iteration, value, fill=set),
-      shape=21,
       color="black",
       data=min.dt)+
     geom_tallrect(aes(

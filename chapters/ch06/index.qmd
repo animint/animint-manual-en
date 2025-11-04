@@ -416,7 +416,6 @@ signalPlot <- ggplot()+
   geom_point(aes(
     position/1e5, signal),
     showSelected="bases.per.probe",
-    shape=1,
     data=breakpoints$signals)+
   geom_segment(aes(
     first.base/1e5, mean, xend=last.base/1e5, yend=mean),
@@ -757,7 +756,6 @@ scatter1975 <- ggplot()+
   geom_point(
     aes(x=life.expectancy, y=fertility.rate, size=population),
     WorldBank1975,
-    shape=21,
     color="red",
     fill="black")
 (viz.scale.size <- animint(

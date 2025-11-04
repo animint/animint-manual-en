@@ -98,7 +98,6 @@ animint(
     geom_point(aes(
       x=life.expectancy, y=fertility.rate, fill=region,
       key=country),
-      shape=21,
       color="black",
       color_off=NA,
       showSelected="year",

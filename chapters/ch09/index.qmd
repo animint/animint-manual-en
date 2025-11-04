@@ -78,7 +78,6 @@ ggplot()+
   facet_grid(loc.lines ~ .)+
   geom_point(aes(
     date, count, color=count==0),
-    shape=21,
     data=counts.dt)+
   scale_color_manual(values=c("TRUE"="grey", "FALSE"="black"))
 ```
@@ -270,7 +269,6 @@ animint(
       data=scatter.max)+
     geom_point(aes(
       count, total.accidents),
-      shape=1,
       clickSelects="month",
       size=5,
       alpha=0.75,
@@ -319,7 +317,6 @@ ggplot()+
   scale_x_continuous("day of the month", breaks=c(1, 10, 20, 30))+
   geom_point(aes(
     day.of.the.month, accident.i, fill=severity),
-    shape=21,
     data=accidents.cumsum)
 ```
 
