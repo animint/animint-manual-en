@@ -30,35 +30,99 @@ tryCatch({
 })
 ```
 
-We begin by examining the accidents data table.
+The data are two time series:
+
+* `montreal.bikes$counter.counts` are daily counts of bikers from counting machines, with one row per combination of location and day.
+* `montreal.bikes$accidents` has one row per accident.
+
+We will compute monthly summaries of these two time series.
+
+### Counters
+
+We begin by examining the data table of counts.
 
 ```{r accidents}
-library(animint2)
-data(montreal.bikes) #only present if installed from github
 old.locale <- Sys.setlocale(locale="en_US.UTF-8")
-for(col_name in c("nom","nom_comptage","Etat")){
-  montreal.bikes$counter.locations[[col_name]] <- iconv(
-    montreal.bikes$counter.locations[[col_name]], "latin1", "UTF-8")
-}
+month_str <- function(POSIXct)strftime(POSIXct, "%Y-%m")
 library(data.table)
-accidents.dt <- data.table(montreal.bikes$accidents)
-accidents.dt[1]
+data(montreal.bikes, package="animint2")#works if installed from github
+(counts_dt <- data.table(montreal.bikes$counter.counts)[, .(
+  location, date, month.str=month_str(date), count)])
 ```
 
-Each accident has data about its date, time, location, and counts of
-death and slight/severe injury. Some of the values are in French
-(e.g. position Voie de circulation, location En intersection, etc).
+Above we see one row for each combination of location and date.
+The bike counts are time series data which we visualize below.
 
-We calculate the time period of the accidents below.
+```{r counterviz}
+counts_dt[, loc.lines := gsub("[- _]", "\n", location)]
+library(animint2)
+ggplot()+
+  theme_bw()+
+  theme(panel.margin=grid::unit(0, "lines"))+
+  facet_grid(loc.lines ~ .)+
+  geom_point(aes(
+    date, count, color=count==0),
+    data=counts_dt)+
+  scale_color_manual(values=c("TRUE"="grey", "FALSE"="black"))
+```
 
-```{r timeRange}
+In the figure above, we clearly see the seasonal regularity (fewer bikers in winter).
+It is also easy to see the difference between zeros and missing values.
+
+### Accidents
+
+Next we examine one row from the accidents data table.
+
+```{r}
+montreal.bikes$accidents[1,]
+```
+
+Each accident has data about its date, time, location, and counts of death and slight/severe injury. Some of the values are in French (for example, `Voie de circulation`, `En intersection`, etc).
+For the injury count columns, we create abbreviated column names using the code below.
+
+```{r}
+severity <- c(
+  deaths="deaths",
+  severe="people.severely.injured",
+  slight="people.slightly.injured")
+montreal.bikes$accidents[, names(severity)] <-
+  montreal.bikes$accidents[, severity]
+accidents_dt <- data.table(montreal.bikes$accidents[, c(
+  "date.str", "time.str", names(severity),
+  "street", "street.number", "cross.street")])
+```
+
+In the code below, we add a column for the month.
+
+```{r}
+ymd2POSIXct <- function(date.str){
+  as.POSIXct(strptime(date.str, "%Y-%m-%d"))
+}
+(accidents_dt[
+, date := ymd2POSIXct(date.str)
+][
+, month.str := month_str(date)
+][])
+```
+
+```{r}
+accidents.dt[1]
 (accidents.dt[
 , date.POSIXct := as.POSIXct(strptime(date.str, "%Y-%m-%d"))
 ][
 , month.str := strftime(date.POSIXct, "%Y-%m")
 ][])
-range(accidents.dt$month.str)
 ```
+
+In the output above, we see that the last months for the accidents are not the same as for the counter data.
+We compare the time intervals using the code below:
+
+```{r}
+data.list <- list(accidents=accidents_dt, counts=counts_dt)
+sapply(data.list, function(DT)range(DT$month.str))
+```
+
+TODO
 
 Below we also compute the range of months for the bike counter data table.
 
@@ -68,22 +132,7 @@ counts.dt[, month.str := strftime(date, "%Y-%m")]
 range(counts.dt$month.str)
 ```
 
-The bike counts are time series data which we visualize below.
 
-```{r counterviz}
-counts.dt[, loc.lines := gsub("[- _]", "\n", location)]
-ggplot()+
-  theme_bw()+
-  theme(panel.margin=grid::unit(0, "lines"))+
-  facet_grid(loc.lines ~ .)+
-  geom_point(aes(
-    date, count, color=count==0),
-    data=counts.dt)+
-  scale_color_manual(values=c("TRUE"="grey", "FALSE"="black"))
-```
-
-Plotting with `geom_point()` makes it easy to see the difference between
-zeros and missing values.
 
 We will compute a summary of all accidents per month in this time
 period, so we first create a data table for each month below. (and
@@ -320,13 +369,17 @@ ggplot()+
     data=accidents.cumsum)
 ```
 
+Before examining the data table of counter locations, we first convert the name variable to unicode strings:
+
 ```{r}
-counter.locations <- data.table(
-  montreal.bikes$counter.locations
-)[, let(
-  lon = coord_X,
-  lat = coord_Y
-)][]
+(counter.locations <- data.table(montreal.bikes$counter.locations)[, .(
+  lon = coord_X, lat = coord_Y,
+  nom_comptage=iconv(nom_comptage, "latin1", "UTF-8"))])
+```
+
+In the output above, we see that the `nom_comptage` column indicates the location of the counter, but the values are not exactly the same as in the `location` column in the table of counts.
+
+```{r}
 loc.name.code <- c(
   "Berri1"="Berri",
   "Brebeuf"="Brébeuf",
