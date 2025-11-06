@@ -42,7 +42,6 @@ We will compute monthly summaries of these two time series.
 We begin by examining the data table of counts.
 
 ```{r accidents}
-old.locale <- Sys.setlocale(locale="en_US.UTF-8")
 month_str <- function(POSIXct)strftime(POSIXct, "%Y-%m")
 library(data.table)
 data(montreal.bikes, package="animint2")#works if installed from github
@@ -122,95 +121,70 @@ data.list <- list(accidents=accidents_dt, counts=counts_dt)
 sapply(data.list, function(DT)range(DT$month.str))
 ```
 
-TODO
-
-Below we also compute the range of months for the bike counter data table.
-
-```{r counterRange}
-(counts.dt <- data.table(montreal.bikes$counter.counts))
-counts.dt[, month.str := strftime(date, "%Y-%m")]
-range(counts.dt$month.str)
-```
-
-
-
-We will compute a summary of all accidents per month in this time
-period, so we first create a data table for each month below. (and
-make sure to set the locale to C for English month names)
-
-```{r months}
-uniq.month.vec <- unique(c(
-  accidents.dt$month.str,
-  counts.dt$month.str))
-one.day <- 60 * 60 * 24
-months <- data.table(month.str=uniq.month.vec)[
-, month01.str := paste0(month.str, "-01")
-][
-, month01.POSIXct := as.POSIXct(strptime(month01.str, "%Y-%m-%d"))
-][, let(
-  next.POSIXct = month01.POSIXct + one.day * 31,
-  month.str = strftime(month01.POSIXct, "%B %Y")
-)][
-, next01.str := paste0(strftime(next.POSIXct, "%Y-%m"), "-01")
-][
-, next01.POSIXct := as.POSIXct(strptime(next01.str, "%Y-%m-%d"))
-]
-month.levs <- months[order(month01.POSIXct), month.str]
-(months[, month := factor(month.str, month.levs)][])
-```
-
-Note that we created a `month` column which is a factor ordered by
-`month.levs`.
+The output above shows that the accidents start and finish after the counts time series.
+Next, to compute a summary for each month, we begin by computing the unique values of month in the range of the two data sets.
 
 ```{r}
-month_pos_ct <- function(mstr)as.POSIXct(
-  strptime(paste0(mstr, "-15"), "%Y-%m-%d"))
-accidents.dt[
-, month.text := strftime(date.POSIXct, "%B %Y")
-][
-, month := factor(month.text, month.levs)
-][
-, month.POSIXct := month_pos_ct(month.str)
-][]
-stopifnot(!is.na(accidents.dt$month.POSIXct))
-accidents.per.month <- accidents.dt[, list(
-  total.accidents=.N,
-  total.people=sum(
-    deaths+people.severely.injured+people.slightly.injured),
-  deaths=sum(deaths),
-  people.severely.injured=sum(people.severely.injured),
-  people.slightly.injured=sum(people.slightly.injured),
-  next.POSIXct = month.POSIXct + one.day * 30,
-  month01.str = paste0(strftime(month.POSIXct, "%Y-%m"), "-01")
-), by=.(month, month.str, month.text, month.POSIXct)][, let(
-  month01.POSIXct = as.POSIXct(strptime(month01.str, "%Y-%m-%d")),
-  next01.str = paste0(strftime(next.POSIXct, "%Y-%m"), "-01")
-)][
-, next01.POSIXct := as.POSIXct(strptime(next01.str, "%Y-%m-%d"))
-][]
+uniq.month.vec <- unique(c(
+  accidents_dt$month.str,
+  counts_dt$month.str))
+month_01 <- function(mois)ymd2POSIXct(paste0(mois, "-01"))
+month_dt <- data.table(month.01 = month_01(uniq.mois.vec))
 ```
 
-We plot the accidents per month below.
+The code below defines the locale so that we can be sure to have the month names in English.
 
-```{r accidentsPerMonth}
-accidents.tall <- melt(
+```{r counterRange}
+old.locale <- Sys.setlocale(locale="en_US.UTF-8")
+month_english <- function(POSIXct)strftime(POSIXct, "%B %Y")
+month_dt[, month.english := month_english(month.01)][]
+```
+
+The output above contains a row for each month.
+<!-- comment -->
+Note that we have created the `month.english` variable which will be used for month selection.
+<!-- comment -->
+In the code below, we compute the total number of accidents of each type per month.
+
+```{r months}
+(accidents.per.month <- dcast(
+  accidents_dt,
+  month.str ~ .,
+  sum,
+  value.var=names(severity)))
+```
+
+The result above shows one row per month, with different columns for each level of severity.
+We reshape those columns into long format using the code below.
+
+```{r}
+(accidents.tall <- melt(
   accidents.per.month,
-  measure.vars=c(
-    "deaths", "people.severely.injured", "people.slightly.injured"),
+  measure.vars=names(severity),
   variable.name="severity",
-  value.name="people")
+  value.name="people"))
+```
+
+Above we see one row for each combination of month and severity.
+In the code below, we use these data to plot the number of accidents in each month.
+
+```{r}
 severity.colors <- c(
   deaths="#A50F15",#dark red
-  people.severely.injured="#FB6A4A",
-  people.slightly.injured="#FEE0D2")#lite red
+  severe="#FB6A4A",
+  slight="#FEE0D2")#lite red
 ggplot()+
   theme_bw()+
   geom_bar(aes(
-    month.POSIXct, people, fill=severity),
+    month_01(month.str), people, fill=severity),
     stat="identity",
     data=accidents.tall)+
-  scale_fill_manual(values=severity.colors)
+  scale_fill_manual(
+    values=severity.colors, breaks=names(severity.colors))+
+  scale_x_datetime("month")
 ```
+
+TODO
 
 In each accident, there are counts of people who died, along with
 people who suffered severe and slight injuries. Below we classify the
