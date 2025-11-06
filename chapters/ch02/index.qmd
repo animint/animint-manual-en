@@ -213,8 +213,9 @@ data visualization.
 
 Note how the sketch above includes two different geoms (point and
 path). The two geoms share a common definition of the `x`, `y`, and
-`color` aesthetics, but have different data sets. Below we translate
-this sketch into R code.
+`color` aesthetics, but have different data sets. 
+Also, the `geom_path()` has `group=country`, which means to draw a curve for each unique value of `country`.
+Below we translate this sketch into R code.
 
 ```{r ch02-two-layer-viz}
 world_bank_before_1975 <- subset(
