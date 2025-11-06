@@ -184,7 +184,132 @@ ggplot()+
   scale_x_datetime("month")
 ```
 
+The figure above is a time series of the number of deaths and injuries.
+The output above shows that accidents with only slight injuries are
+most frequent, and accidents with at least one death are least
+frequent.
+
+## Interactive viz of accident frequency {#regression}
+
+In this section, we want to compare, for each month, the data for counters and accidents.
+Do we have more accidents when there are more bikes on the road?
+To check, we will fit a regression model, where each observation is a month with both kinds of data.
+First, we compute a summary of counts per month using the code below.
+
+```{r}
+(counts.per.month <- dcast(
+  counts_dt[!is.na(count)],
+  location + month.str ~ .,
+  list(length, mean, sum),
+  value.var="count"))
+```
+
+The output above has one row per combination of location and month, with columns for:
+
+* `count_length`: the number of days.
+* `count_mean`: the mean count per day.
+* `count_sum`: the total number of counts in that month.
+
+We can see that some months have missing days.
+For example, there are only 18 days for `Totem_Laurier` in September 2013.
+To model only whole months, we would like to remove months with missing days.
+Therefore, we use the code below to compute the number of days in each month:
+
+```{r}
+one.day <- 60 * 60 * 24
+next_month <- function(POSIXct)month_01(POSIXct + one.day * 31)
+counts.per.month[, days.in.month := as.integer(round(difftime(
+  month_01(month_str(next_month(month_01(month.str)))),
+  month_01(month.str),
+  units="days"
+)))][]
+```
+
+The output above contains the new column `days.in.month`.
+We use the code below to print only the months with missing days:
+
+```{r}
+counts.per.month[
+  count_length < days.in.month,
+  .(location, month.str, count_length, days.in.month)]
+```
+
+The data shown above are excluded from regression analysis using the code below.
+
+```{r}
+complete.months <- counts.per.month[count_length == days.in.month]
+```
+
+Next, we make a table with counts and accidents in different columns:
+
+```{r}
+city.wide.complete <- complete.months[count_sum>0, .(
+  locations=.N,
+  total.counts=sum(count_sum)
+), keyby=month.str]
+city.wide.accidents <- accidents_dt[, .(
+  total.accidents=.N
+), keyby=month.str]
+(scatter.not.na <- city.wide.accidents[
+  city.wide.complete, nomatch=0L
+][, month.01 := month_01(month.str)][])
+```
+
+The output above shows one row per month with both count and acciednt data.
+Next, we fit a linear model which uses counts to predict accidents.
+
+```{r}
+(fit <- lm(total.accidents ~ total.counts - 1, scatter.not.na))
+scatter.not.na[, mean(total.accidents/total.counts)]
+scatter.not.na[, sum(total.accidents)/sum(total.counts)]
+```
+
+The output above shows that the estimated linear model coefficient is similar to the estimated empirical means.
+Finally, we use the code below to create an interactive graphic.
+
+```{r ch09-viz-regression}
+scatter.not.na[, let(
+  pred.accidents = predict(fit),
+  month.english = month_english(month.01)
+)]
+animint(
+  regression=ggplot()+
+    theme_bw()+
+    ggtitle("Numbers of accidents and cyclists")+
+    geom_line(aes(
+      total.counts, pred.accidents),
+      color="grey",
+      data=scatter.not.na)+
+    geom_point(aes(
+      total.counts, total.accidents),
+      clickSelects="month.english",
+      size=5,
+      alpha=0.75,
+      data=scatter.not.na)+
+    ylab("Total bike accidents (all Montreal locations)")+
+    xlab("Total cyclists (all Montreal locations)"),
+  timeSeries=ggplot()+
+    theme_bw()+
+    ggtitle("Time series of accident frequency")+
+    xlab("Month")+
+    geom_point(aes(
+      month.01, total.accidents/total.counts),
+      clickSelects="month.english",             
+      size=5,
+      alpha=0.75,
+      data=scatter.not.na))
+```
+
+The data viz above shows two data visualizations of city-wide accident
+frequency over time. The plot on the left shows that the number of
+accidents grows with the number of cyclists. The plot on the right
+shows the frequency of accidents over time.
+
+## Interactive viz with map and details {#details}
 TODO
+
+The plot below is a dotplot of accidents for each month. Each dot
+represents one person who got in an accident.
 
 In each accident, there are counts of people who died, along with
 people who suffered severe and slight injuries. Below we classify the
@@ -204,121 +329,7 @@ accidents.dt[
 ]
 ```
 
-The output above shows that accidents with only slight injuries are
-most frequent, and accidents with at least one death are least
-frequent.
-Below we compute counts per month.
 
-```{r}
-counts.per.month <- counts.dt[, let(
-  month.POSIXct = month_pos_ct(month.str),
-  month.text = strftime(date, "%B %Y"),
-  day.of.the.month = as.integer(strftime(date, "%d"))
-)][
-, month := factor(month.text, month.levs)
-][, list(
-  days=.N,
-  mean.per.day=mean(count),
-  count=sum(count),
-  month01.str = paste0(month.str, "-01")
-), by=.(location, month, month.str, month.POSIXct)][
-  0 < count
-][
-, month01.POSIXct := as.POSIXct(strptime(month01.str, "%Y-%m-%d"))
-][
-, next.POSIXct := month01.POSIXct + one.day * 31
-][
-, next01.str := paste0(strftime(next.POSIXct, "%Y-%m"), "-01")
-][
-, next01.POSIXct := as.POSIXct(strptime(next01.str, "%Y-%m-%d"))
-][
-, days.in.month := as.integer(round(difftime(
-  next01.POSIXct, month01.POSIXct, units="days")))
-][]
-counts.per.month[days < days.in.month, {
-  list(location, month, days, days.in.month)
-}]
-```
-
-As shown above, some months do not have observations for all days.
-
-## Interactive viz of accident frequency {#regression}
-
-```{r ch09-viz-regression}
-complete.months <- counts.per.month[days == days.in.month]
-month.labels <- counts.per.month[, {
-  .SD[which.max(count), ]
-}, by=location]
-day.labels <- counts.dt[, {
-  .SD[which.max(count), ]
-}, by=.(location, month)]
-city.wide.cyclists <- counts.per.month[0 < count, list(
-  locations=.N,
-  count=sum(count),
-  month01.str = paste0(month.str, "-01")
-), by=.(month, month.str, month.POSIXct)][
-, month01.POSIXct := as.POSIXct(strptime(month01.str, "%Y-%m-%d"))
-][
-, next.POSIXct := month01.POSIXct + one.day * 31
-][
-, next01.str := paste0(strftime(next.POSIXct, "%Y-%m"), "-01")
-][
-, next01.POSIXct := as.POSIXct(strptime(next01.str, "%Y-%m-%d"))
-][]
-month.str.vec <- strftime(seq(
-  strptime("2012-01-15", "%Y-%m-%d"),
-  strptime("2013-01-15", "%Y-%m-%d"),
-  by="month"), "%Y-%m")
-city.wide.complete <- complete.months[0 < count, list(
-  locations=.N,
-  count=sum(count),
-  month01.str = paste0(month.str, "-01")
-), by=.(month, month.str, month.POSIXct)]
-setkey(city.wide.complete, month.str)
-scatter.cyclists <- city.wide.complete[month.str.vec]
-scatter.accidents <- accidents.per.month[
-  scatter.cyclists, on=.(month.str)]
-scatter.not.na <- scatter.accidents[!is.na(locations),]
-scatter.max <- scatter.not.na[locations==max(locations)]
-fit <- lm(total.accidents ~ count - 1, scatter.max)
-scatter.max[, pred.accidents := predict(fit)]
-animint(
-  regression=ggplot()+
-    theme_bw()+
-    ggtitle("Numbers of accidents and cyclists")+
-    geom_line(aes(
-      count, pred.accidents),
-      color="grey",
-      data=scatter.max)+
-    geom_point(aes(
-      count, total.accidents),
-      clickSelects="month",
-      size=5,
-      alpha=0.75,
-      data=scatter.max)+
-    ylab("Total bike accidents (all Montreal locations)")+
-    xlab("Total cyclists (all Montreal locations)"),
-  timeSeries=ggplot()+
-    theme_bw()+
-    ggtitle("Time series of accident frequency")+
-    xlab("Month")+
-    geom_point(aes(
-      month.POSIXct, total.accidents/count),
-      clickSelects="month",             
-      size=5,
-      alpha=0.75,
-      data=scatter.max))
-```
-
-The data viz above shows two data visualizations of city-wide accident
-frequency over time. The plot on the left shows that the number of
-accidents grows with the number of cyclists. The plot on the right
-shows the frequency of accidents over time.
-
-## Interactive viz with map and details {#details}
-
-The plot below is a dotplot of accidents for each month. Each dot
-represents one person who got in an accident.
 
 ```{r}
 accidents.cumsum <- accidents.dt[
