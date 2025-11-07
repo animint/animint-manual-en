@@ -128,7 +128,9 @@ WorldBank$Region <- sub(
 world_bank <- subset(
   WorldBank,
   is.finite(fertility.rate) & is.finite(life.expectancy),
-  select=c(Region,country,year,fertility.rate,life.expectancy))
+  select=c(
+    Region, country, year, fertility.rate, life.expectancy,
+    lending, population, income))
 tail(world_bank)
 dim(world_bank)
 ```
@@ -149,7 +151,7 @@ fertility rate on the vertical (y) axis, and a legend for the
 region. These elements of the sketch can be directly translated into R
 code using the following method. First, we need to construct a data
 table that has one row for every country in 1975, and columns named
-`life.expectancy`, `fertility.rate`, and `region`. The `world_bank`
+`life.expectancy`, `fertility.rate`, and `Region`. The `world_bank`
 data already has these columns, so all we need to do is consider the
 subset for the year 1975:
 
@@ -164,20 +166,19 @@ use the notes in the sketch to code a ggplot with a corresponding
 `aes` or aesthetic mapping of data variables to visual properties:
 
 ```{r scatter}
-scatter <- ggplot()+
+(scatter <- ggplot()+
   geom_point(
     mapping=aes(x=life.expectancy, y=fertility.rate, color=Region),
-    data=world_bank_1975)
-scatter
+    data=world_bank_1975))
 ```
 
 The `aes` function is called with names for visual properties (`x`,
 `y`, `color`) and values for the corresponding data variables
-(`life.expectancy`, `fertility.rate`, `region`). This mapping is
+(`life.expectancy`, `fertility.rate`, `Region`). This mapping is
 applied to the variables in the `world_bank_1975` data table, in order
 to create the visual properties of the `geom_point()`. The ggplot was
 saved as the `scatter` object, which when printed on the R command
-line shows the plot on a graphics device. Note that we automatically
+line, shows the plot on a graphics device. Note that we automatically
 have a `Region` color legend.
 
 ## Rendering ggplots on web pages using animint {#rendering-with-animint}
@@ -199,10 +200,11 @@ In RStudio, the interactive graph should appear in the Viewer panel.
 You can use the `browser` option to define the web browser to use for rendering, for example: `options(browser="firefox")`.
 If, when you run the code above, the animint does not render in your web browser for some reason (for example if you see a blank web page), then please consult our [wiki FAQ](https://github.com/tdhock/animint2/wiki/FAQ#web-browser-on-local-indexhtml-file-is-blank) which will help you find a solution.
 
-**Exercise**: try changing the `aes` mapping of the ggplot, and then
-making a new animint. Quantitative variables like `population` are
-best shown using the `x`/`y` axes or point `size`. Qualitative
-variables like `lending` are best shown using point `color` or `fill`.
+**Exercises**: try making some new animints, by changing the `aes` mapping of the ggplot.
+
+* Try using a qualitative variable like `lending` or `income` as `color` or `fill`.
+* Quantitative variables like `population` are best shown using the `x`/`y` axes or point `size`. Try using `population` or `log10(population)` for `x` or `y`, and you should see that using the log transformation works well for this variable (`population` ranges over several orders of magnitude).
+* Try using `aes(size=log10(population))` and we should see a quantitative legend, which is not interactive. Try creating a new categorical/qualitative variable, `log10pop`, defined as `paste(round(log10(population)))`. Using `aes(size=log10pop)` should result in an interactive discrete legend.
 
 ## Multi-layer data visualization (multiple geoms) {#multi-layer}
 
