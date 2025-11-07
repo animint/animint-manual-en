@@ -26,7 +26,7 @@ CRAN. Therefore to access this data set, you will need to install
 tryCatch({
   data(montreal.bikes, package="animint2")
 }, warning=function(w){
-  remotes::install_github("tdhock/animint2")
+  remotes::install_github("animint/animint2")
 })
 ```
 
@@ -245,7 +245,7 @@ city.wide.accidents <- accidents_dt[, .(
 ][, month.01 := month_01(month.str)][])
 ```
 
-The output above shows one row per month with both count and acciednt data.
+The output above shows one row per month with both count and accident data.
 Next, we fit a linear model which uses counts to predict accidents.
 
 ```{r}
@@ -290,10 +290,10 @@ animint(
       data=scatter.not.na))
 ```
 
-The data viz above shows two data visualizations of city-wide accident
-frequency over time. The plot on the left shows that the number of
-accidents grows with the number of cyclists. The plot on the right
-shows the frequency of accidents over time.
+The data viz above shows two data visualizations of city-wide accident frequency over time.
+
+* The first plot shows that the number of accidents grows with the number of cyclists.
+* The second plot shows the frequency of accidents over time.
 
 ## Interactive viz with map and details {#details}
 
@@ -314,6 +314,7 @@ Before examining the data table of counter locations, we first convert the name 
 ```
 
 In the output above, we see that the `nom_comptage` column indicates the location of the counter, but the values are not exactly the same as in the `location` column in the table of counts.
+We use the code below to establish correspondence between the names in the two tables.
 
 ```{r}
 loc.name.code <- c(
