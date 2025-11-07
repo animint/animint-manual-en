@@ -120,7 +120,7 @@ uniq.month.vec <- unique(c(
   accidents_dt$month.str,
   counts_dt$month.str))
 month_01 <- function(mois)ymd2POSIXct(paste0(mois, "-01"))
-month_dt <- data.table(month.01 = month_01(uniq.mois.vec))
+month_dt <- data.table(month.01 = month_01(uniq.month.vec))
 ```
 
 The code below defines the locale so that we can be sure to have the month names in English.
@@ -212,8 +212,7 @@ next_month <- function(POSIXct)month_01(POSIXct + one.day * 31)
 counts.per.month[, days.in.month := as.integer(round(difftime(
   month_01(month_str(next_month(month_01(month.str)))),
   month_01(month.str),
-  units="days"
-)))][]
+  units="days")))][]
 ```
 
 The output above contains the new column `days.in.month`.
@@ -429,7 +428,7 @@ accidents.range <- dcast(
   geom_segment(aes(
     date_min, lieu,
     xend=date_max, yend=lieu),
-    color=gravité.colors[["décès"]],
+    color=severity.colors[["deaths"]],
     data=accidents.range,
     size=seg.size))
 ```
@@ -571,9 +570,7 @@ In the code below, we create a grid of days.
   min(month.01),
   max(next_month(month.01)),
   by="day"
-))][
-, weekday := strftime(date, "%a")
-][])
+))][, weekday := strftime(date, "%a")][])
 ```
 
 The output above shows one row per day in the period of observed data.
@@ -581,8 +578,7 @@ The code below creates a table to highlight weekends.
 
 ```{r}
 (weekend.dt <- add_day_month(days.dt[
-  grepl("Sat|Sun", weekday)
-])[])
+  grepl("Sat|Sun", weekday)])[])
 ```
 
 The output above has one row per weekend day.
@@ -659,6 +655,8 @@ The code below adds the accident data.
 The figure above has a new panel for accident data on top.
 
 ### Interactive graphic
+
+Finally, we combine the previous ggplots into an interactive data visualization using the code below.
 
 ```{r ch09-viz-mtl}
 animint(
