@@ -83,6 +83,8 @@ format:
     toc: false
     toc-depth: 2
     fig-cap-location: bottom
+    fig-format: png
+    fig-dpi: 200
     tbl-cap-location: top
     urlcolor: "blue"
     linkcolor: "black"
