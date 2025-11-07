@@ -318,16 +318,16 @@ In the output above, we see that the `nom_comptage` column indicates the locatio
 
 ```{r}
 loc.name.code <- c(
-  "Berri1"="Berri",
-  "Brebeuf"="Brébeuf",
+  Berri1="Berri",
+  Brebeuf="Brébeuf",
   CSC="Côte-Sainte-Catherine",
-  "Maisonneuve_1"="Maisonneuve 1",
-  "Maisonneuve_2"="Maisonneuve 2",
-  "Parc"="du Parc",
+  Maisonneuve_1="Maisonneuve 1",
+  Maisonneuve_2="Maisonneuve 2",
+  Parc="du Parc",
   PierDup="Pierre-Dupuy",
   "Rachel/Papineau"="Rachel",
   "Saint-Urbain"="Saint-Urbain",
-  "Totem_Laurier"="Totem_Laurier")
+  Totem_Laurier="Totem_Laurier")
 (show.locations <- counter.locations[
 , location := loc.name.code[nom_comptage]
 ][!is.na(location)])
@@ -597,104 +597,108 @@ add_day_month(counts_dt)
 
 The output above shows the day with the max count, for each location and month.
 Next, we use the code below to plot the daily count data.
-TODO
 
 ```{r}
-DaysFacet <- ggplot()+
-  ggtitle("Selected month (weekends in grey)")+
-  theme_bw()+
-  theme_animint(colspan=2, last_in_row=TRUE)+
+(DaysCounters <- ggplot()+
   geom_tallrect(aes(
-    xmin=day.of.the.month-0.5, xmax=day.of.the.month+0.5,
-    key=paste(day.POSIXct)),
-    showSelected="month",
+    xmin=day.in.month-0.5, xmax=day.in.month+0.5,
+    key=paste(date)),
+    showSelected="month.english",
     fill="grey",
     color="white",
     data=weekend.dt)+
-  guides(color="none")+
+  guides(color="none", fill="none")+
+  theme_bw()+
   facet_grid(facet ~ ., scales="free")+
   geom_line(aes(
-    day.of.the.month, count, group=location,
-    key=location,
-    color=location),
-    showSelected=c("location", "month"),
+    day.in.month, count, group=location,
+    key=location, color=location),
+    showSelected=c("location", "month.english"),
     clickSelects="location",
-    chunk_vars=c("month"),
-    data=data.table(counts.dt, facet=counter.title))+
+    chunk_vars=c("month.english"),
+    data=COMPTEURS(counts_dt))+
   scale_color_manual(values=location.colors)+
   ylab("")+
   geom_point(aes(
-    day.of.the.month, count, color=location,
-    key=paste(day.of.the.month, location),
+    day.in.month, count, color=location,
+    key=paste(day.in.month, location),
     tooltip=paste(
-      count, "cyclists counted at",
-      location, "on",
+      count, "cyclistes à",
+      location, "en",
       date)),
-    showSelected=c("location", "month"),
+    showSelected=c("location", "month.english"),
     clickSelects="location",
     size=5,
-    chunk_vars=c("month"),
+    chunk_vars=c("month.english"),
     fill="white",
-    data=data.table(counts.dt, facet=counter.title))+
-  scale_fill_manual(
-    values=severity.colors,
-    breaks=rev(names(severity.colors)))+
-  geom_text(aes(
-    15, 23, label=month, key=1),
-    showSelected="month",
-    data=data.table(months, facet=accidents.title))+
-  scale_x_continuous("day of the month", breaks=c(1, 10, 20, 30))+
-  geom_text(aes(
-    day.of.the.month, count+500, color=location, label=location,
-    key=location),
-    showSelected=c("location", "month"),
-    clickSelects="location",
-    data=data.table(day.labels, facet=counter.title))+
-  geom_point(aes(
-    day.of.the.month, accident.i,
-    key=paste(date.str, accident.i),
-    tooltip=paste(
-      deaths_severe_slight(
-        deaths,
-        people.severely.injured,
-        people.slightly.injured),
-      "at",
-      ifelse(is.na(street.number), "", street.number),
-      street, "/", cross.street,
-      date.str, time.str),
-    fill=severity),
-    showSelected="month",
-    size=4,
-    chunk_vars=c("month"),
-    data=data.table(accidents.cumsum, facet=accidents.title))
-DaysFacet
+    data=COMPTEURS(counts_dt)))
 ```
+
+The figure above is over-plotted, because it shows all of the months at the same time, whereas only one month will be shown in the interactive version.
+The code below adds the accident data.
+
+```{r}
+(DaysFacet <- DaysCounters+
+   scale_fill_manual(
+     values=severity.colors, breaks=names(severity.colors))+
+   geom_text(aes(
+     15, 23, label=month.english, key=1),
+     showSelected="month.english",
+     data=ACCIDENTS(month_dt))+
+   scale_x_continuous("Day in month", breaks=c(1, 10, 20, 30))+
+   geom_point(aes(
+     day.in.month, accident.i,
+     key=paste(date.str, accident.i),
+     fill=severity),
+     showSelected=c("severity","month.english"),
+     size=4,
+     chunk_vars="month.english",
+     data=ACCIDENTS(accidents.cumsum)))
+```
+
+The figure above has a new panel for accident data on top.
+
+### Interactive graphic
 
 ```{r ch09-viz-mtl}
 animint(
-  DaysFacet,
-  MonthFacet,
-  MonthSummary,
+  MonthFacet+
+    ggtitle("All data, select month"),
+  DaysFacet+
+    ggtitle("Selected month (weekends in grey)")+
+    geom_label_aligned(aes(
+      day.in.month, count+1500, color=location, label=location,
+      key=location),
+      showSelected=c("location", "month.english"),
+      clickSelects="location",
+      data=COMPTEURS(day.text))+
+    theme_animint(last_in_row=TRUE),
+  MonthSummary+theme_animint(width=450, height=250),
+  mtl.map+theme_animint(height=250),
   selector.types=list(severity="multiple"),
-  duration=list(month=2000),
+  duration=list(month.english=2000),
   first=list(
-    location="Berri",
-    month="September 2012"),
-  time=list(variable="month", ms=5000))
+    location="Maisonneuve 2",
+    month.english="July 2012"))
 ```
+
+The visualization above contains 4 plots:
+
+* Upper left: time series with summary data for each month.
+* Upper right: time series of daily details for selected month.
+* Bottom left: min and max dates for each data source.
+* Bottom right: counter locations on the Montreal map.
 
 ## Chapter summary and exercises {#ch09-exercises}
 
+We have explored several methods for visualizing time series data of bike counts and accidents in Montreal.
+
 Exercises:
 
-* Change location to a multiple selection variable.
-* Add a plot for the map to the data viz.
-* On the map, draw a circle for each location, with size that changes
-  based on the `count` of the accidents in the currently selected
-  `month`.
-* On the `MonthSummary` plot, add a background
-  rectangle that can be used to select the `month`.
-* Remove the `MonthSummary` plot and add a similar visualization as a
-  third panel in the `MonthFacet` plot.
+* Change `location` to a multiple selection variable.
+* On the map, draw a circle for each location, with size that changes based on the `count` of the accidents in the currently selected `month`.
+* On the `MonthSummary` plot, add background rectangles that can be used to select the `month`.
+* Remove the `MonthSummary` plot and add a similar visualization as a third panel in the `MonthFacet` plot.
+* In `DaysFacet`, add `aes(tooltip)` with details of each accident (address, number of people involved, etc).
 
 Next, [Chapter 10](/ch10) explains how to visualize the K-Nearest-Neighbors machine learning model.
