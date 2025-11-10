@@ -1,0 +1,281 @@
+# Torch
+
+```{r setup, echo=FALSE}
+knitr::opts_chunk$set(fig.path="ch19-figures/")
+if(FALSE){
+  knitr::knit("index.qmd")
+}
+```
+
+In this chapter we will explore several data visualizations related to machine learning using torch.
+
+## What is torch? {#what-is-torch}
+
+TODO
+
+## Loading data {#torch-load-data}
+
+* [mlr3torch blog](https://tdhock.github.io/blog/2025/mlr3torch-conv/) uses MNIST.
+* SOAK paper figure uses waveform, vowel, aztrees.
+
+```{r}
+task_list <- mlr3::tsks(c("spam","sonar"))
+mlr3torchAUM::MeasureClassifInvAUC$new()
+measure_list <- mlr3::msrs(c("classif.logloss", "classif.auc"))
+n.epochs <- 200
+make_torch_learner <- function(id,...){
+  po_list <- list(
+    mlr3pipelines::po("scale"),
+    mlr3pipelines::po(
+      "select",
+      selector = mlr3pipelines::selector_type(c("numeric", "integer"))),
+    mlr3torch::PipeOpTorchIngressNumeric$new(),
+    ...,
+    mlr3pipelines::po("nn_head"),
+    mlr3pipelines::po(
+      "torch_loss",
+      mlr3torch::t_loss("cross_entropy")),
+    mlr3pipelines::po(
+      "torch_optimizer",
+      mlr3torch::t_opt("sgd", lr=0.1)),
+    mlr3pipelines::po(
+      "torch_callbacks",
+      mlr3torch::t_clbk("history")),
+    mlr3pipelines::po(
+      "torch_model_classif",
+      batch_size = 10,
+      patience=n.epochs,
+      measures_valid=measure_list,
+      measures_train=measure_list,
+      predict_type="prob",
+      epochs = paradox::to_tune(upper = n.epochs, internal = TRUE)))
+  graph <- Reduce(mlr3pipelines::concat_graphs, po_list)
+  glearner <- mlr3::as_learner(graph)
+  mlr3::set_validate(glearner, validate = 0.5)
+  mlr3tuning::auto_tuner(
+    learner = glearner,
+    tuner = mlr3tuning::tnr("internal"),
+    resampling = mlr3::rsmp("insample"),
+    measure = mlr3::msr("internal_valid_score", minimize = TRUE),
+    term_evals = 1,
+    id=id,
+    store_models = TRUE)
+}
+
+learner.list <- list(
+  make_torch_learner("torch_linear"),
+  make_torch_learner(
+    "torch_dense_50",
+    mlr3pipelines::po(
+      "nn_linear",
+      out_features = 50),
+    mlr3pipelines::po("nn_relu_1", inplace = TRUE)
+  ),
+  mlr3::LearnerClassifFeatureless$new()$configure(id="featureless"),
+  mlr3learners::LearnerClassifCVGlmnet$new()$configure(id="cv_glmnet"))
+for(learner.i in seq_along(learner.list)){
+  learner.list[[learner.i]]$predict_type <- "prob"
+}
+kfoldcv <- mlr3::rsmp("cv")
+kfoldcv$param_set$values$folds <- 3
+## TODO normalize features.
+sapply(task_list, function(L)sapply(L$data()[,-1], range))
+(bench.grid <- mlr3::benchmark_grid(
+  task_list,
+  learner.list,
+  kfoldcv))
+
+reg.dir <- "ch19-reg"
+cache.RData <- paste0(reg.dir,".RData")
+if(file.exists(cache.RData)){
+  load(cache.RData)
+}else{
+  if(require(future))plan("multisession")
+  bench.result <- mlr3::benchmark(bench.grid, store_models = TRUE)
+  save(bench.result, file=cache.RData)
+}
+
+score_dt <- bench.result$score()
+(score_some <- score_dt[order(classif.ce), .(
+  task_id,
+  learner_id=factor(learner_id, unique(learner_id)),
+  iteration,
+  percent_error=100*classif.ce)])
+library(ggplot2)
+ggplot()+
+  facet_grid(. ~ task_id, labeller=label_both)+
+  geom_point(aes(
+    percent_error, learner_id),
+    shape=1,
+    data=score_some)+
+  scale_x_continuous(
+    breaks=seq(0,100,by=10),
+    limits=c(0,50))
+
+score_dt$prediction_test[[10]]
+score_dt$prediction_test[[24]]
+roc_dt <- score_dt[, {
+  pred <- prediction_test[[1]]
+  WeightedROC::WeightedROC(pred$prob[,1], pred$truth)
+}, by=.(task_id, learner_id, iteration)]
+
+library(data.table)
+(score_stats <- dcast(
+  score_some,
+  task_id + learner_id ~ .,
+  list(mean, sd),
+  value.var="percent_error"))
+ggplot()+
+  facet_grid(. ~ task_id, labeller=label_both)+
+  geom_point(aes(
+    percent_error_mean, learner_id),
+    shape=1,
+    data=score_stats)+
+  geom_segment(aes(
+    percent_error_mean+percent_error_sd, learner_id,
+    xend=percent_error_mean-percent_error_sd, yend=learner_id),
+    data=score_stats)+
+  geom_text(aes(
+    percent_error_mean, learner_id,
+    label=sprintf("%.2f±%.2f", percent_error_mean, percent_error_sd)),
+    vjust=-0.5,
+    data=score_stats)+
+  scale_x_continuous(
+    "Percent error on test set (mean ± SD over 3 folds in CV)",
+    limits=c(0,50),
+    breaks=seq(0,100,by=10))
+
+if(FALSE){
+(levs <- levels(score_some$learner_id))
+(pval_dt <- data.table(comparison_i=1:3)[, {
+  two_levs <- levs[comparison_i+c(0,1)]
+  lev2rank <- structure(c("lo","hi"), names=two_levs)
+  i_long <- score_some[
+    learner_id %in% two_levs
+  ][
+  , rank := lev2rank[paste(learner_id)]
+  ][]
+  i_wide <- dcast(i_long, iteration ~ rank, value.var="percent_error")
+  paired <- with(i_wide, t.test(lo, hi, alternative = "l", paired=TRUE))
+  unpaired <- with(i_wide, t.test(lo, hi, alternative = "l", paired=FALSE))
+  data.table(
+    learner.lo=factor(two_levs[1],levs),
+    learner.hi=factor(two_levs[2],levs),
+    p.paired=paired$p.value,
+    p.unpaired=unpaired$p.value,
+    mean.diff=paired$est,
+    mean.lo=unpaired$est[1],
+    mean.hi=unpaired$est[2])
+}, by=comparison_i])
+ggplot()+
+  geom_segment(aes(
+    mean.lo, learner.lo,
+    xend=mean.hi, yend=learner.lo),
+    data=pval_dt,
+    size=2,
+    color="red")+
+  geom_text(aes(
+    x=(mean.lo+mean.hi)/2, learner.lo,
+    label=sprintf("P=%.4f", p.paired)),
+    data=pval_dt,
+    vjust=1.5,
+    color="red")+
+  geom_point(aes(
+    percent_error_mean, learner_id),
+    shape=1,
+    data=score_show)+
+  geom_segment(aes(
+    percent_error_mean+percent_error_sd, learner_id,
+    xend=percent_error_mean-percent_error_sd, yend=learner_id),
+    size=1,
+    data=score_show)+
+  geom_text(aes(
+    percent_error_mean, learner_id,
+    label=sprintf("%.2f±%.2f", percent_error_mean, percent_error_sd)),
+    vjust=-0.5,
+    data=score_show)+
+  coord_cartesian(xlim=c(0,10))+
+  scale_y_discrete("algorithm")+
+  scale_x_continuous(
+    "Percent error on test set (mean ± SD over 3 folds in CV)",
+    breaks=seq(0,10,by=2))
+}
+
+(score_torch <- score_dt[
+  grepl("torch",learner_id)
+][
+, best_epoch := sapply(
+  learner, function(L)unlist(L$tuning_result$internal_tuned_values))
+][])
+
+
+(history_torch <- score_torch[, {
+  L <- learner[[1]]
+  M <- L$archive$learners(1)[[1]]$model
+  M$torch_model_classif$model$callbacks$history
+}, by=.(learner_id, iteration)])
+
+(history_long <- nc::capture_melt_single(
+  history_torch,
+  set=nc::alevels(valid="validation", train="subtrain"),
+  ".classif.",
+  measure=nc::alevels("logloss", ce="prop_error")))
+
+ggplot()+
+  theme_bw()+
+  theme(legend.position=c(0.9, 0.15))+
+  geom_vline(aes(
+    xintercept=best_epoch),
+    data=score_torch)+
+  geom_text(aes(
+    best_epoch, Inf, label=paste0(" best epoch=", best_epoch)),
+    vjust=1.5, hjust=0,
+    data=score_torch)+
+  geom_line(aes(
+    epoch, value, color=set),
+    data=history_long[measure=="logloss"])+
+  facet_grid(task_id + learner_id ~ iteration, labeller=label_both, scales="free")+
+  scale_y_log10("logistic loss")+
+  scale_x_continuous("epoch")
+
+get_fold <- function(DT,it=1)DT[iteration==it]
+history_fold <- get_fold(history_long)
+score_fold <- get_fold(score_torch)
+min_fold <- history_fold[
+, .SD[value==min(value)]
+, by=.(learner_id, measure, set)
+][, point := "min"]
+ggplot()+
+  theme_bw()+
+  theme(legend.position=c(0.9, 0.2))+
+  geom_vline(aes(
+    xintercept=best_epoch),
+    data=score_fold)+
+  geom_text(aes(
+    best_epoch, Inf, label=paste0(" best epoch=", best_epoch)),
+    vjust=1.5, hjust=0,
+    data=score_fold)+
+  geom_line(aes(
+    epoch, value, color=set),
+    data=history_fold)+
+  geom_point(aes(
+    epoch, value, color=set, fill=point),
+    shape=21,
+    data=min_fold)+
+  scale_fill_manual(values=c(min="black"))+
+  facet_grid(measure ~ learner_id, labeller=label_both, scales="free")+
+  scale_x_continuous("epoch")+
+  scale_y_log10("")
+```
+
+## Chapter summary and exercises {#ch20-exercises}
+
+We have created several data visualizations related to torch.
+
+Exercises:
+
+* TODO
+
+Next, [the appendix](/ch99) explains some R
+programming idioms that are generally useful for interactive data
+visualization design.
