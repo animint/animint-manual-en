@@ -1,7 +1,7 @@
 # Torch
 
 ```{r setup, echo=FALSE}
-knitr::opts_chunk$set(fig.path="ch19-figures/")
+knitr::opts_chunk$set(fig.path="ch20-figures/")
 if(FALSE){
   knitr::knit("index.qmd")
 }
@@ -85,7 +85,7 @@ sapply(task_list, function(L)sapply(L$data()[,-1], range))
   learner.list,
   kfoldcv))
 
-reg.dir <- "ch19-reg"
+reg.dir <- "ch20-reg"
 cache.RData <- paste0(reg.dir,".RData")
 if(file.exists(cache.RData)){
   load(cache.RData)
@@ -106,7 +106,7 @@ ggplot()+
     data=score_dt)+
   scale_x_continuous(
     breaks=seq(0,100,by=10),
-    limits=c(0,50))
+    limits=c(0,60))
 
 roc_dt <- score_dt[, {
   pred <- prediction_test[[1]]
@@ -116,6 +116,7 @@ roc_dt <- score_dt[, {
 animint(
   testErr=ggplot()+
     theme_bw()+
+    theme_animint(width=800, height=200, last_in_row=TRUE)+
     facet_grid(. ~ task_id, labeller=label_both)+
     geom_point(aes(
       ## TODO show AUC instead of error.
@@ -128,7 +129,7 @@ animint(
       data=score_dt)+
     scale_x_continuous(
       breaks=seq(0,100,by=10),
-      limits=c(0,50)),
+      limits=c(0,60)),
   roc=ggplot()+
     ## TODO add pred point.
     theme_bw()+
@@ -228,7 +229,7 @@ ggplot()+
   L <- learner[[1]]
   M <- L$archive$learners(1)[[1]]$model
   M$torch_model_classif$model$callbacks$history
-}, by=.(task_id, learner_id, iteration)])
+}, by=.(task_id, learner_id, iteration, task_iteration)])
 
 (history_long <- nc::capture_melt_single(
   history_torch,
@@ -251,6 +252,50 @@ ggplot()+
   facet_grid(task_id + learner_id ~ iteration, labeller=label_both, scales="free")+
   scale_y_log10("logistic loss")+
   scale_x_continuous("epoch")
+
+norm01 <- function(x)(x-min(x))/(max(x)-min(x))
+history_long[, norm := norm01(value), by=.(iteration, task_id, learner_id, set, measure)]
+ggplot()+
+  theme_bw()+
+  geom_vline(aes(
+    xintercept=best_epoch),
+    data=score_torch)+
+  geom_text(aes(
+    best_epoch, Inf, label=paste0(" best epoch=", best_epoch)),
+    vjust=1.5, hjust=0,
+    data=score_torch)+
+  geom_line(aes(
+    epoch, norm, color=set),
+    data=history_long[measure=="logloss"])+
+  facet_grid(task_id + learner_id ~ iteration, labeller=label_both, scales="free")+
+  scale_y_log10("normalized log logistic loss")+
+  scale_x_continuous("epoch")
+
+animint(
+  testErr=ggplot()+
+    theme_bw()+
+    theme_animint(width=800, height=200, last_in_row=TRUE)+
+    facet_grid(. ~ task_id, labeller=label_both)+
+    geom_point(aes(
+      ## TODO show AUC instead of error.
+      percent_error, learner_id),
+      clickSelects="task_iteration",
+      size=5,
+      fill="grey",
+      color="black",
+      color_off="grey",
+      data=score_dt)+
+    scale_x_continuous(
+      breaks=seq(0,100,by=10),
+      limits=c(0,60)),
+  torchDetails=ggplot()+
+    theme_bw()+
+    theme_animint(width=800)+
+    facet_grid(. ~ learner_id, labeller=label_both)+
+    geom_line(aes(
+      epoch, norm, color=set, group=set),
+      showSelected="task_iteration",
+      data=history_long[measure=="logloss"]))
 
 get_fold <- function(DT,it=1)DT[iteration==it & task_id=="sonar"]
 history_fold <- get_fold(history_long)
