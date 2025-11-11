@@ -251,6 +251,12 @@ viz.duration.time
 ```
 
 The data visualization above is animated, because the selected year advances every two seconds.
+There are several animation controls that are available if you click the "Show animation controls" button:
+
+* To pause the animation, click the "Pause" button (which then changes to "Play").
+* To re-start animation, click the "Play" button.
+* To control the animation delay, type a new number of milliseconds per update in the "updates" box, then type Return/Enter.
+* If you edit the animation delay (updates box) or smooth transition durations (other boxes), make sure that the animation delay is greater than the other boxes (so the smooth transition can finish before the next animation update).
 
 **Exercise:** make an animated data visualization that does NOT use
 smooth transitions. Hint: make a list of ggplots that has the `time`
