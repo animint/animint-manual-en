@@ -19,7 +19,46 @@ TODO
 * SOAK paper figure uses waveform, vowel, aztrees.
 
 ```{r}
+library(data.table)
+data.list <- list()
+
+prefix <- "https://hastie.su.domains/ElemStatLearn/datasets/"
+cache.fread <- function(data.name, f){
+  cache.dir <- file.path("data", data.name)
+  dir.create(cache.dir, showWarnings=FALSE, recursive=TRUE)
+  local.path <- file.path(cache.dir, f)
+  if(!file.exists(local.path)){
+    u <- paste0(prefix, f)
+    download.file(u, local.path)
+  }
+  fread(local.path)
+}
+
+for(data.name in c("vowel","waveform","zip")){
+  suffix <- if(data.name=="zip")".gz" else ""
+  set.list <- list()
+  for(predefined.set in c("test","train")){
+    one.set.dt <- cache.fread(
+      data.name,
+      paste0(data.name, ".", predefined.set, suffix)
+    )
+    if("row.names" %in% names(one.set.dt)){
+      one.set.dt[, row.names := NULL]
+    }
+    setnames(one.set.dt, old=names(one.set.dt)[1], new="y")
+    set.list[[predefined.set]] <- data.table(
+      predefined.set, one.set.dt)
+  }
+  data.list[[data.name]] <- rbindlist(set.list)
+}
+dir.create("data_Classif")
+for(data.name in names(data.list))fwrite(
+  data.list[[data.name]],
+  paste0(file.path("data_Classif", data.name), ".csv")
+)
+
 task_list <- mlr3::tsks(c("spam","sonar"))
+## TODO data where linear model was better than non-linear in SOAK paper: waveform. data where nearest neighbors was best, vowel.
 mlr3torchAUM::MeasureClassifInvAUC$new()
 measure_list <- mlr3::msrs(c("classif.logloss", "classif.auc"))
 n.epochs <- 200
@@ -138,7 +177,6 @@ animint(
       data=roc_dt,
       showSelected="task_iteration"))
 
-library(data.table)
 (score_stats <- dcast(
   score_dt,
   task_id + learner_id ~ .,
