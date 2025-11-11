@@ -32,38 +32,41 @@ the [Keeling Curve data visualization from Chapter 1](/#large-data).
 
 ![Sketch of data visualization of carbon dioxide over time](ch03-viz-co2.png)
 
-The sketch above includes `showSelected=month` for the `geom_point()`,
-meaning that it should show the subset of data for the selected
-months. In contrast, since the `geom_line()` does not include
-`showSelected` keywords, it always shows the entire data set
-(regardless of the selected months).
+The sketch above can be translated to the R code below.
 
-As another example, consider the sketch below of the first WorldBank
-data visualization from Chapter 2.
+```r
+ggplot(co2, aes(time, ppm))+
+  geom_point(aes(color=month), showSelected="month")+
+  geom_line()
+```
 
-![Sketch of WorldBank data visualization with `showSelected`](ch03-viz-showSelectedColor.png)
+The code above includes `showSelected="month"` for the `geom_point()`, meaning that it should show the subset of data for the selected months.
+In contrast, since the `geom_line()` does not include `showSelected`, it always shows the entire data set (regardless of the selected months).
 
-The sketch above specifies `showSelected=region` for the `geom_point()`,
-meaning that it should show the subset of data for the selected
-regions.
+As another example, consider the sketch below of the first WorldBank data visualization from Chapter 2.
 
-Note that the code we used in chapter 2 did not explicitly specify
-`showSelected=region`. Instead, we specified `aes(color=region)`, and
-animint automatically assigned a `showSelected` keyword. In general, animint will assign
-a `showSelected` keyword for each variable that is used in a
-categorical legend.
+![Sketch of World Bank data visualization with `showSelected`](ch03-viz-showSelectedColor.png)
 
-However, the `showSelected` keyword is not limited to use with
-categorical legends. You can use `showSelected` keywords for any data
-variables you like, by explicitly specifying the variable names in the
-`showSelected` argument of the geom. 
+The sketch above can be translated to the R code below.
 
-Each variable that is used with `showSelected` is treated by
-animint as a *selection variable*. For example, the Keeling Curve data
-viz has one selection variable (month), and so does the WorldBank data
-viz (region). For each selection variable, animint keeps track of the
-currently selected values. When the selection changes, animint updates
-the subset of data that is shown.
+```r
+ggplot()+
+  geom_point(aes(
+    life.expectancy, fertility.rate, color=Region),
+    data=world_bank_1975,
+    showSelected="Region")
+```
+
+The code above specifies `showSelected="Region"` for the `geom_point()`, meaning that it should show the subset of data for the selected regions.
+Note that the code we used in chapter 2 did not explicitly specify `showSelected="Region"`.
+Instead, we specified `aes(color=Region)`, and `animint2` automatically added `showSelected`.
+In general, animint will add `showSelected` for each variable that is used in a categorical legend.
+
+However, the `showSelected` keyword is not limited to use with categorical legends.
+You can use `showSelected` keywords for any data variables you like, by explicitly specifying the variable names in the `showSelected` argument of the geom.
+Each variable that is used with `showSelected` is treated by `animint2` as a *selection variable*. For example, the Keeling Curve data viz has one selection variable (`month`), and so does the World Bank data viz (`Region`).
+For each selection variable, `animint2` keeps track of the currently selected values.
+When the selection changes, `animint2` updates the subset of data that is shown.
 
 Each of the data visualizations sketched above has only one selection
 variable. However, a data visualization can have any number of
