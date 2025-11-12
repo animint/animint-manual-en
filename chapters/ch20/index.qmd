@@ -114,8 +114,8 @@ learner.list <- list(
       out_features = 50),
     mlr3pipelines::po("nn_relu_1", inplace = TRUE)
   ),
-  mlr3::LearnerClassifFeatureless$new()$configure(id="featureless"),
-  mlr3learners::LearnerClassifCVGlmnet$new()$configure(id="cv_glmnet"))
+  mlr3learners::LearnerClassifCVGlmnet$new()$configure(id="cv_glmnet"),
+  mlr3::LearnerClassifFeatureless$new()$configure(id="featureless"))
 for(learner.i in seq_along(learner.list)){
   learner.list[[learner.i]]$predict_type <- "prob"
 }
@@ -138,7 +138,7 @@ if(file.exists(cache.RData)){
   save(bench.result, file=cache.RData)
 }
 
-score_dt <- bench.result$score()[, let(
+score_dt <- bench.result$score(mlr3::msrs(c('classif.auc','classif.ce')))[, let(
   task_iteration = paste(task_id, iteration),
   percent_error=100*classif.ce)][]
 library(animint2)
@@ -162,7 +162,6 @@ animint(
     theme_animint(width=800, height=200, last_in_row=TRUE)+
     facet_grid(. ~ task_id, labeller=label_both)+
     geom_point(aes(
-      ## TODO show AUC instead of error.
       percent_error, learner_id),
       clickSelects="task_iteration",
       size=5,
@@ -173,8 +172,22 @@ animint(
     scale_x_continuous(
       breaks=seq(0,100,by=10),
       limits=c(0,60)),
+  testAUC=ggplot()+
+    theme_bw()+
+    theme_animint(width=800, height=200, last_in_row=TRUE)+
+    facet_grid(. ~ task_id, labeller=label_both)+
+    geom_point(aes(
+      classif.auc, learner_id),
+      clickSelects="task_iteration",
+      size=5,
+      fill="grey",
+      color="black",
+      color_off="grey",
+      data=score_dt)+
+    scale_x_continuous(
+      limits=c(0.5,1)),
   roc=ggplot()+
-    ## TODO add pred point.
+    ## TODO add pred point for threshold=0.5
     theme_bw()+
     geom_path(aes(
       FPR, TPR, group=learner_id, color=learner_id),
