@@ -19,9 +19,10 @@ TODO
 * SOAK paper figure uses waveform, vowel, aztrees.
 
 ```{r}
-library(data.table)
-data.list <- list()
 
+task_list <- mlr3::tsks(c("spam","sonar"))
+
+library(data.table)
 prefix <- "https://hastie.su.domains/ElemStatLearn/datasets/"
 cache.fread <- function(data.name, f){
   cache.dir <- file.path("data", data.name)
@@ -33,7 +34,6 @@ cache.fread <- function(data.name, f){
   }
   fread(local.path)
 }
-
 for(data.name in c("vowel","waveform","zip")){
   suffix <- if(data.name=="zip")".gz" else ""
   set.list <- list()
@@ -46,20 +46,15 @@ for(data.name in c("vowel","waveform","zip")){
       one.set.dt[, row.names := NULL]
     }
     setnames(one.set.dt, old=names(one.set.dt)[1], new="y")
-    set.list[[predefined.set]] <- data.table(
-      predefined.set, one.set.dt)
+    set.list[[predefined.set]] <- one.set.dt
   }
-  data.list[[data.name]] <- rbindlist(set.list)
+  task.dt <- rbindlist(set.list)[
+    y %in% unique(y)[1:2]
+  ][, y := factor(y)]
+  one.task <- mlr3::TaskClassif$new(data.name, task.dt, target='y')
+  task_list[[data.name]] <- one.task
 }
-dir.create("data_Classif")
-for(data.name in names(data.list))fwrite(
-  data.list[[data.name]],
-  paste0(file.path("data_Classif", data.name), ".csv")
-)
 
-task_list <- mlr3::tsks(c("spam","sonar"))
-## TODO data where linear model was better than non-linear in SOAK paper: waveform. data where nearest neighbors was best, vowel.
-mlr3torchAUM::MeasureClassifInvAUC$new()
 measure_list <- mlr3::msrs(c("classif.logloss", "classif.auc"))
 n.epochs <- 200
 make_torch_learner <- function(id,...){
@@ -101,7 +96,16 @@ make_torch_learner <- function(id,...){
     store_models = TRUE)
 }
 
+nn_learner <- mlr3learners::LearnerClassifKKNN$new()
+nn_learner$param_set$values$k <- paradox::to_tune(1, 20)
+nn_learner$predict_type <- "prob"
+nn_tuned <- mlr3tuning::auto_tuner(
+  tuner = mlr3tuning::TunerBatchGridSearch$new(),
+  learner = nn_learner,
+  resampling = mlr3::rsmp("cv"),
+  measure = mlr3::msr("classif.auc", minimize = FALSE))
 learner.list <- list(
+  nn_tuned,
   make_torch_learner("torch_linear"),
   make_torch_learner(
     "torch_dense_50",
