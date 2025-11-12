@@ -20,7 +20,9 @@ TODO
 
 ```{r}
 
-task_list <- mlr3::tsks(c("spam","sonar"))
+mlr.tasks <- c("spam","sonar")
+mlr.tasks <- "spam"
+task_list <- mlr3::tsks(mlr.tasks)
 
 library(data.table)
 prefix <- "https://hastie.su.domains/ElemStatLearn/datasets/"
@@ -34,7 +36,9 @@ cache.fread <- function(data.name, f){
   }
   fread(local.path)
 }
-for(data.name in c("vowel","waveform","zip")){
+data.sets <- c("vowel","waveform","zip")
+data.sets <- "vowel"
+for(data.name in data.sets){
   suffix <- if(data.name=="zip")".gz" else ""
   set.list <- list()
   for(predefined.set in c("test","train")){
@@ -71,7 +75,7 @@ make_torch_learner <- function(id,...){
       mlr3torch::t_loss("cross_entropy")),
     mlr3pipelines::po(
       "torch_optimizer",
-      mlr3torch::t_opt("sgd", lr=0.1)),
+      mlr3torch::t_opt("adam")),
     mlr3pipelines::po(
       "torch_callbacks",
       mlr3torch::t_clbk("history")),
@@ -97,12 +101,15 @@ make_torch_learner <- function(id,...){
 }
 
 nn_learner <- mlr3learners::LearnerClassifKKNN$new()
-nn_learner$param_set$values$k <- paradox::to_tune(1, 20)
+nn_learner$param_set$values$k <- paradox::to_tune(1, 30)
 nn_learner$predict_type <- "prob"
+grid_search <- mlr3tuning::tnr("grid_search")
+kfoldcv <- mlr3::rsmp("cv")
+kfoldcv$param_set$values$folds <- 3
 nn_tuned <- mlr3tuning::auto_tuner(
-  tuner = mlr3tuning::TunerBatchGridSearch$new(),
+  tuner = grid_search,
   learner = nn_learner,
-  resampling = mlr3::rsmp("cv"),
+  resampling = kfoldcv,
   measure = mlr3::msr("classif.auc", minimize = FALSE))
 learner.list <- list(
   nn_tuned,
@@ -119,8 +126,6 @@ learner.list <- list(
 for(learner.i in seq_along(learner.list)){
   learner.list[[learner.i]]$predict_type <- "prob"
 }
-kfoldcv <- mlr3::rsmp("cv")
-kfoldcv$param_set$values$folds <- 3
 ## TODO normalize features.
 sapply(task_list, function(L)sapply(L$data()[,-1], range))
 (bench.grid <- mlr3::benchmark_grid(
