@@ -21,7 +21,6 @@ TODO
 ```{r}
 
 mlr.tasks <- c("spam","sonar")
-mlr.tasks <- "spam"
 task_list <- mlr3::tsks(mlr.tasks)
 
 library(data.table)
@@ -37,7 +36,6 @@ cache.fread <- function(data.name, f){
   fread(local.path)
 }
 data.sets <- c("vowel","waveform","zip")
-data.sets <- "vowel"
 for(data.name in data.sets){
   suffix <- if(data.name=="zip")".gz" else ""
   set.list <- list()
@@ -75,7 +73,7 @@ make_torch_learner <- function(id,...){
       mlr3torch::t_loss("cross_entropy")),
     mlr3pipelines::po(
       "torch_optimizer",
-      mlr3torch::t_opt("adam")),
+      mlr3torch::t_opt("sgd", lr=0.1)),
     mlr3pipelines::po(
       "torch_callbacks",
       mlr3torch::t_clbk("history")),
@@ -101,7 +99,7 @@ make_torch_learner <- function(id,...){
 }
 
 nn_learner <- mlr3learners::LearnerClassifKKNN$new()
-nn_learner$param_set$values$k <- paradox::to_tune(1, 30)
+nn_learner$param_set$values$k <- paradox::to_tune(1, 40)
 nn_learner$predict_type <- "prob"
 grid_search <- mlr3tuning::tnr("grid_search")
 kfoldcv <- mlr3::rsmp("cv")
@@ -126,21 +124,16 @@ learner.list <- list(
 for(learner.i in seq_along(learner.list)){
   learner.list[[learner.i]]$predict_type <- "prob"
 }
-## TODO normalize features.
-sapply(task_list, function(L)sapply(L$data()[,-1], range))
 (bench.grid <- mlr3::benchmark_grid(
   task_list,
   learner.list,
   kfoldcv))
 
-reg.dir <- "ch20-reg"
-cache.RData <- paste0(reg.dir,".RData")
-if(file.exists(cache.RData)){
-  load(cache.RData)
+if(TRUE){
+  data(bench.result, package="animint2data")
 }else{
   if(require(future))plan("multisession")
   bench.result <- mlr3::benchmark(bench.grid, store_models = TRUE)
-  save(bench.result, file=cache.RData)
 }
 
 score_dt <- bench.result$score(mlr3::msrs(c(
@@ -148,9 +141,10 @@ score_dt <- bench.result$score(mlr3::msrs(c(
 )))[, let(
   task_iteration = paste(task_id, iteration),
   percent_error=100*classif.ce)][]
+
 library(animint2)
 ggplot()+
-  facet_grid(. ~ task_id, labeller=label_both)+
+  facet_grid(task_id ~ ., labeller=label_both)+
   geom_point(aes(
     percent_error, learner_id),
     data=score_dt)+
@@ -158,11 +152,13 @@ ggplot()+
     breaks=seq(0,100,by=10),
     limits=c(0,60))
 
-score_dt[, lev_str := {
-  pred <- prediction_test[[1]]
-  paste(levels(pred$truth), collapse=" vs ")
-}, by=task_id]
+```
 
+So the first factor level in R is considered the positive class in
+torch, which has the float value 1. The negative class is the second
+factor level, which gets converted to the float value 0.
+
+```{r}
 roc_dt <- score_dt[, roc := {
   pred <- prediction_test[[1]]
   is.positive <- as.integer(pred$truth)==1
@@ -176,15 +172,40 @@ roc_dt <- score_dt[, roc := {
 
 ```
 
-So the first factor level in R is considered the positive class in
-torch, which has the float value 1. The negative class is the second
-factor level, which gets converted to the float value 0.
+## Nearest neighbors
+
+```{r}
+best_dt <- score_dt[grep("knn", learner_id), {
+  arch <- learner[[1]]$archive
+  adata <- arch$data[, status := ifelse(
+    classif.auc==max(classif.auc), "max", "other")]
+  arch$best()[, let(details=list(adata))]
+}, by=.(task_id, iteration)]
+details_dt <- best_dt[, details[[1]], by=.(task_id,iteration)]
+
+if(require(animint2)){
+  ggplot()+
+    geom_vline(aes(
+      xintercept=k),
+      data=best_dt)+
+    geom_point(aes(
+      k, classif.auc, color=status),
+      data=details_dt)+
+    facet_grid(iteration ~ task_id)
+}
+```
+
+### ROC curves
 
 ```{r}
 
 score_dt[
 , lab.tpr := rank(classif.auc)/10
 , by=.(task_id, iteration, task_iteration)]
+score_dt[, lev_str := {
+  pred <- prediction_test[[1]]
+  paste(levels(pred$truth), collapse=" vs ")
+}, by=task_id]
 animint(
   testErr=ggplot()+
     theme_bw()+
@@ -230,7 +251,9 @@ animint(
       alignment="vertical")+
     geom_text(aes(
       0.5, 0, 
-      label=task_iteration),
+      label=sprintf(
+        "%s (%s) fold %d",
+        task_id, lev_str, iteration)),
       data=score_dt[learner_id=="featureless"],
       showSelected="task_iteration")+
     geom_point(aes(
@@ -317,6 +340,11 @@ animint(
       color=point_color,
       color_off=point_color_off,
       data=score_dt[learner_id != "featureless"]))
+```
+
+### P-values
+
+```{r}
 (score_stats <- dcast(
   score_dt,
   task_id + learner_id ~ .,
@@ -339,7 +367,6 @@ ggplot()+
   scale_x_continuous(
     "Percent error on test set (mean ± SD over 3 folds in CV)",
     breaks=seq(0,100,by=10))
-
 if(FALSE){
 (levs <- levels(score_dt$learner_id))
 (pval_dt <- data.table(comparison_i=1:3)[, {
@@ -394,7 +421,11 @@ ggplot()+
     "Percent error on test set (mean ± SD over 3 folds in CV)",
     breaks=seq(0,10,by=2))
 }
+```
 
+### Torch
+
+```{r}
 (score_torch <- score_dt[
   grepl("torch",learner_id)
 ][
@@ -517,6 +548,34 @@ ggplot()+
   facet_grid(measure ~ learner_id, labeller=label_both, scales="free")+
   scale_x_continuous("epoch")+
   scale_y_log10("")
+```
+
+### glmnet
+
+```{r}
+score_glmnet <- score_dt[grep("glmnet",learner_id)]
+L <- score_glmnet$learner[[1]]
+library(glmnet)
+plot(L$model)
+
+cv_glmnet_one <- with(L$model, data.table(nzero, lambda, cvm, cvsd))
+(gg.glmnet <- ggplot()+
+  geom_segment(aes(
+    -log(lambda), cvm+cvsd,
+    xend=-log(lambda), yend=cvm-cvsd),
+    data=cv_glmnet_one)+
+  geom_point(aes(
+    -log(lambda), cvm, fill=nzero),
+    data=cv_glmnet_one)+
+  scale_fill_gradient(low="white", high="red"))
+
+animint(
+  gg.glmnet+
+    geom_label_aligned(aes(
+      -log(lambda), Inf, label=nzero),
+      alignment="horizontal",
+      vjust=1,
+      data=cv_glmnet_one[seq(1,.N,by=5)]))
 ```
 
 ## Chapter summary and exercises {#ch20-exercises}
