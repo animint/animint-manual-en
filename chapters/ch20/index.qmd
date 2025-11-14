@@ -1,4 +1,4 @@
-# Torch
+# Machine learning benchmarks
 
 ```{r setup, echo=FALSE}
 knitr::opts_chunk$set(fig.path="ch20-figures/")
@@ -7,15 +7,32 @@ if(FALSE){
 }
 ```
 
-In this chapter we will explore several data visualizations related to machine learning using torch.
+In this chapter we will explore several data visualizations related to benchmarking machine learning algorithms using the `mlr3` framework.
 
-## What is torch? {#what-is-torch}
+## What is `mlr3`? {#what-is-mlr3}
 
-TODO
+There are many different packages which implement machine learning algorithms that can be used in R. For example,
+
+* `library(kknn)` provides K-Nearest Neighbors, which was explained in [Chapter 10](/ch10).
+* `library(glmnet)` provides L1-regularized linear models like the Lasso, which was explained in [Chapter 11](/ch11).
+* `library(torch)` provides neural networks, which were explained in [Chapter 18](/ch18).
+
+When we want to machine learning to create a predictive model for a given data set, we typically want to try a variety of different algorithms, because we do not know in advance which algorithm will be most accurate for a given data set.
+So we would like to run the learning algorithms which are implemented in these different R packages, and standardized the results so they can be analyzed together to determine which algorithm is most accurate.
+Each R package provides a function for model fitting, which has a different name and API in each package (some functions input matrices, others data frames, etc).
+Typically each package provides a `predict()` method, but the output format differs between packages (some packages output class labels, others output probabilities between 0 and 1, others output a real-valued score, etc).
+How can we adapt our data set to each package?
+And how can we convert each packages results into a standard format for analysis?
+The `mlr3` framework provides a useful package for this purpose [@bischl2024applied].
+
+* Each data set is represented as a `Task` which is basically a data table with meta-data about which columns to use for inputs, outputs, etc.
+* Each machine learning algorithm is represented as a `Learner` class that provides predicted values in a standard format (matrix of predicted probabilities for each class).
+
+This chapter explains how to use `animint2` to create interactive visualizations that explore how well different learning algorithms predict in different data sets.
+Some of the code in this chapter is adapted from [a blog post](https://tdhock.github.io/blog/2025/mlr3torch-conv/) with some static visualizations.
 
 ## Loading data {#torch-load-data}
 
-* [mlr3torch blog](https://tdhock.github.io/blog/2025/mlr3torch-conv/) uses MNIST.
 * SOAK paper figure uses waveform, vowel, aztrees.
 
 ```{r}

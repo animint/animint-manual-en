@@ -1,5 +1,5 @@
 options(repos="http://cloud.r-project.org")
-for(p in c("penaltyLearning","future.apply","maps","lars","LambertW","kernlab","data.table","quarto","chromote","magick","mlr3torch","glmnet","kknn","mlr3learners","mlr3tuning"))if(!requireNamespace(p))install.packages(p)
+for(p in c("penaltyLearning","future.apply","maps","lars","LambertW","kernlab","data.table","quarto","chromote","magick","mlr3torch","glmnet","kknn","mlr3learners","mlr3tuning","WeightedROC"))if(!requireNamespace(p))install.packages(p)
 remotes::install_github("animint/animint2")
 remotes::install_github("animint/animint2data")
 unlink("chapters/_book", recursive = TRUE)
