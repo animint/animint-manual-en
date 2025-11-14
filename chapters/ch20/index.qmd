@@ -111,16 +111,17 @@ nn_tuned <- mlr3tuning::auto_tuner(
   measure = mlr3::msr("classif.auc", minimize = FALSE))
 learner.list <- list(
   nn_tuned,
-  make_torch_learner("torch_linear"),
-  make_torch_learner(
+  mlr3learners::LearnerClassifCVGlmnet$new()$configure(id="cv_glmnet"),
+  mlr3::LearnerClassifFeatureless$new()$configure(id="featureless"))
+if(torch::torch_is_installed()){
+  learner.list$linear <- make_torch_learner("torch_linear")
+  learner.list$dense <- make_torch_learner(
     "torch_dense_50",
     mlr3pipelines::po(
       "nn_linear",
       out_features = 50),
-    mlr3pipelines::po("nn_relu_1", inplace = TRUE)
-  ),
-  mlr3learners::LearnerClassifCVGlmnet$new()$configure(id="cv_glmnet"),
-  mlr3::LearnerClassifFeatureless$new()$configure(id="featureless"))
+    mlr3pipelines::po("nn_relu_1", inplace = TRUE))
+}
 for(learner.i in seq_along(learner.list)){
   learner.list[[learner.i]]$predict_type <- "prob"
 }
@@ -130,6 +131,8 @@ for(learner.i in seq_along(learner.list)){
   kfoldcv))
 
 if(TRUE){
+  if(!requireNamespace("animint2data"))
+    remotes::install_github("animint/animint2data")
   data(bench.result, package="animint2data")
 }else{
   if(require(future))plan("multisession")
