@@ -20,7 +20,9 @@ TODO
 
 ```{r}
 
-task_list <- mlr3::tsks(c("spam","sonar"))
+mlr.tasks <- c("spam","sonar")
+mlr.tasks <- "spam"
+task_list <- mlr3::tsks(mlr.tasks)
 
 library(data.table)
 prefix <- "https://hastie.su.domains/ElemStatLearn/datasets/"
@@ -34,7 +36,9 @@ cache.fread <- function(data.name, f){
   }
   fread(local.path)
 }
-for(data.name in c("vowel","waveform","zip")){
+data.sets <- c("vowel","waveform","zip")
+data.sets <- "vowel"
+for(data.name in data.sets){
   suffix <- if(data.name=="zip")".gz" else ""
   set.list <- list()
   for(predefined.set in c("test","train")){
@@ -71,7 +75,7 @@ make_torch_learner <- function(id,...){
       mlr3torch::t_loss("cross_entropy")),
     mlr3pipelines::po(
       "torch_optimizer",
-      mlr3torch::t_opt("sgd", lr=0.1)),
+      mlr3torch::t_opt("adam")),
     mlr3pipelines::po(
       "torch_callbacks",
       mlr3torch::t_clbk("history")),
@@ -97,12 +101,15 @@ make_torch_learner <- function(id,...){
 }
 
 nn_learner <- mlr3learners::LearnerClassifKKNN$new()
-nn_learner$param_set$values$k <- paradox::to_tune(1, 20)
+nn_learner$param_set$values$k <- paradox::to_tune(1, 30)
 nn_learner$predict_type <- "prob"
+grid_search <- mlr3tuning::tnr("grid_search")
+kfoldcv <- mlr3::rsmp("cv")
+kfoldcv$param_set$values$folds <- 3
 nn_tuned <- mlr3tuning::auto_tuner(
-  tuner = mlr3tuning::TunerBatchGridSearch$new(),
+  tuner = grid_search,
   learner = nn_learner,
-  resampling = mlr3::rsmp("cv"),
+  resampling = kfoldcv,
   measure = mlr3::msr("classif.auc", minimize = FALSE))
 learner.list <- list(
   nn_tuned,
@@ -119,8 +126,6 @@ learner.list <- list(
 for(learner.i in seq_along(learner.list)){
   learner.list[[learner.i]]$predict_type <- "prob"
 }
-kfoldcv <- mlr3::rsmp("cv")
-kfoldcv$param_set$values$folds <- 3
 ## TODO normalize features.
 sapply(task_list, function(L)sapply(L$data()[,-1], range))
 (bench.grid <- mlr3::benchmark_grid(
@@ -138,7 +143,9 @@ if(file.exists(cache.RData)){
   save(bench.result, file=cache.RData)
 }
 
-score_dt <- bench.result$score(mlr3::msrs(c('classif.auc','classif.ce')))[, let(
+score_dt <- bench.result$score(mlr3::msrs(c(
+  'classif.auc','classif.ce','classif.tpr','classif.fpr'
+)))[, let(
   task_iteration = paste(task_id, iteration),
   percent_error=100*classif.ce)][]
 library(animint2)
@@ -151,11 +158,33 @@ ggplot()+
     breaks=seq(0,100,by=10),
     limits=c(0,60))
 
-roc_dt <- score_dt[, {
+score_dt[, lev_str := {
   pred <- prediction_test[[1]]
-  WeightedROC::WeightedROC(pred$prob[,2], pred$truth)
-}, by=.(task_id, learner_id, iteration, task_iteration)]
+  paste(levels(pred$truth), collapse=" vs ")
+}, by=task_id]
 
+roc_dt <- score_dt[, roc := {
+  pred <- prediction_test[[1]]
+  is.positive <- as.integer(pred$truth)==1
+  label01 <- ifelse(is.positive, 1, 0)
+  list(list(WeightedROC::WeightedROC(pred$prob[,1], label01)))
+}, by=.(task_id, learner_id, iteration, task_iteration)][
+, auc := WeightedROC::WeightedAUC(roc[[1]])
+, by=.(task_id, learner_id, iteration, task_iteration)][
+, roc[[1]]
+, by=.(task_id, learner_id, iteration, task_iteration)]
+
+```
+
+So the first factor level in R is considered the positive class in
+torch, which has the float value 1. The negative class is the second
+factor level, which gets converted to the float value 0.
+
+```{r}
+
+score_dt[
+, lab.tpr := rank(classif.auc)/10
+, by=.(task_id, iteration, task_iteration)]
 animint(
   testErr=ggplot()+
     theme_bw()+
@@ -187,13 +216,107 @@ animint(
     scale_x_continuous(
       limits=c(0.5,1)),
   roc=ggplot()+
-    ## TODO add pred point for threshold=0.5
     theme_bw()+
     geom_path(aes(
       FPR, TPR, group=learner_id, color=learner_id),
       data=roc_dt,
+      showSelected="task_iteration")+
+    geom_label_aligned(aes(
+      Inf, lab.tpr, color=learner_id,
+      label=sprintf("%s AUC=%.3f", learner_id, classif.auc)),
+      data=score_dt,
+      hjust=1,
+      showSelected="task_iteration",
+      alignment="vertical")+
+    geom_text(aes(
+      0.5, 0, 
+      label=task_iteration),
+      data=score_dt[learner_id=="featureless"],
+      showSelected="task_iteration")+
+    geom_point(aes(
+      classif.fpr, classif.tpr, fill=learner_id,
+      tooltip=sprintf("%s default FPR=%.3f TPR=%.3f, errors=%.1f%%\n", learner_id, classif.fpr, classif.tpr, classif.ce*100)),
+      data=score_dt,
+      size=4,
+      color="black",
       showSelected="task_iteration"))
 
+summary_dt <- score_dt[, .(
+  max_auc=max(classif.auc),
+  nrow=task[[1]]$nrow
+), by=task_id]
+
+point_size <- 5
+point_fill <- "grey"
+point_color <- "black"
+point_color_off <- "grey"
+animint(
+  summary=ggplot()+
+    ggtitle("1. Select task")+
+    theme_bw()+
+    geom_point(aes(
+      nrow, max_auc),
+      size=point_size,
+      fill=point_fill,
+      color=point_color,
+      color_off=point_color_off,
+      clickSelects="task_id",
+      data=summary_dt),
+  roc=ggplot()+
+    theme_bw()+
+    theme_animint(last_in_row=TRUE)+
+    geom_path(aes(
+      FPR, TPR, group=learner_id, color=learner_id),
+      data=roc_dt,
+      showSelected=c("task_id","iteration"))+
+    geom_label_aligned(aes(
+      Inf, lab.tpr, color=learner_id,
+      label=sprintf("%s AUC=%.3f", learner_id, classif.auc)),
+      data=score_dt,
+      hjust=1,
+      showSelected=c("task_id","iteration"),
+      alignment="vertical")+
+    geom_text(aes(
+      0.5, 0, 
+      label=task_iteration),
+      data=score_dt[learner_id=="featureless"],
+      showSelected=c("task_id","iteration"))+
+    geom_point(aes(
+      classif.fpr, classif.tpr, fill=learner_id,
+      tooltip=sprintf("%s default FPR=%.3f TPR=%.3f, errors=%.1f%%\n", learner_id, classif.fpr, classif.tpr, classif.ce*100)),
+      data=score_dt,
+      size=4,
+      color="black",
+      showSelected=c("task_id","iteration")),
+  testAUC=ggplot()+
+    ggtitle("2. Select iteration, all learners")+
+    theme_bw()+
+    theme_animint(
+      width=800, height=200, last_in_row=TRUE, colspan=2)+
+    geom_point(aes(
+      classif.auc, learner_id),
+      clickSelects="iteration",
+      showSelected="task_id",
+      size=point_size,
+      fill=point_fill,
+      color=point_color,
+      color_off=point_color_off,
+      data=score_dt),
+  testAUCzoom=ggplot()+
+    ggtitle("2. Select iteration, zoom to non-trivial")+
+    theme_bw()+
+    theme_animint(
+      update_axes="x",
+      width=800, height=200, last_in_row=TRUE, colspan=2)+
+    geom_point(aes(
+      classif.auc, learner_id),
+      clickSelects="iteration",
+      showSelected="task_id",
+      size=point_size,
+      fill=point_fill,
+      color=point_color,
+      color_off=point_color_off,
+      data=score_dt[learner_id != "featureless"]))
 (score_stats <- dcast(
   score_dt,
   task_id + learner_id ~ .,
@@ -215,7 +338,6 @@ ggplot()+
     data=score_stats)+
   scale_x_continuous(
     "Percent error on test set (mean ± SD over 3 folds in CV)",
-    limits=c(0,50),
     breaks=seq(0,100,by=10))
 
 if(FALSE){
@@ -308,6 +430,22 @@ ggplot()+
   scale_y_log10("logistic loss")+
   scale_x_continuous("epoch")
 
+ggplot()+
+  theme_bw()+
+  geom_vline(aes(
+    xintercept=best_epoch),
+    data=score_torch)+
+  geom_text(aes(
+    best_epoch, Inf, label=paste0(" best epoch=", best_epoch)),
+    vjust=1.5, hjust=0,
+    data=score_torch)+
+  geom_line(aes(
+    epoch, value, color=set),
+    data=history_long[measure=="logloss"])+
+  facet_grid(task_id + learner_id ~ iteration, labeller=label_both)+
+  scale_y_log10("logistic loss")+
+  scale_x_continuous("epoch")
+
 norm01 <- function(x)(x-min(x))/(max(x)-min(x))
 history_long[, norm := norm01(value), by=.(iteration, task_id, learner_id, set, measure)]
 ggplot()+
@@ -347,6 +485,7 @@ animint(
     theme_bw()+
     theme_animint(width=800)+
     facet_grid(. ~ learner_id, labeller=label_both)+
+    scale_y_log10("normalized logistic loss (log scale)")+
     geom_line(aes(
       epoch, norm, color=set, group=set),
       showSelected="task_iteration",
