@@ -31,15 +31,26 @@ The `mlr3` framework provides a useful package for this purpose [@bischl2024appl
 This chapter explains how to use `animint2` to create interactive visualizations that explore how well different learning algorithms predict in different data sets.
 Some of the code in this chapter is adapted from [a blog post](https://tdhock.github.io/blog/2025/mlr3torch-conv/) with some static visualizations.
 
-## Loading data {#torch-load-data}
+## Defining and running a benchmark {#running-a-benchmark}
 
-* SOAK paper figure uses waveform, vowel, aztrees.
+In the `mlr3` framework, a benchmark machine learning experiment typically consists of computing all combinations of:
+
+* a list of `Tasks` or data sets,
+* a list of `Learners` or learning algorithms,
+* and the iterations or splits of a `Resampling` method.
+
+### Tasks {#tasks}
+
+We begin by defining a list of two tasks that come already defined in the `mlr3` framework.
 
 ```{r}
-
 mlr.tasks <- c("spam","sonar")
 task_list <- mlr3::tsks(mlr.tasks)
+```
 
+Next, we define a function for downloading data sets from the Elements of Statistical Learning book web site [@Hastie2009].
+
+```{r}
 library(data.table)
 prefix <- "https://hastie.su.domains/ElemStatLearn/datasets/"
 cache.fread <- function(data.name, f){
@@ -52,6 +63,11 @@ cache.fread <- function(data.name, f){
   }
   fread(local.path)
 }
+```
+
+Next, we loop over three data set names, downloading and reading the corresponding data files, and creating a binary classification task (involving just the first two classes).
+
+```r
 data.sets <- c("vowel","waveform","zip")
 for(data.name in data.sets){
   suffix <- if(data.name=="zip")".gz" else ""
@@ -68,40 +84,92 @@ for(data.name in data.sets){
     set.list[[predefined.set]] <- one.set.dt
   }
   task.dt <- rbindlist(set.list)[
-    y %in% unique(y)[1:2]
+    y %in% unique(y)[1:2] #only first two classes.
   ][, y := factor(y)]
   one.task <- mlr3::TaskClassif$new(data.name, task.dt, target='y')
   task_list[[data.name]] <- one.task
 }
+```
 
+The code above results in a task list with 5 tasks.
+
+### Learners {#learners}
+
+In this section, we define which learning algorithms to run on the previously defined tasks.
+The code below begins with a list of two learners:
+
+* `cv_glmnet` is a linear model, with degree of L1 regularization automatically selected using 10-fold cross-validation.
+* `featureless` is the standard baselines which ignores all of the input features, and always predicts the most frequent class that was seen in the training data.
+
+```{r}
+learner.list <- list(
+  mlr3learners::LearnerClassifCVGlmnet$new()$configure(id="cv_glmnet"),
+  mlr3::LearnerClassifFeatureless$new()$configure(id="featureless"))
+```
+
+Next, we define a K-nearest neighbor learner.
+
+```{r}
+knn_learner <- mlr3learners::LearnerClassifKKNN$new()
+knn_learner$param_set$values$k <- paradox::to_tune(1, 40)
+knn_learner$predict_type <- "prob"
+```
+
+The code above says that we will tune the number of neighbors hyper-parameter, `k`, from 1 to 40.
+The code below means that we will choose `k` using grid search (default 10 values of `k`), with 3-fold cross-validation, maximizing mean ROC-AUC over validation sets.
+
+```{r}
+kfoldcv <- mlr3::rsmp("cv")
+kfoldcv$param_set$values$folds <- 3
+learner.list$knn <- mlr3tuning::auto_tuner(
+  learner = knn_learner,
+  tuner = mlr3tuning::tnr("grid_search"),
+  resampling = kfoldcv,
+  measure = mlr3::msr("classif.auc", minimize = FALSE))
+```
+
+Next, we will define two learners that use `library(torch)`.
+In this case, we need to define the learner using a list of pipe operations, which can be created using the helper function below.
+
+```{r}
 measure_list <- mlr3::msrs(c("classif.logloss", "classif.auc"))
 n.epochs <- 200
+make_po_list <- function(...)list(
+  mlr3pipelines::po("scale"),
+  mlr3pipelines::po(
+    "select",
+    selector = mlr3pipelines::selector_type(c("numeric", "integer"))),
+  mlr3torch::PipeOpTorchIngressNumeric$new(),
+  ...,
+  mlr3pipelines::po("nn_head"),
+  mlr3pipelines::po(
+    "torch_loss",
+    mlr3torch::t_loss("cross_entropy")),
+  mlr3pipelines::po(
+    "torch_optimizer",
+    mlr3torch::t_opt("sgd", lr=0.1)),
+  mlr3pipelines::po(
+    "torch_callbacks",
+    mlr3torch::t_clbk("history")),
+  mlr3pipelines::po(
+    "torch_model_classif",
+    batch_size = 10,
+    patience=n.epochs,
+    measures_valid=measure_list,
+    measures_train=measure_list,
+    predict_type="prob",
+    epochs = paradox::to_tune(upper = n.epochs, internal = TRUE)))
+```
+
+Note in the code above that the `lr` parameter is the learning rate, which controls how fast the algorithm learns.
+The helper function below is used to define a torch learner that
+
+* uses half of the train data as the validation set (`validate = 0.5`), and the other half as the subtrain set (to compute gradients).
+* chooses the number of epochs by minimizing the first item of `measure_list` (logistic loss).
+
+```{r}
 make_torch_learner <- function(id,...){
-  po_list <- list(
-    mlr3pipelines::po("scale"),
-    mlr3pipelines::po(
-      "select",
-      selector = mlr3pipelines::selector_type(c("numeric", "integer"))),
-    mlr3torch::PipeOpTorchIngressNumeric$new(),
-    ...,
-    mlr3pipelines::po("nn_head"),
-    mlr3pipelines::po(
-      "torch_loss",
-      mlr3torch::t_loss("cross_entropy")),
-    mlr3pipelines::po(
-      "torch_optimizer",
-      mlr3torch::t_opt("sgd", lr=0.1)),
-    mlr3pipelines::po(
-      "torch_callbacks",
-      mlr3torch::t_clbk("history")),
-    mlr3pipelines::po(
-      "torch_model_classif",
-      batch_size = 10,
-      patience=n.epochs,
-      measures_valid=measure_list,
-      measures_train=measure_list,
-      predict_type="prob",
-      epochs = paradox::to_tune(upper = n.epochs, internal = TRUE)))
+  po_list <- make_po_list(...)
   graph <- Reduce(mlr3pipelines::concat_graphs, po_list)
   glearner <- mlr3::as_learner(graph)
   mlr3::set_validate(glearner, validate = 0.5)
@@ -110,26 +178,13 @@ make_torch_learner <- function(id,...){
     tuner = mlr3tuning::tnr("internal"),
     resampling = mlr3::rsmp("insample"),
     measure = mlr3::msr("internal_valid_score", minimize = TRUE),
-    term_evals = 1,
-    id=id,
-    store_models = TRUE)
+    term_evals = 1, id = id, store_models = TRUE)
 }
+```
 
-nn_learner <- mlr3learners::LearnerClassifKKNN$new()
-nn_learner$param_set$values$k <- paradox::to_tune(1, 40)
-nn_learner$predict_type <- "prob"
-grid_search <- mlr3tuning::tnr("grid_search")
-kfoldcv <- mlr3::rsmp("cv")
-kfoldcv$param_set$values$folds <- 3
-nn_tuned <- mlr3tuning::auto_tuner(
-  tuner = grid_search,
-  learner = nn_learner,
-  resampling = kfoldcv,
-  measure = mlr3::msr("classif.auc", minimize = FALSE))
-learner.list <- list(
-  nn_tuned,
-  mlr3learners::LearnerClassifCVGlmnet$new()$configure(id="cv_glmnet"),
-  mlr3::LearnerClassifFeatureless$new()$configure(id="featureless"))
+The code below adds two torch learners to the learner list.
+
+```{r}
 if(torch::torch_is_installed()){
   learner.list$linear <- make_torch_learner("torch_linear")
   learner.list$dense <- make_torch_learner(
@@ -139,30 +194,68 @@ if(torch::torch_is_installed()){
       out_features = 50),
     mlr3pipelines::po("nn_relu_1", inplace = TRUE))
 }
+```
+
+### Running the benchmark {#running-the-benchmark}
+
+Before running a classification benchmark, it is important to ensure that `predict_type` of all learners is set to `prob` so that real-valued scores between 0 and 1 are output (allowing computation of evaluation metrics such as ROC-AUC).
+
+```{r}
 for(learner.i in seq_along(learner.list)){
   learner.list[[learner.i]]$predict_type <- "prob"
 }
-(bench.grid <- mlr3::benchmark_grid(
+```
+
+Next, we define the benchmark grid, which combines the tasks, learners, and a resampling method (3-fold cross-validation).
+
+```{r}
+bench.grid <- mlr3::benchmark_grid(
   task_list,
   learner.list,
-  kfoldcv))
+  kfoldcv)
+```
 
+The code block below downloads the benchmark from `library(animint2data)`.
+
+```{r}
 if(TRUE){
   if(!requireNamespace("animint2data"))
     remotes::install_github("animint/animint2data")
   data(bench.result, package="animint2data")
-}else{
+}else{ # to re-run execute the two lines below:
   if(require(future))plan("multisession")
   bench.result <- mlr3::benchmark(bench.grid, store_models = TRUE)
 }
+```
 
-score_dt <- bench.result$score(mlr3::msrs(c(
-  'classif.auc','classif.ce','classif.tpr','classif.fpr'
-)))[, let(
-  task_iteration = paste(task_id, iteration),
-  percent_error=100*classif.ce)][]
+If you want to re-run the benchmark, you could run the line of code above.
+This benchmark may take several minutes or hours, depending on the speed of your computer.
+Running `plan("multisession")` enables parallel execution, each task/learner/split on a different CPU of your computer.
+Read [the related blog post](https://tdhock.github.io/blog/2025/mlr3torch-conv/) to see some R code that can be used to parallelize using a compute cluster, which would be even faster.
 
+## Test error and accuracy plots {#test-error-and-accuracy-plots}
+
+First, we define a list of error/accuracy metrics, which are called `Measures` in `mlr3`.
+
+```{r}
+test_measure_list <- mlr3::msrs(c(
+  'classif.auc','classif.ce','classif.tpr','classif.fpr'))
+sapply(test_measure_list, function(M)M$label)
+```
+
+The output above shows the mapping between measure names and abbreviations.
+Next, we run the `$score()` method of the benchmark result, to compute various evaluation metrics on the test set for each combination of task/learner/split.
+
+```{r}
+(score_dt <- bench.result$score(test_measure_list))
+```
+
+The output above has one row per combination of task/learner/split.
+The code below visualizes the corresponding test error values.
+
+```{r}
 library(animint2)
+score_dt[, let(percent_error=100*classif.ce)]
 ggplot()+
   facet_grid(task_id ~ ., labeller=label_both)+
   geom_point(aes(
@@ -171,7 +264,6 @@ ggplot()+
   scale_x_continuous(
     breaks=seq(0,100,by=10),
     limits=c(0,60))
-
 ```
 
 So the first factor level in R is considered the positive class in
@@ -179,6 +271,7 @@ torch, which has the float value 1. The negative class is the second
 factor level, which gets converted to the float value 0.
 
 ```{r}
+score_dt[, task_iteration := paste(task_id, iteration)]
 roc_dt <- score_dt[, roc := {
   pred <- prediction_test[[1]]
   is.positive <- as.integer(pred$truth)==1
