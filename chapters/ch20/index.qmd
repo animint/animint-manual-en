@@ -266,6 +266,12 @@ ggplot()+
     limits=c(0,60))
 ```
 
+The figure above shows three dots per row, one for each train/test split.
+We can see that nearest neighbors has smallest error rate is some data (`vowel`), whereas the `torch_dense_50` neural network is best in others like `spam`.
+The goal in the rest of this chapter will be to make interactive versions of this figure, which show details for each train/test split.
+
+### ROC curves
+
 So the first factor level in R is considered the positive class in
 torch, which has the float value 1. The negative class is the second
 factor level, which gets converted to the float value 0.
@@ -284,31 +290,6 @@ roc_dt <- score_dt[, roc := {
 , by=.(task_id, learner_id, iteration, task_iteration)]
 
 ```
-
-## Nearest neighbors
-
-```{r}
-best_dt <- score_dt[grep("knn", learner_id), {
-  arch <- learner[[1]]$archive
-  adata <- arch$data[, status := ifelse(
-    classif.auc==max(classif.auc), "max", "other")]
-  arch$best()[, let(details=list(adata))]
-}, by=.(task_id, iteration)]
-details_dt <- best_dt[, details[[1]], by=.(task_id,iteration)]
-
-if(require(animint2)){
-  ggplot()+
-    geom_vline(aes(
-      xintercept=k),
-      data=best_dt)+
-    geom_point(aes(
-      k, classif.auc, color=status),
-      data=details_dt)+
-    facet_grid(iteration ~ task_id)
-}
-```
-
-### ROC curves
 
 ```{r}
 
@@ -534,6 +515,97 @@ ggplot()+
     "Percent error on test set (mean ± SD over 3 folds in CV)",
     breaks=seq(0,10,by=2))
 }
+```
+
+## Checking for over- and under-fitting {#over-under-fitting}
+
+In this section, our goal is to make various figures that check if each algorithm is regularized appropriately.
+Each machine learning algorithm has a different hyper-parameter that is used to avoid under- and over-fitting.
+
+* nearest neighbors has the number of neighbors: small number of neighbors may overfit, large number of neighbors may underfit.
+* `torch` learners has the number of gradient descent epochs: large number of epochs may overfit, small number of epochs may underfit.
+* the `glmnet` L1-regularized linear model has the penalty `lambda`: small penalty may overfit, large penalty may underfit.
+
+### Nearest neighbors {#nearest-neighbors-selection}
+
+In this section, we show how to verify is the number of neighbors was selected appropriately, to avoid over- and under-fitting.
+First, we compute a table with one row per train/test split, and columns which contain information on how many neighbors were used for prediction.
+
+```{r}
+(best_dt <- score_dt[grep("knn", learner_id), {
+  arch <- learner[[1]]$archive
+  adata <- arch$data[, status := ifelse(
+    classif.auc==max(classif.auc), "max", "other")]
+  arch$best()[, .(k, details=list(adata))]
+}, by=.(task_id, iteration, task_iteration)])
+```
+
+The table above has columns
+
+* `k`, the number of neighbors selected as best.
+* `details`, a table of information about how that number of neighbors was selected.
+
+Below, we create a new table by combining all of the details tables.
+
+```{r}
+details_dt <- best_dt[
+, details[[1]][order(k)]
+, by=.(task_id, iteration, task_iteration)]
+details_dt[, .(task_id, iteration, k, classif.auc, status)]
+```
+
+The table above shows details about what was the validation AUC for each potential value of `k`, the number of neighbors.
+Below we plot the validation AUC as a function of the number of neighbors, emphasizing the selected value and the max.
+
+```{r}
+ggplot()+
+  geom_vline(aes(
+    xintercept=k),
+    data=best_dt)+
+  geom_point(aes(
+    k, classif.auc, color=status),
+    data=details_dt)+
+  scale_y_continuous("Validation AUC")+
+  facet_grid(task_id ~ iteration, labeller=label_both, scales="free")
+```
+
+Above we see how the AUC was selected for each task and iteration.
+
+* Some data sets (`sonar`, `spam`, `vowel`) have a clear max at an intermediate number of neighbors, which avoids both over- and under-fitting. For `vowel` iteration 2, max AUC occurs at the extreme value of 1 neighbor, which is unusual, but does not suggest underfitting in this case, because there is no smaller value of neighbors than 1.
+* Some data sets (`waveform`, `zip`) have max AUC at the largest number of neighbors (40), which suggests overfitting. These data suggest that an even larger AUC may be obtained by increasing the number of neighbors past 40, until we see a clear decrease of the AUC values.
+
+Below we make an interactive version of the same plot.
+
+```{r}
+animint(
+  testErr=ggplot()+
+    theme_bw()+
+    theme_animint(width=800, height=200, last_in_row=TRUE)+
+    facet_grid(. ~ task_id, labeller=label_both)+
+    geom_point(aes(
+      ## TODO show AUC instead of error.
+      percent_error, learner_id),
+      clickSelects="task_iteration",
+      size=5,
+      fill="grey",
+      color="black",
+      color_off="grey",
+      data=score_dt)+
+    scale_x_continuous(
+      breaks=seq(0,100,by=10),
+      limits=c(0,60)),
+  knnDetails=ggplot()+
+    ggtitle("Nearest neighbors model selection")+
+    theme_animint(update_axes="y")+
+    geom_vline(aes(
+      xintercept=k),
+      showSelected="task_iteration",
+      data=best_dt)+
+    scale_y_continuous("Validation AUC")+
+    geom_point(aes(
+      k, classif.auc, color=status),
+      showSelected="task_iteration",
+      data=details_dt))
 ```
 
 ### Torch
