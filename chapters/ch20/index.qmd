@@ -89,9 +89,16 @@ for(data.name in data.sets){
   one.task <- mlr3::TaskClassif$new(data.name, task.dt, target='y')
   task_list[[data.name]] <- one.task
 }
+task_list
 ```
 
-The code above results in a task list with 5 tasks.
+The code above results in a task list with 5 binary classification tasks:
+
+* `spam` represents email classification into spam or not, based on a bag of words vector.
+* [`sonar`](https://rdrr.io/cran/mlbench/man/Sonar.html) represents a problem of discriminating metal and rock, based on a vector of sonar frequency bands.
+* `vowel` represents a problem of discriminating vowel sounds, using ten features extracted from audio data.
+* `waveform`
+* `zip` represents handwritten digit recognition, where features are a vector representing 16x16 pixel intensities.
 
 ### Learners {#learners}
 
@@ -112,15 +119,16 @@ Next, we define a K-nearest neighbor learner.
 ```{r}
 knn_learner <- mlr3learners::LearnerClassifKKNN$new()
 knn_learner$param_set$values$k <- paradox::to_tune(1, 40)
-knn_learner$predict_type <- "prob"
 ```
 
 The code above says that we will tune the number of neighbors hyper-parameter, `k`, from 1 to 40.
 The code below means that we will choose `k` using grid search (default 10 values of `k`), with 3-fold cross-validation, maximizing mean ROC-AUC over validation sets.
+Note that we must set `predict_type="prob"` so that the learned model outputs real-valued scores (necessary for computing ROC-AUC) instead of only predicted class labels.
 
 ```{r}
 kfoldcv <- mlr3::rsmp("cv")
 kfoldcv$param_set$values$folds <- 3
+knn_learner$predict_type <- "prob"
 learner.list$knn <- mlr3tuning::auto_tuner(
   learner = knn_learner,
   tuner = mlr3tuning::tnr("grid_search"),
