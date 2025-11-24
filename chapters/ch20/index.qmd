@@ -97,7 +97,7 @@ The code above results in a task list with 5 binary classification tasks:
 * `spam` represents email classification into spam or not, based on a bag of words vector.
 * [`sonar`](https://rdrr.io/cran/mlbench/man/Sonar.html) represents a problem of discriminating metal and rock, based on a vector of sonar frequency bands.
 * `vowel` represents a problem of discriminating vowel sounds, using ten features extracted from audio data.
-* `waveform`
+* `waveform` is a simulated binary problem [@Hastie2009].
 * `zip` represents handwritten digit recognition, where features are a vector representing 16x16 pixel intensities.
 
 ### Learners {#learners}
@@ -123,7 +123,7 @@ knn_learner$param_set$values$k <- paradox::to_tune(1, 40)
 
 The code above says that we will tune the number of neighbors hyper-parameter, `k`, from 1 to 40.
 The code below means that we will choose `k` using grid search (default 10 values of `k`), with 3-fold cross-validation, maximizing mean ROC-AUC over validation sets.
-Note that we must set `predict_type="prob"` so that the learned model outputs real-valued scores (necessary for computing ROC-AUC) instead of only predicted class labels.
+Note that to compute ROC-AUC, we must set `predict_type="prob"` so that the learned model outputs real-valued scores, instead of only predicted class labels.
 
 ```{r}
 kfoldcv <- mlr3::rsmp("cv")
@@ -255,11 +255,13 @@ The output above shows the mapping between measure names and abbreviations.
 Next, we run the `$score()` method of the benchmark result, to compute various evaluation metrics on the test set for each combination of task/learner/split.
 
 ```{r}
-(score_dt <- bench.result$score(test_measure_list))
+score_dt <- bench.result$score(test_measure_list)
+score_dt[, .(task_id, learner_id, iteration, classif.auc, classif.ce)]
 ```
 
-The output above has one row per combination of task/learner/split.
+The output above has one row per combination of task/learner/split, and two evaluation metrics: ROC-AUC and classification error.
 The code below visualizes the corresponding test error values.
+Note that we convert the error rate into a percent in order to save space in the X axis tick labels (30 versus 0.3 for example).
 
 ```{r}
 library(animint2)
@@ -280,92 +282,145 @@ The goal in the rest of this chapter will be to make interactive versions of thi
 
 ### ROC curves
 
-So the first factor level in R is considered the positive class in
-torch, which has the float value 1. The negative class is the second
-factor level, which gets converted to the float value 0.
+In this section, we will compute ROC curves, which are useful for evaluation in binary classification.
+In fact, `$score()` has already computed the Area Under the Curve (AUC), which we plot below.
 
 ```{r}
-score_dt[, task_iteration := paste(task_id, iteration)]
-roc_dt <- score_dt[, roc := {
+ggplot()+
+  facet_grid(. ~ task_id)+
+  geom_point(aes(
+    classif.auc, learner_id),
+    data=score_dt)
+```
+
+The figure above shows AUC for every data set, learning algorithm, and train/test split in cross-validation.
+Consistent with the error rate plot above, the AUC indicates that `zip` is the easiest problem, whereas `sonar` is the most difficult.
+It is clear that `featureless` always has AUC=0.5, as expected.
+The code below hides the results for `featureless`, in order to emphasize the other non-trivial results.
+
+```{r}
+ggplot()+
+  facet_grid(. ~ task_id, scales="free")+
+  geom_point(aes(
+    classif.auc, learner_id),
+    data=score_dt[learner_id!="featureless"])
+```
+
+We see in the figure above that `featureless` is no longer present in the figure above.
+The code below implements a slightly more complex version of the previous AUC plot, which will be used for interactive display.
+Note that we create a new `task_it` column which will be useful later as an interactive variable (for selecting `task_id` and `iteration` at the same time).
+
+```{r}
+score_dt[, task_it := paste(task_id, iteration)]
+(gg.auc <- ggplot()+
+   theme_bw()+
+   facet_grid(. ~ task_id, scales="free")+
+   scale_x_continuous(
+     "Area Under the ROC Curve")+
+   geom_point(aes(
+     classif.auc*100, learner_id),
+     clickSelects="task_it",
+     size=5,
+     fill="grey",
+     color="black",
+     color_off="grey",
+     data=score_dt[learner_id!="featureless"]))
+```
+
+Next, we compute ROC curves for each combination of `task_id`, `learner_id`, and cross-validation split (`iteration`).
+Note that R represents binary labels as a factor with two levels.
+The first factor level in R is considered the positive class in `mlr3`, so the code below computes the ROC curve using the first column in the `prob` scores matrix, and the `label01` binary label vector.
+
+```{r}
+roc_dt <- score_dt[, {
   pred <- prediction_test[[1]]
   is.positive <- as.integer(pred$truth)==1
   label01 <- ifelse(is.positive, 1, 0)
-  list(list(WeightedROC::WeightedROC(pred$prob[,1], label01)))
-}, by=.(task_id, learner_id, iteration, task_iteration)][
-, auc := WeightedROC::WeightedAUC(roc[[1]])
-, by=.(task_id, learner_id, iteration, task_iteration)][
-, roc[[1]]
-, by=.(task_id, learner_id, iteration, task_iteration)]
-
+  WeightedROC::WeightedROC(pred$prob[,1], label01)
+}, by=.(task_id, learner_id, iteration, task_it)]
+roc_dt[, .(task_it, learner_id, threshold, FPR, TPR)]
 ```
 
-```{r}
+The output above is a table representing the ROC curves used for evaluation of the model predictions on the cross-validation test sets.
+We can see that `FPR=TPR=1` when `threshold=0`, and `FPR=TPR=0` when `threshold=Inf`.
+The code below displays these ROC curves in separate panels.
 
-score_dt[
-, lab.tpr := rank(classif.auc)/10
-, by=.(task_id, iteration, task_iteration)]
+```{r}
+gg.roc <- ggplot()+
+  theme_bw()+
+  geom_path(aes(
+    FPR, TPR, group=learner_id, color=learner_id),
+    data=roc_dt,
+    showSelected="task_it")
+gg.roc+facet_grid(iteration ~ task_id)
+```
+
+The figure above shows a ROC curve for each data set and cross-validation split.
+Below, we add a point to emphasize the default prediction threshold of each algorithm.
+
+```{r}
+gg.roc.point <- gg.roc+
+  geom_point(aes(
+    classif.fpr, classif.tpr, fill=learner_id,
+    tooltip=sprintf(
+      "%s default FPR=%.3f TPR=%.3f, errors=%.1f%%\n",
+      learner_id, classif.fpr, classif.tpr, classif.ce*100)),
+    data=score_dt,
+    size=4,
+    color="black",
+    showSelected="task_it")
+gg.roc.point+facet_grid(iteration ~ task_id)
+```
+
+The result above shows a ROC point at the default prediction threshold.
+It is clear that different algorithms have different values for both FPR and TPR, by default.
+The code below adds text, which will be used with interactivity to display the currently selected data set and cross-validation split.
+
+```{r}
 score_dt[, lev_str := {
   pred <- prediction_test[[1]]
   paste(levels(pred$truth), collapse=" vs ")
 }, by=task_id]
+gg.roc.text <- gg.roc.point+
+  geom_text(aes(
+    0.5, 0,
+    label=sprintf(
+      "%s (%s) fold %d",
+      task_id, lev_str, iteration)),
+    data=score_dt[learner_id=="featureless"],
+    showSelected="task_it")
+gg.roc.text+facet_grid(iteration ~ task_id)
+```
+
+The figure above shows a text label at the bottom of each panel.
+The code below combines the ROC and AUC plots together into an interactive visualization.
+
+```{r viz-auc-roc}
+score_dt[
+, lab.tpr := rank(classif.auc)/10
+, by=.(task_id, iteration, task_it)]
 animint(
-  testErr=ggplot()+
-    theme_bw()+
-    theme_animint(width=800, height=200, last_in_row=TRUE)+
-    facet_grid(. ~ task_id, labeller=label_both)+
-    geom_point(aes(
-      percent_error, learner_id),
-      clickSelects="task_iteration",
-      size=5,
-      fill="grey",
-      color="black",
-      color_off="grey",
-      data=score_dt)+
-    scale_x_continuous(
-      breaks=seq(0,100,by=10),
-      limits=c(0,60)),
-  testAUC=ggplot()+
-    theme_bw()+
-    theme_animint(width=800, height=200, last_in_row=TRUE)+
-    facet_grid(. ~ task_id, labeller=label_both)+
-    geom_point(aes(
-      classif.auc, learner_id),
-      clickSelects="task_iteration",
-      size=5,
-      fill="grey",
-      color="black",
-      color_off="grey",
-      data=score_dt)+
-    scale_x_continuous(
-      limits=c(0.5,1)),
-  roc=ggplot()+
-    theme_bw()+
-    geom_path(aes(
-      FPR, TPR, group=learner_id, color=learner_id),
-      data=roc_dt,
-      showSelected="task_iteration")+
+  testAUC=gg.auc+
+    ggtitle("Click to select data set and cross-validation split")+
+    theme_animint(width=800, height=200, last_in_row=TRUE),
+  roc=gg.roc.text+
+    ggtitle("ROC curves for selection")+
     geom_label_aligned(aes(
       Inf, lab.tpr, color=learner_id,
       label=sprintf("%s AUC=%.3f", learner_id, classif.auc)),
       data=score_dt,
       hjust=1,
-      showSelected="task_iteration",
-      alignment="vertical")+
-    geom_text(aes(
-      0.5, 0, 
-      label=sprintf(
-        "%s (%s) fold %d",
-        task_id, lev_str, iteration)),
-      data=score_dt[learner_id=="featureless"],
-      showSelected="task_iteration")+
-    geom_point(aes(
-      classif.fpr, classif.tpr, fill=learner_id,
-      tooltip=sprintf("%s default FPR=%.3f TPR=%.3f, errors=%.1f%%\n", learner_id, classif.fpr, classif.tpr, classif.ce*100)),
-      data=score_dt,
-      size=4,
-      color="black",
-      showSelected="task_iteration"))
+      showSelected="task_it",
+      alignment="vertical"))
+```
 
+In the visualization above, you can click the test AUC values in the top plot to show the corresponding ROC curve details in the bottom plot.
+
+### Interactive ROC curves
+
+TODO dist from prev roc point, cumsum etc.
+
+```{r}
 summary_dt <- score_dt[, .(
   max_auc=max(classif.auc),
   nrow=task[[1]]$nrow
@@ -403,7 +458,7 @@ animint(
       alignment="vertical")+
     geom_text(aes(
       0.5, 0, 
-      label=task_iteration),
+      label=task_it),
       data=score_dt[learner_id=="featureless"],
       showSelected=c("task_id","iteration"))+
     geom_point(aes(
@@ -545,7 +600,7 @@ First, we compute a table with one row per train/test split, and columns which c
   adata <- arch$data[, status := ifelse(
     classif.auc==max(classif.auc), "max", "other")]
   arch$best()[, .(k, details=list(adata))]
-}, by=.(task_id, iteration, task_iteration)])
+}, by=.(task_id, iteration, task_it)])
 ```
 
 The table above has columns
@@ -558,7 +613,7 @@ Below, we create a new table by combining all of the details tables.
 ```{r}
 details_dt <- best_dt[
 , details[[1]][order(k)]
-, by=.(task_id, iteration, task_iteration)]
+, by=.(task_id, iteration, task_it)]
 details_dt[, .(task_id, iteration, k, classif.auc, status)]
 ```
 
@@ -593,7 +648,7 @@ animint(
     geom_point(aes(
       ## TODO show AUC instead of error.
       percent_error, learner_id),
-      clickSelects="task_iteration",
+      clickSelects="task_it",
       size=5,
       fill="grey",
       color="black",
@@ -607,12 +662,12 @@ animint(
     theme_animint(update_axes="y")+
     geom_vline(aes(
       xintercept=k),
-      showSelected="task_iteration",
+      showSelected="task_it",
       data=best_dt)+
     scale_y_continuous("Validation AUC")+
     geom_point(aes(
       k, classif.auc, color=status),
-      showSelected="task_iteration",
+      showSelected="task_it",
       data=details_dt))
 ```
 
@@ -630,7 +685,7 @@ animint(
   L <- learner[[1]]
   M <- L$archive$learners(1)[[1]]$model
   M$torch_model_classif$model$callbacks$history
-}, by=.(task_id, learner_id, iteration, task_iteration)])
+}, by=.(task_id, learner_id, iteration, task_it)])
 
 (history_long <- nc::capture_melt_single(
   history_torch,
@@ -696,7 +751,7 @@ animint(
     geom_point(aes(
       ## TODO show AUC instead of error.
       percent_error, learner_id),
-      clickSelects="task_iteration",
+      clickSelects="task_it",
       size=5,
       fill="grey",
       color="black",
@@ -712,7 +767,7 @@ animint(
     scale_y_log10("normalized logistic loss (log scale)")+
     geom_line(aes(
       epoch, norm, color=set, group=set),
-      showSelected="task_iteration",
+      showSelected="task_it",
       data=history_long[measure=="logloss"]))
 
 get_fold <- function(DT,it=1)DT[iteration==it & task_id=="sonar"]
