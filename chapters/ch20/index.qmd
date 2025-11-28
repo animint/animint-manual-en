@@ -761,15 +761,17 @@ The table above shows details about what was the validation AUC for each potenti
 Below we plot the validation AUC as a function of the number of neighbors, emphasizing the selected value and the max.
 
 ```{r}
-ggplot()+
+gg.neighbors <- ggplot()+
   geom_vline(aes(
     xintercept=k),
+    showSelected="task_it",
     data=best_dt)+
   geom_point(aes(
     k, classif.auc, color=status),
+    showSelected="task_it",
     data=details_dt)+
-  scale_y_continuous("Validation AUC")+
-  facet_grid(task_id ~ iteration, labeller=label_both)
+  scale_y_continuous("Validation AUC")
+gg.neighbors+facet_grid(task_id ~ iteration)
 ```
 
 Above we see how the AUC was selected for each task and iteration.
@@ -783,18 +785,9 @@ Below we make an interactive version of the same plot.
 animint(
   testAUC=gg.auc+
     ggtitle("Select data set and cross-validation split"),
-  knnDetails=ggplot()+
+  knnDetails=gg.neighbors+
     ggtitle("Nearest neighbors model selection")+
-    theme_animint(update_axes="y", last_in_row=TRUE)+
-    geom_vline(aes(
-      xintercept=k),
-      showSelected="task_it",
-      data=best_dt)+
-    scale_y_continuous("Validation AUC")+
-    geom_point(aes(
-      k, classif.auc, color=status),
-      showSelected="task_it",
-      data=details_dt))
+    theme_animint(update_axes="y", last_in_row=TRUE))
 ```
 
 ### Torch
