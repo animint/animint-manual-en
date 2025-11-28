@@ -18,7 +18,7 @@ jobs:
       - uses: actions/checkout@v3
       - name: install and update texlive
         run: /usr/bin/sudo DEBIAN_FRONTEND=noninteractive apt update -y -qq
-      - run: /usr/bin/sudo DEBIAN_FRONTEND=noninteractive apt install tidy texlive texlive-fonts-extra texlive-extra-utils -y
+      - run: /usr/bin/sudo DEBIAN_FRONTEND=noninteractive apt install tidy texlive texlive-fonts-extra texlive-extra-utils r-recommended -y
       - name: Setup r2u
         uses: eddelbuettel/github-actions/r2u-setup@master
       - uses: quarto-dev/quarto-actions/setup@v2
