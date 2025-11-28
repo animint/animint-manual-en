@@ -19,7 +19,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Render book
-        run: R --vanilla < render.R
+        run: R --no-save < render.R
 
       - name: netlify deploy
         uses: animint/animint-actions/netlify-deploy-comment@main
