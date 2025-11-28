@@ -314,6 +314,7 @@ Note that we create a new `task_it` column which will be useful later as an inte
 score_dt[, task_it := paste(task_id, iteration)]
 (gg.auc <- ggplot()+
    theme_bw()+
+   ##facet_wrap( ~ task_id, scales="free", ncol=1)+
    facet_grid(. ~ task_id, scales="free")+
    scale_x_continuous(
      "Area Under the ROC Curve")+
@@ -393,20 +394,27 @@ gg.roc.text+facet_grid(iteration ~ task_id)
 ```
 
 The figure above shows a text label at the bottom of each panel.
+Next, the code below computes the rank of each algorithm within each test set.
+
+```{r}
+score_dt[
+, algo.rank := rank(classif.auc)
+, by=.(task_id, iteration, task_it)]
+```
+
+The ranks computed above will be used to display labels below.
 The code below combines the ROC and AUC plots together into an interactive visualization.
 
 ```{r viz-auc-roc}
-score_dt[
-, lab.tpr := rank(classif.auc)/10
-, by=.(task_id, iteration, task_it)]
 animint(
   testAUC=gg.auc+
     ggtitle("Click to select data set and cross-validation split")+
-    theme_animint(width=800, height=200, last_in_row=TRUE),
+    theme_animint(width=1000, height=200, last_in_row=TRUE),
   roc=gg.roc.text+
     ggtitle("ROC curves for selection")+
+    theme_animint(width=400, height=400)+
     geom_label_aligned(aes(
-      Inf, lab.tpr, color=learner_id,
+      Inf, algo.rank*0.1, color=learner_id,
       label=sprintf("%s AUC=%.3f", learner_id, classif.auc)),
       data=score_dt,
       hjust=1,
