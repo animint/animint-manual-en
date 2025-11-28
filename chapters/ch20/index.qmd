@@ -267,7 +267,7 @@ Note that we convert the error rate into a percent in order to save space in the
 library(animint2)
 score_dt[, let(percent_error=100*classif.ce)]
 ggplot()+
-  facet_grid(task_id ~ ., labeller=label_both)+
+  facet_grid(task_id ~ .)+
   geom_point(aes(
     percent_error, learner_id),
     data=score_dt)+
@@ -287,20 +287,20 @@ In fact, `$score()` has already computed the Area Under the Curve (AUC), which w
 
 ```{r}
 ggplot()+
-  facet_grid(. ~ task_id)+
+  facet_grid(task_id ~ .)+
   geom_point(aes(
     classif.auc, learner_id),
     data=score_dt)
 ```
 
-The figure above shows AUC for every data set, learning algorithm, and train/test split in cross-validation.
+The figure above shows test AUC for every data set, learning algorithm, and train/test split in cross-validation.
 Consistent with the error rate plot above, the AUC indicates that `zip` is the easiest problem, whereas `sonar` is the most difficult.
 It is clear that `featureless` always has AUC=0.5, as expected.
 The code below hides the results for `featureless`, in order to emphasize the other non-trivial results.
 
 ```{r}
 ggplot()+
-  facet_grid(. ~ task_id, scales="free")+
+  facet_grid(task_id ~ .)+
   geom_point(aes(
     classif.auc, learner_id),
     data=score_dt[learner_id!="featureless"])
@@ -314,8 +314,7 @@ Note that we create a new `task_it` column which will be useful later as an inte
 score_dt[, task_it := paste(task_id, iteration)]
 (gg.auc <- ggplot()+
    theme_bw()+
-   ##facet_wrap( ~ task_id, scales="free", ncol=1)+
-   facet_grid(. ~ task_id, scales="free")+
+   facet_grid(task_id ~ ., scales="free")+
    scale_x_continuous(
      "Area Under the ROC Curve")+
    geom_point(aes(
@@ -352,7 +351,9 @@ gg.roc <- ggplot()+
   geom_path(aes(
     FPR, TPR, group=learner_id, color=learner_id),
     data=roc_dt,
-    showSelected="task_it")
+    showSelected="task_it")+
+  scale_x_continuous(breaks=seq(0,1,by=0.5))+
+  scale_y_continuous(breaks=seq(0,1,by=0.5))
 gg.roc+facet_grid(iteration ~ task_id)
 ```
 
@@ -408,8 +409,8 @@ The code below combines the ROC and AUC plots together into an interactive visua
 ```{r viz-auc-roc}
 animint(
   testAUC=gg.auc+
-    ggtitle("Click to select data set and cross-validation split")+
-    theme_animint(width=1000, height=200, last_in_row=TRUE),
+    ggtitle("Select data set and cross-validation split")+
+    theme_animint(width=400, height=400),
   roc=gg.roc.text+
     ggtitle("ROC curves for selection")+
     theme_animint(width=400, height=400)+
@@ -437,7 +438,7 @@ For a more fair comparison between algorithms, in this section we compare algori
 ```
 
 The table above shows the best TPR for each possible FPR of each algorithm, in each task and cross-validation iteration.
-We want to display only the values for which all algorithms are present, so below we count the number of algorithms which has each FPR  value.
+We want to display only the values for which all algorithms are present, so below we count the number of algorithms which has each FPR value.
 
 ```{r}
 best_TPR_algos <- best_TPR_dt[, .(
@@ -448,11 +449,11 @@ table(best_TPR_algos$algos)
 
 The table above means that there are some FPR values which are present in only 1-3 learners.
 We only want to show FPR values which are present in at least 4, which is what is coded below.
-We additionally keep only a max of 20 FPR values, almost evenly spaced across the range of FPR values.
+We additionally keep only a max of 40 FPR values, almost evenly spaced across the range of FPR values.
 
 ```{r}
 (min.algos <- length(learner.list)-1)
-max.FPR.values <- 20
+max.FPR.values <- 40
 (FPR_vlines <- best_TPR_algos[algos >= min.algos][
 , keep := c(TRUE, diff(ceiling(FPR*max.FPR.values))!=0)
 , by=.(task_id,iteration,task_it)][keep==TRUE])
@@ -466,7 +467,7 @@ gg.roc.fpr <- gg.roc.text+
   geom_vline(aes(
     xintercept=FPR),
     alpha=0.7,
-    size=3,
+    size=5,
     data=FPR_vlines,
     showSelected="task_it",
     clickSelects="FPR")
@@ -480,16 +481,15 @@ Below we create a plot which will show the best TPR values for the selected FPR 
 best_TPR_show <- best_TPR_dt[
   FPR_vlines, on=.(task_id,iteration,task_it,FPR)]
 (gg.tpr <- ggplot()+
-   theme(
-     legend.position="none",
-     axis.text.x=element_text(angle=30, hjust=1))+
+   theme_bw()+
+   theme(legend.position="none")+
    geom_point(aes(
-     learner_id, best_TPR, color=learner_id),
+     best_TPR, learner_id, color=learner_id),
      data=best_TPR_show,
      size=5,
      showSelected=c("task_it","FPR"))+
    geom_text(aes(
-     learner_id, best_TPR, label=sprintf("%.4f", best_TPR)),
+     best_TPR, learner_id, label=sprintf("%.4f", best_TPR)),
      data=best_TPR_show,
      showSelected=c("task_it","FPR")))
 ```
@@ -500,13 +500,13 @@ Below we combine the previous plots into an interactive display.
 ```{r viz-select-fpr}
 (viz.select.fpr <- animint(
   testAUC=gg.auc+
-    ggtitle("Click to select data set and cross-validation split")+
-    theme_animint(width=1000, height=200, colspan=2, last_in_row=TRUE),
+    ggtitle("Select data set and cross-validation split"),
   roc=gg.roc.fpr+
     ggtitle("ROC curves for selection")+
-    theme_animint(width=400, height=400),
+    theme_animint(last_in_row=TRUE),
   TPR=gg.tpr+
-    ggtitle("Best TPR for selected FPR")))
+    ggtitle("Best TPR for selected FPR")+
+    theme_animint(colspan=2, width=800, height=200)))
 ```
 
 The interactive display above shows
@@ -514,6 +514,10 @@ The interactive display above shows
 * in the top plot, you can click test AUC values to select a data set and cross-validation iteration.
 * in the bottom left plot, you can click a vertical line to select a FPR threshold.
 * in the bottom right plot, you can see the best TPR values for the selected FPR threshold.
+
+Try clicking various FPR thresholds in the sonar data set.
+You should see that the algorithm ranking is different for different FPR thresholds.
+For example, `cv_glmnet` is worst for small FPR values, but it is best for larger FPR values.
 
 ### Adding a zoom level
 
@@ -595,7 +599,9 @@ gg.roc.show.task.it <- ggplot()+
   geom_path(aes(
     FPR, TPR, group=learner_id, color=learner_id),
     data=roc_dt,
-    showSelected=c("task_id","iteration"))
+    showSelected=c("task_id","iteration"))+
+  scale_x_continuous(breaks=seq(0,1,by=0.5))+
+  scale_y_continuous(breaks=seq(0,1,by=0.5))
 gg.roc.show.task.it+facet_grid(iteration ~ task_id)
 ```
 
@@ -628,6 +634,8 @@ The figure above shows
 
 ### P-values
 
+TODO
+
 ```{r}
 (score_stats <- dcast(
   score_dt,
@@ -635,7 +643,7 @@ The figure above shows
   list(mean, sd),
   value.var="percent_error"))
 ggplot()+
-  facet_grid(. ~ task_id, labeller=label_both)+
+  facet_grid(task_id ~ .)+
   geom_point(aes(
     percent_error_mean, learner_id),
     data=score_stats)+
@@ -651,6 +659,9 @@ ggplot()+
   scale_x_continuous(
     "Percent error on test set (mean ± SD over 3 folds in CV)",
     breaks=seq(0,100,by=10))
+```
+
+```{r}
 if(FALSE){
 (levs <- levels(score_dt$learner_id))
 (pval_dt <- data.table(comparison_i=1:3)[, {
@@ -758,7 +769,7 @@ ggplot()+
     k, classif.auc, color=status),
     data=details_dt)+
   scale_y_continuous("Validation AUC")+
-  facet_grid(task_id ~ iteration, labeller=label_both, scales="free")
+  facet_grid(task_id ~ iteration, labeller=label_both)
 ```
 
 Above we see how the AUC was selected for each task and iteration.
@@ -768,27 +779,13 @@ Above we see how the AUC was selected for each task and iteration.
 
 Below we make an interactive version of the same plot.
 
-```{r}
+```{r viz-neighbors}
 animint(
-  testErr=ggplot()+
-    theme_bw()+
-    theme_animint(width=800, height=200, last_in_row=TRUE)+
-    facet_grid(. ~ task_id, labeller=label_both)+
-    geom_point(aes(
-      ## TODO show AUC instead of error.
-      percent_error, learner_id),
-      clickSelects="task_it",
-      size=5,
-      fill="grey",
-      color="black",
-      color_off="grey",
-      data=score_dt)+
-    scale_x_continuous(
-      breaks=seq(0,100,by=10),
-      limits=c(0,60)),
+  testAUC=gg.auc+
+    ggtitle("Select data set and cross-validation split"),
   knnDetails=ggplot()+
     ggtitle("Nearest neighbors model selection")+
-    theme_animint(update_axes="y")+
+    theme_animint(update_axes="y", last_in_row=TRUE)+
     geom_vline(aes(
       xintercept=k),
       showSelected="task_it",
@@ -839,7 +836,9 @@ ggplot()+
     labeller=label_both, scales="free")+
   scale_y_log10("logistic loss")+
   scale_x_continuous("epoch")
+```
 
+```{r}
 ggplot()+
   theme_bw()+
   geom_vline(aes(
@@ -855,7 +854,9 @@ ggplot()+
   facet_grid(task_id + learner_id ~ iteration, labeller=label_both)+
   scale_y_log10("logistic loss")+
   scale_x_continuous("epoch")
+```
 
+```{r}
 norm01 <- function(x)(x-min(x))/(max(x)-min(x))
 history_long[
 , norm := norm01(value)
@@ -877,14 +878,15 @@ ggplot()+
     labeller=label_both, scales="free")+
   scale_y_log10("normalized log logistic loss")+
   scale_x_continuous("epoch")
+```
 
+```{r}
 animint(
   testErr=ggplot()+
     theme_bw()+
     theme_animint(width=800, height=200, last_in_row=TRUE)+
     facet_grid(. ~ task_id, labeller=label_both)+
     geom_point(aes(
-      ## TODO show AUC instead of error.
       percent_error, learner_id),
       clickSelects="task_it",
       size=5,
@@ -893,7 +895,7 @@ animint(
       color_off="grey",
       data=score_dt)+
     scale_x_continuous(
-      breaks=seq(0,100,by=10),
+      breaks=seq(0,100,by=25),
       limits=c(0,60)),
   torchDetails=ggplot()+
     theme_bw()+
@@ -904,7 +906,9 @@ animint(
       epoch, norm, color=set, group=set),
       showSelected="task_it",
       data=history_long[measure=="logloss"]))
+```
 
+```{r}
 get_fold <- function(DT,it=1)DT[iteration==it & task_id=="sonar"]
 history_fold <- get_fold(history_long)
 score_fold <- get_fold(score_torch)
@@ -940,7 +944,9 @@ score_glmnet <- score_dt[grep("glmnet",learner_id)]
 L <- score_glmnet$learner[[1]]
 library(glmnet)
 plot(L$model)
+```
 
+```{r}
 cv_glmnet_one <- with(L$model, data.table(nzero, lambda, cvm, cvsd))
 (gg.glmnet <- ggplot()+
   geom_segment(aes(
@@ -950,8 +956,10 @@ cv_glmnet_one <- with(L$model, data.table(nzero, lambda, cvm, cvsd))
   geom_point(aes(
     -log(lambda), cvm, fill=nzero),
     data=cv_glmnet_one)+
-  scale_fill_gradient(low="white", high="red"))
+   scale_fill_gradient(low="white", high="red"))
+```
 
+```{r viz-glmnet-one}
 animint(
   gg.glmnet+
     geom_label_aligned(aes(
@@ -968,9 +976,13 @@ We have created several data visualizations related to torch.
 Exercises:
 
 * In `viz.select.fpr`, there are no smooth transitions. Add a smooth transition for the `FPR` variable, and make sure to set `aes(key)` on the `geom_point()` and `geom_text()` in `gg.tpr`.
+* In `viz.select.fpr`, a separate plot is used to display Best TPR for selected FPR. Remove that plot, and add a `geom_point()` and `geom_label_aligned()` to the ROC curve plot, which show the same information.
 * In `gg.summary`, currently only the max AUC is shown. Add `geom_segment()` that shows the variation in AUC among algorithms.
 * Add an error rate plot to the display with interactive ROC curves where you can select FPR. Hint: you will need to join the number of labels to the ROC curve table.
 * In the "Best TPR for selected FPR" plot, add `geom_text()` which shows the selected value of FPR.
+* Change the color legends so that the two linear models (`cv_glmnet` and `torch_linear`) have different shades of the same color (for example dark and light purple).
+* In visualizations with ROC curves, add `aes(color)` or `aes(fill)` to the other plots, with a consistent color scheme that matches the ROC curves.
+* Instead of showing Best TPR for selected FPR, make a re-design that shows best FPR for selected TPR.
 
 Next, [the appendix](/ch99) explains some R
 programming idioms that are generally useful for interactive data
