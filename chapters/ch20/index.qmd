@@ -477,7 +477,8 @@ The output above shows ROC curves in each panel, with vertical lines showing the
 Below we create a plot which will show the best TPR values for the selected FPR threshold.
 
 ```{r}
-best_TPR_show <- best_TPR_dt[FPR_vlines, on=.(task_id,iteration,task_it,FPR)]
+best_TPR_show <- best_TPR_dt[
+  FPR_vlines, on=.(task_id,iteration,task_it,FPR)]
 (gg.tpr <- ggplot()+
    theme(
      legend.position="none",
@@ -517,7 +518,7 @@ The interactive display above shows
 ### Adding a zoom level
 
 The previous data visualizations used facets to display the test AUC of different data sets.
-In this section, we propose a re-design that shows test AUC for only one data set at a time.
+In this section, we propose a re-design that shows test AUC for only one data set at a time.
 We will use a display which allows data set selection in function of number of rows and max AUC, which we compute below.
 
 ```{r}
@@ -661,8 +662,10 @@ if(FALSE){
   , rank := lev2rank[paste(learner_id)]
   ][]
   i_wide <- dcast(i_long, iteration ~ rank, value.var="percent_error")
-  paired <- with(i_wide, t.test(lo, hi, alternative = "l", paired=TRUE))
-  unpaired <- with(i_wide, t.test(lo, hi, alternative = "l", paired=FALSE))
+  paired <- with(i_wide, t.test(
+    lo, hi, alternative = "l", paired=TRUE))
+  unpaired <- with(i_wide, t.test(
+    lo, hi, alternative = "l", paired=FALSE))
   data.table(
     learner.lo=factor(two_levs[1],levs),
     learner.hi=factor(two_levs[2],levs),
@@ -831,7 +834,9 @@ ggplot()+
   geom_line(aes(
     epoch, value, color=set),
     data=history_long[measure=="logloss"])+
-  facet_grid(task_id + learner_id ~ iteration, labeller=label_both, scales="free")+
+  facet_grid(
+    task_id + learner_id ~ iteration,
+    labeller=label_both, scales="free")+
   scale_y_log10("logistic loss")+
   scale_x_continuous("epoch")
 
@@ -852,7 +857,9 @@ ggplot()+
   scale_x_continuous("epoch")
 
 norm01 <- function(x)(x-min(x))/(max(x)-min(x))
-history_long[, norm := norm01(value), by=.(iteration, task_id, learner_id, set, measure)]
+history_long[
+, norm := norm01(value)
+, by=.(iteration, task_id, learner_id, set, measure)]
 ggplot()+
   theme_bw()+
   geom_vline(aes(
@@ -865,7 +872,9 @@ ggplot()+
   geom_line(aes(
     epoch, norm, color=set),
     data=history_long[measure=="logloss"])+
-  facet_grid(task_id + learner_id ~ iteration, labeller=label_both, scales="free")+
+  facet_grid(
+    task_id + learner_id ~ iteration,
+    labeller=label_both, scales="free")+
   scale_y_log10("normalized log logistic loss")+
   scale_x_continuous("epoch")
 
