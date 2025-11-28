@@ -880,7 +880,7 @@ ggplot()+
   scale_x_continuous("epoch")
 ```
 
-```{r}
+```{r viz-torch-details}
 animint(
   testErr=ggplot()+
     theme_bw()+
@@ -983,7 +983,8 @@ Exercises:
 * Change the color legends so that the two linear models (`cv_glmnet` and `torch_linear`) have different shades of the same color (for example dark and light purple).
 * In visualizations with ROC curves, add `aes(color)` or `aes(fill)` to the other plots, with a consistent color scheme that matches the ROC curves.
 * Instead of showing Best TPR for selected FPR, make a re-design that shows best FPR for selected TPR.
+* Each section of this chapter has presented a different data visualization technique. Combine several different techniques in a single data visualization:
+  * Show model selection plots for all three algorithms (`glmnet`, `torch`, nearest neighbors).
+  * Show interactive ROC curves at the same time.
 
-Next, [the appendix](/ch99) explains some R
-programming idioms that are generally useful for interactive data
-visualization design.
+Next, [the appendix](/ch99) explains some R programming idioms that are generally useful for interactive data visualization design.
