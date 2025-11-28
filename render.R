@@ -1,4 +1,4 @@
-pkgs <- c("penaltyLearning","future.apply","maps","lars","LambertW","kernlab","data.table","quarto","chromote","magick","mlr3torch","glmnet","kknn","mlr3learners","mlr3tuning","WeightedROC","remotes")
+pkgs <- c("penaltyLearning","future.apply","maps","lars","LambertW","kernlab","data.table","quarto","chromote","magick","mlr3torch","glmnet","kknn","mlr3learners","mlr3tuning","WeightedROC","remotes","nc")
 ins.mat <- installed.packages()
 missing.pkgs <- setdiff(pkgs, rownames(ins.mat))
 install.packages(missing.pkgs)
