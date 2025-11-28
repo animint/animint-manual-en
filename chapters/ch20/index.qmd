@@ -426,86 +426,116 @@ In the visualization above, you can click the test AUC values in the top plot to
 
 ### Interactive ROC curves
 
-TODO dist from prev roc point, cumsum etc.
+### Adding a zoom level
+
+The previous data visualizations used facets to display the test AUC of different data sets.
+In this section, we propose a re-design that shows test AUC for only one data set at a time.
+We will use a display which allows data set selection in function of number of rows and max AUC, which we compute below.
 
 ```{r}
-summary_dt <- score_dt[, .(
+(summary_dt <- score_dt[, .(
   max_auc=max(classif.auc),
   nrow=task[[1]]$nrow
-), by=task_id]
+), by=task_id])
+```
 
+The output above is a data table with one row per data set.
+We use these data in the scatter plot below.
+
+```{r}
 point_size <- 5
 point_fill <- "grey"
 point_color <- "black"
 point_color_off <- "grey"
+(gg.summary <- ggplot()+
+  theme_bw()+
+  geom_point(aes(
+    nrow, max_auc),
+    size=point_size,
+    fill=point_fill,
+    color=point_color,
+    color_off=point_color_off,
+    clickSelects="task_id",
+    data=summary_dt))
+```
+
+The scatterplot above shows a summary, one dot per data set.
+Note in the code above we have `clickSelects="task_id"`, which only selects task (not cross-validation iteration).
+So in the code below we create a test AUC plot with `showSelected="task_id"` and `clickSelects="iteration"`.
+
+```{r}
+gg.auc.show.task <- ggplot()+
+  theme_bw()+
+  geom_point(aes(
+    classif.auc, learner_id),
+    clickSelects="iteration",
+    showSelected="task_id",
+    size=point_size,
+    fill=point_fill,
+    color=point_color,
+    color_off=point_color_off,
+    data=score_dt)
+gg.auc.show.task+facet_grid(task_id ~ .)
+```
+
+The output above shows a multi-panel display, with one panel for each data set.
+We notice that the AUC values are on very different scales between data sets, and featureless always has AUC=0.5 (as expected).
+We therefore create a second version of this plot, without featureless, in the code below.
+
+```{r}
+gg.auc.show.task.zoom <- ggplot()+
+  theme_bw()+
+  geom_point(aes(
+    classif.auc, learner_id),
+    clickSelects="iteration",
+    showSelected="task_id",
+    size=point_size,
+    fill=point_fill,
+    color=point_color,
+    color_off=point_color_off,
+    data=score_dt[learner_id != "featureless"])
+gg.auc.show.task.zoom+facet_grid(task_id ~ .)
+```
+
+We no longer see featureless in the output above.
+Next, we create a plot of ROC curves for selected iteration and task.
+
+```{r}
+gg.roc.show.task.it <- ggplot()+
+  theme_bw()+
+  geom_path(aes(
+    FPR, TPR, group=learner_id, color=learner_id),
+    data=roc_dt,
+    showSelected=c("task_id","iteration"))
+gg.roc.show.task.it+facet_grid(iteration ~ task_id)
+```
+
+The figure above shows a panel for each task and iteration.
+Below we combine the ggplots into an interactive data visualization.
+
+```{r viz-two-selectors}
 animint(
-  summary=ggplot()+
-    ggtitle("1. Select task")+
-    theme_bw()+
-    geom_point(aes(
-      nrow, max_auc),
-      size=point_size,
-      fill=point_fill,
-      color=point_color,
-      color_off=point_color_off,
-      clickSelects="task_id",
-      data=summary_dt),
-  roc=ggplot()+
-    theme_bw()+
-    theme_animint(last_in_row=TRUE)+
-    geom_path(aes(
-      FPR, TPR, group=learner_id, color=learner_id),
-      data=roc_dt,
-      showSelected=c("task_id","iteration"))+
-    geom_label_aligned(aes(
-      Inf, lab.tpr, color=learner_id,
-      label=sprintf("%s AUC=%.3f", learner_id, classif.auc)),
-      data=score_dt,
-      hjust=1,
-      showSelected=c("task_id","iteration"),
-      alignment="vertical")+
-    geom_text(aes(
-      0.5, 0, 
-      label=task_it),
-      data=score_dt[learner_id=="featureless"],
-      showSelected=c("task_id","iteration"))+
-    geom_point(aes(
-      classif.fpr, classif.tpr, fill=learner_id,
-      tooltip=sprintf("%s default FPR=%.3f TPR=%.3f, errors=%.1f%%\n", learner_id, classif.fpr, classif.tpr, classif.ce*100)),
-      data=score_dt,
-      size=4,
-      color="black",
-      showSelected=c("task_id","iteration")),
-  testAUC=ggplot()+
+  summary=gg.summary+
+    ggtitle("1. Select task"),
+  roc=gg.roc.show.task.it+
+    ggtitle("ROC curves for selected task and iteration")+
+    theme_animint(last_in_row=TRUE),
+  testAUC=gg.auc.show.task+
     ggtitle("2. Select iteration, all learners")+
-    theme_bw()+
     theme_animint(
-      width=800, height=200, last_in_row=TRUE, colspan=2)+
-    geom_point(aes(
-      classif.auc, learner_id),
-      clickSelects="iteration",
-      showSelected="task_id",
-      size=point_size,
-      fill=point_fill,
-      color=point_color,
-      color_off=point_color_off,
-      data=score_dt),
-  testAUCzoom=ggplot()+
+      width=800, height=200, last_in_row=TRUE, colspan=2),
+  testAUCzoom=gg.auc.show.task.zoom+
     ggtitle("2. Select iteration, zoom to non-trivial")+
-    theme_bw()+
     theme_animint(
       update_axes="x",
-      width=800, height=200, last_in_row=TRUE, colspan=2)+
-    geom_point(aes(
-      classif.auc, learner_id),
-      clickSelects="iteration",
-      showSelected="task_id",
-      size=point_size,
-      fill=point_fill,
-      color=point_color,
-      color_off=point_color_off,
-      data=score_dt[learner_id != "featureless"]))
+      width=800, height=200, last_in_row=TRUE, colspan=2))
 ```
+
+The figure above shows
+
+* in the upper left, an overview for all data sets.
+* at the bottom, two test AUC plots for the selected data set.
+* in the upper right, ROC curves for the selected data set and iteration.
 
 ### P-values
 
@@ -840,7 +870,7 @@ We have created several data visualizations related to torch.
 
 Exercises:
 
-* TODO
+* In `gg.summary`, currently only the max AUC is shown. Add `geom_segment()` that shows the variation in AUC among algorithms.
 
 Next, [the appendix](/ch99) explains some R
 programming idioms that are generally useful for interactive data
