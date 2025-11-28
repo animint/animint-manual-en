@@ -497,7 +497,7 @@ Above we see a dot plot with text showing the TPR at each selectable FPR.
 Below we combine the previous plots into an interactive display.
 
 ```{r viz-select-fpr}
-animint(
+(viz.select.fpr <- animint(
   testAUC=gg.auc+
     ggtitle("Click to select data set and cross-validation split")+
     theme_animint(width=1000, height=200, colspan=2, last_in_row=TRUE),
@@ -505,7 +505,7 @@ animint(
     ggtitle("ROC curves for selection")+
     theme_animint(width=400, height=400),
   TPR=gg.tpr+
-    ggtitle("Best TPR for selected FPR"))
+    ggtitle("Best TPR for selected FPR")))
 ```
 
 The interactive display above shows
@@ -958,6 +958,7 @@ We have created several data visualizations related to torch.
 
 Exercises:
 
+* In `viz.select.fpr`, there are no smooth transitions. Add a smooth transition for the `FPR` variable, and make sure to set `aes(key)` on the `geom_point()` and `geom_text()` in `gg.tpr`.
 * In `gg.summary`, currently only the max AUC is shown. Add `geom_segment()` that shows the variation in AUC among algorithms.
 * Add an error rate plot to the display with interactive ROC curves where you can select FPR. Hint: you will need to join the number of labels to the ROC curve table.
 * In the "Best TPR for selected FPR" plot, add `geom_text()` which shows the selected value of FPR.
