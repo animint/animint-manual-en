@@ -18,7 +18,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-      - run: DEBIAN_FRONTEND=noninteractive apt install tidy texlive texlive-fonts-extra texlive-extra-utils quarto -y
+      - run: DEBIAN_FRONTEND=noninteractive apt update -y -qq && apt install tidy texlive texlive-fonts-extra texlive-extra-utils quarto -y
       - name: Render book
         run: R --no-save < render.R
       - name: netlify deploy
