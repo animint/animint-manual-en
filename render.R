@@ -1,6 +1,7 @@
-options(repos="http://cloud.r-project.org")
+#options(repos="http://cloud.r-project.org")
 remotes::install_github("animint/animint2", dep=TRUE)
 pkgs <- c("penaltyLearning","future.apply","maps","lars","LambertW","kernlab","data.table","quarto","chromote","magick","mlr3torch","glmnet","kknn","mlr3learners","mlr3tuning","WeightedROC")
+remotes::install_github("animint/animint2", dep=TRUE)
 for(p in pkgs)if(!requireNamespace(p))install.packages(p)
 remotes::install_github("animint/animint2data")
 unlink("chapters/_book", recursive = TRUE)
