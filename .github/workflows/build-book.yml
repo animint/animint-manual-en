@@ -12,7 +12,7 @@ jobs:
   build-book:
     runs-on: ubuntu-latest
     container:
-      image: rocker/r2u:latest
+      image: rocker/r2u4ci
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
 
