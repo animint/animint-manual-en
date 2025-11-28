@@ -20,7 +20,7 @@ jobs:
       - uses: actions/checkout@v3
       - name: Render book
         run: R --no-save < render.R
-
+      - run: DEBIAN_FRONTEND=noninteractive apt install tidy texlive texlive-fonts-extra texlive-extra-utils quarto -y
       - name: netlify deploy
         uses: animint/animint-actions/netlify-deploy-comment@main
         with:
