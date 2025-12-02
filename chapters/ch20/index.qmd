@@ -1003,7 +1003,7 @@ Exercises:
 * Add an error rate plot to the display with interactive ROC curves where you can select FPR. Hint: you will need to join the number of labels to the ROC curve table.
 * In the "Best TPR for selected FPR" plot, add `geom_text()` which shows the selected value of FPR.
 * Change the color legends so that the two linear models (`cv_glmnet` and `torch_linear`) have different shades of the same color (for example dark and light purple).
-* In visualizations with ROC curves, add `aes(color)` or `aes(fill)` to the other plots, with a consistent color scheme that matches the ROC curves.
+* In visualizations with ROC curves, add `aes(color)` or `aes(fill)` to the other plots, with a consistent color scheme that matches the ROC curves. Make sure there is only one legend, and that it can make all data for a learner disappear, across all plots.
 * Instead of showing Best TPR for selected FPR, make a re-design that shows best FPR for selected TPR.
 * Each section of this chapter has presented a different data visualization technique. Combine several different techniques in a single data visualization:
   * Show model selection plots for all three algorithms (`glmnet`, `torch`, nearest neighbors).
