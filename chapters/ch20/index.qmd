@@ -683,10 +683,17 @@ gg.rank <- ggplot()+
     classif.auc_mean+classif.auc_sd, auc.task.rank,
     xend=classif.auc_mean-classif.auc_sd, yend=auc.task.rank),
     data=score_stats)+
+  scale_y_continuous(
+    "Algorithm rank using AUC",
+    breaks=1:4,
+    limits=c(1,5))+
   scale_x_continuous(
     "AUC (mean ± SD over 3 folds in CV)")
 gg.rank+facet_wrap("task_id", scales="free")
 ```
+
+Above we see ranks, but not algorithm names.
+Below, we add names.
 
 ```{r}
 gg.rank.text <- gg.rank+
@@ -696,43 +703,48 @@ gg.rank.text <- gg.rank+
       "%s %.4f±%.4f",
       learner_id,
       classif.auc_mean, classif.auc_sd)),
-    hjust=0,
-    vjust=-0.5,
-    data=score_stats)+
-  scale_y_continuous(limits=c(1,5))
+    hjust=0, vjust=-0.5, size=10,
+    data=score_stats)
 gg.rank.text+facet_wrap("task_id", scales="free")
 ```
+
+To test for significant differences, we do a self-join below.
 
 ```{r}
 score_dt_rank <- score_stats[, .(auc.task.rank, learner_id, task_id)][
   score_dt, on=.(learner_id, task_id), nomatch=0L]
-join_dt <- score_dt_rank[, next.rank := auc.task.rank+1][
+(join_dt <- score_dt_rank[, next.rank := auc.task.rank+1][
   score_dt_rank,
   .(task_id, iteration,
     auc.task.rank,
     lo.auc=classif.auc,
     hi.auc=i.classif.auc),
   on=.(task_id, iteration, auc.task.rank=next.rank),
-  nomatch=0L]
+  nomatch=0L])
+```
+
+Below we compute P-values.
+
+```{r}
 (pval_dt <- join_dt[, {
   paired <- t.test(
     lo.auc, hi.auc, alternative = "l", paired=TRUE)
-  unpaired <- t.test(
-    lo.auc, hi.auc, alternative = "l", paired=FALSE)
   data.table(
     p.paired=paired$p.value,
-    p.unpaired=unpaired$p.value,
-    mean.diff=paired$est,
-    mean.lo=unpaired$est[1],
-    mean.hi=unpaired$est[2])
+    mean.lo=mean(lo.auc),
+    mean.hi=mean(hi.auc))
 }, by=.(task_id, auc.task.rank)])
+```
+
+TODO
+
+```{r}
 gg.rank.seg <- gg.rank+
   geom_segment(aes(
     mean.lo, auc.task.rank+0.5,
     xend=mean.hi, yend=auc.task.rank+0.5),
     color="red",
-    data=pval_dt)+
-  scale_y_continuous(limits=c(1,5))
+    data=pval_dt)
 gg.rank.seg+facet_wrap("task_id", scales="free")
 ```
 
@@ -740,12 +752,11 @@ gg.rank.seg+facet_wrap("task_id", scales="free")
 gg.rank.p <- gg.rank.seg+
   geom_text(aes(
     mean.lo, auc.task.rank+0.5, label=ifelse(
-      p.paired<0.0001, "P<0.0001",
-      sprintf("P=%.4f", p.paired))),
+      p.paired<0.01, "P<0.01",
+      sprintf("P=%.2f", p.paired))),
     color="red",
     hjust=1,
-    data=pval_dt)+
-  scale_y_continuous(limits=c(1,5))
+    data=pval_dt)
 gg.rank.p+facet_wrap("task_id", scales="free")
 ```
 
