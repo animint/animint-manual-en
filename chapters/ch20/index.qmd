@@ -399,7 +399,7 @@ Next, the code below computes the rank of each algorithm within each test set.
 
 ```{r}
 score_dt[
-, algo.rank := rank(classif.auc)
+, auc.it.rank := rank(classif.auc)
 , by=.(task_id, iteration, task_it)]
 ```
 
@@ -415,7 +415,7 @@ animint(
     ggtitle("ROC curves for selection")+
     theme_animint(width=400, height=400)+
     geom_label_aligned(aes(
-      Inf, algo.rank*0.1, color=learner_id,
+      Inf, auc.it.rank*0.1, color=learner_id,
       label=sprintf("%s AUC=%.3f", learner_id, classif.auc)),
       data=score_dt,
       hjust=1,
@@ -634,31 +634,83 @@ The figure above shows
 
 ### P-values
 
-TODO
+In this section, we compute and display P-values.
+First, we compute mean and standard deviation over test folds.
 
 ```{r}
 (score_stats <- dcast(
-  score_dt,
+  score_dt[learner_id!="featureless"],
   task_id + learner_id ~ .,
   list(mean, sd),
-  value.var="percent_error"))
+  value.var="classif.auc"))
+```
+
+We plot the numbers above using the code below.
+
+```{r}
+score_stats[, let(
+  lo=classif.auc_mean-classif.auc_sd,
+  hi=classif.auc_mean+classif.auc_sd)]
 ggplot()+
   facet_grid(task_id ~ .)+
   geom_point(aes(
-    percent_error_mean, learner_id),
+    classif.auc_mean, learner_id),
     data=score_stats)+
   geom_segment(aes(
-    percent_error_mean+percent_error_sd, learner_id,
-    xend=percent_error_mean-percent_error_sd, yend=learner_id),
-    data=score_stats)+
-  geom_text(aes(
-    percent_error_mean, learner_id,
-    label=sprintf("%.2f±%.2f", percent_error_mean, percent_error_sd)),
-    vjust=-0.5,
+    hi, learner_id,
+    xend=lo, yend=learner_id),
     data=score_stats)+
   scale_x_continuous(
-    "Percent error on test set (mean ± SD over 3 folds in CV)",
-    breaks=seq(0,100,by=10))
+    "AUC (mean ± SD over 3 folds in CV)",
+    breaks=seq(0,1,by=0.1))
+```
+
+Above we see mean and SD for each algorithm and data set.
+Next, we compute ranks.
+
+```{r}
+score_stats[, auc.task.rank := rank(classif.auc_mean), by=task_id][]
+```
+
+We plot ranks using the code below.
+
+```{r}
+(gg.rank <- ggplot()+
+  facet_grid(.~task_id, scales="free")+
+  geom_point(aes(
+    classif.auc_mean, auc.task.rank),
+    data=score_stats)+
+  geom_segment(aes(
+    classif.auc_mean+classif.auc_sd, auc.task.rank,
+    xend=classif.auc_mean-classif.auc_sd, yend=auc.task.rank),
+    data=score_stats)+
+  scale_x_continuous(
+    "AUC (mean ± SD over 3 folds in CV)"))
+```
+
+```{r}
+score_stats[, hjust := {
+  M <- max(hi)
+  m <- min(lo)
+  f <- function(a)m+a*(M-m)
+  fcase(
+    classif.auc_mean<f(0.3), 0,
+    classif.auc_mean>f(0.7), 1,
+    default=0.5)
+}, by=task_id]
+gg.rank.text <- gg.rank+
+  geom_text(aes(
+    classif.auc_mean, auc.task.rank+0.1,
+    hjust=hjust,
+    label=sprintf("%.4f±%.4f", classif.auc_mean, classif.auc_sd)),
+    data=score_stats)+
+  scale_y_continuous(limits=c(1,5))
+```
+
+```{r}
+animint(
+  gg.rank.text+
+    theme_animint(width=800))
 ```
 
 ```{r}
@@ -672,7 +724,7 @@ if(FALSE){
   ][
   , rank := lev2rank[paste(learner_id)]
   ][]
-  i_wide <- dcast(i_long, iteration ~ rank, value.var="percent_error")
+  i_wide <- dcast(i_long, iteration ~ rank, value.var="classif.auc")
   paired <- with(i_wide, t.test(
     lo, hi, alternative = "l", paired=TRUE))
   unpaired <- with(i_wide, t.test(
