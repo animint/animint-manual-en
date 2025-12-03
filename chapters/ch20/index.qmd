@@ -672,6 +672,7 @@ Next, we compute ranks.
 score_stats[, auc.task.rank := rank(-classif.auc_mean), by=task_id][]
 ```
 
+Above we see a new column `auc.task.rank` with values from 1 to 4.
 We plot ranks using the code below.
 
 ```{r}
@@ -736,7 +737,8 @@ Below we compute P-values.
 }, by=.(task_id, auc.task.rank)])
 ```
 
-TODO
+Above we see a table with one row per T-test result.
+We plot the differences between means in red below.
 
 ```{r}
 gg.rank.seg <- gg.rank+
@@ -748,17 +750,26 @@ gg.rank.seg <- gg.rank+
 gg.rank.seg+facet_wrap("task_id", scales="free")
 ```
 
+Above we see red segments highlighting differences between adjacent means.
+Below we add text to show P-values.
+
 ```{r}
 gg.rank.p <- gg.rank.seg+
   geom_text(aes(
     mean.lo, auc.task.rank+0.5, label=ifelse(
       p.paired<0.01, "P<0.01",
       sprintf("P=%.2f", p.paired))),
-    color="red",
-    hjust=1,
+    color="red", hjust=1, size=10,
     data=pval_dt)
 gg.rank.p+facet_wrap("task_id", scales="free")
 ```
+
+Above we see P-values have been added.
+
+* One P-value is less than 0.01, indicating a difference that is statistically significant, between ranks 2 and 3 in `sonar`.
+* Most P-values are greater than 0.05, indicating that these differences are not statistically significant.
+* Because of the small sample size (3 train/test splits), increasing the number of cross-validation folds may decrease some of these P-values (exercise for the reader).
+* Exercise: combine P-values with algorithm names and mean/SD on the same plot. Use this plot instead of `testAUCzoom` in the previous animint.
 
 ## Checking for over- and under-fitting {#over-under-fitting}
 
