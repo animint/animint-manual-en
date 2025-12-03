@@ -144,6 +144,7 @@ Finally, the plot above is overplotted, meaning we are unable to see all of the 
 ## Fix overplotting by heat map and zoom {#fix-overplotting-heatmap-zoom}
 
 In this section, we show how the previous volcano plot can be revised to show more detail, using a heat map linked to a zoomed scatterplot.
+Note that the computations are an example of pre-aggregation, which is also mentioned in the documentation of [altair](https://altair-viz.github.io/user_guide/large_datasets.html#preaggregate-and-filter-in-pandas) and [plotly](https://web.archive.org/web/20250827141658/https://plotly-r.com/performance).
 To begin, we define the `round_rel()` function below, which is used to add `round_*` and `rel_*` columns which we will use to define heat map tiles.
 
 * `round_*` columns are rounded to the nearest bin size (integer by default), and are used to define the heat map tile `x` and `y` positions.
