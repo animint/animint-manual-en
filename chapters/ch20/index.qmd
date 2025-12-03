@@ -661,7 +661,7 @@ ggplot()+
     xend=lo, yend=learner_id),
     data=score_stats)+
   scale_x_continuous(
-    "AUC (mean ± SD over 3 folds in CV)",
+    "Test AUC (mean ± SD over 3 folds in CV)",
     breaks=seq(0,1,by=0.1))
 ```
 
@@ -685,11 +685,11 @@ gg.rank <- ggplot()+
     xend=classif.auc_mean-classif.auc_sd, yend=auc.task.rank),
     data=score_stats)+
   scale_y_continuous(
-    "Algorithm rank using AUC",
+    "Algorithm rank using test AUC",
     breaks=1:4,
     limits=c(1,5))+
   scale_x_continuous(
-    "AUC (mean ± SD over 3 folds in CV)")
+    "Test AUC (mean ± SD over 3 folds in CV)")
 gg.rank+facet_wrap("task_id", scales="free")
 ```
 
@@ -1040,7 +1040,7 @@ gg.log.scale <- ggplot()+
    scale_y_log10()+
    geom_line(aes(
      epoch, Relative_values, color=set, group=set),
-     showSelected="task_it",
+     showSelected=c("task_it", "set"),
      data=history_long)
 ```
 
@@ -1132,11 +1132,13 @@ Exercises:
 * In `viz.select.fpr`, there are no smooth transitions. Add a smooth transition for the `FPR` variable, and make sure to set `aes(key)` on the `geom_point()` and `geom_text()` in `gg.tpr`.
 * In `viz.select.fpr`, a separate plot is used to display Best TPR for selected FPR. Remove that plot, and add a `geom_point()` and `geom_label_aligned()` to the ROC curve plot, which show the same information.
 * In `gg.summary`, currently only the max AUC is shown. Add `geom_segment()` that shows the variation in AUC among algorithms.
-* Add an error rate plot to the display with interactive ROC curves where you can select FPR. Hint: you will need to join the number of labels to the ROC curve table.
-* In the "Best TPR for selected FPR" plot, add `geom_text()` which shows the selected value of FPR.
+* In `viz.select.fpr` we showed Best TPR for selected FPR.
+  * Add a plot “Best error rate for selected FPR”. Hint: you will need to join the number of labels to the ROC curve table.
+  * Add `geom_text()` which shows the selected value of FPR.
+  * Make a re-design that shows best FPR for selected TPR.
 * Change the color legends so that the two linear models (`cv_glmnet` and `torch_linear`) have different shades of the same color (for example dark and light purple).
 * In visualizations with ROC curves, add `aes(color)` or `aes(fill)` to the other plots, with a consistent color scheme that matches the ROC curves. Make sure there is only one legend, and that it can make all data for a learner disappear, across all plots.
-* Instead of showing Best TPR for selected FPR, make a re-design that shows best FPR for selected TPR.
+* In `viz.torch.log`, add points and lines to emphasize the best and selected epochs.
 * Each section of this chapter has presented a different data visualization technique. Combine several different techniques in a single data visualization:
   * Show model selection plots for all three algorithms (`glmnet`, `torch`, nearest neighbors).
   * Show interactive ROC curves at the same time.

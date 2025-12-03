@@ -363,6 +363,4 @@ Exercises:
   * In `volcanoZoom`, use `clickSelects="true_tile"` so that interactivity can be used to map volcano plot points back into the simulation parameter space. Add green dots with `showSelected="true_tile"` to `volcanoTiles` to show where the 100 trials for the selected parameter combination appear in volcano plot space.
   * Create a new selection variable that is a unique combination of `true_tile` and `trial`, then use it for `clickSelects` in both `volcanoZoom` and `viz.parameters$zoom`, so that we can see a correspondence between a point in volcano space, and a trial in the parameter zoom details plot.
 
-Next, [the appendix](/ch99) explains some R
-programming idioms that are generally useful for interactive data
-visualization design.
+Next, [Chapter 20](/ch20) explains how to visualize results of machine learning benchmarks.
