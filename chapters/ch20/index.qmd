@@ -1060,7 +1060,8 @@ For an example of additional details shown using inverse AUC, try selecting one 
 
 ### glmnet
 
-
+In this section, we explore visualizations of the `glmnet` L1-regularized linear model.
+We begin by using the `plot()` method of the model stored in the learner object.
 
 ```{r}
 score_glmnet <- score_dt[grep("glmnet",learner_id)]
@@ -1069,28 +1070,58 @@ library(glmnet)
 plot(L$model)
 ```
 
+The plot above shows the validation set Binomial Deviance (same as log loss in previous section) as a function of the model complexity (measured by negative log penalty).
+We see the curve decrease, but not increase, which may indicate underfitting.
+To reproduce this plot, we use the ggplot code below.
+
 ```{r}
 cv_glmnet_one <- with(L$model, data.table(nzero, lambda, cvm, cvsd))
 (gg.glmnet <- ggplot()+
-  geom_segment(aes(
-    -log(lambda), cvm+cvsd,
-    xend=-log(lambda), yend=cvm-cvsd),
-    data=cv_glmnet_one)+
-  geom_point(aes(
-    -log(lambda), cvm, fill=nzero),
-    data=cv_glmnet_one)+
+   scale_y_continuous("Validation log loss")+
+   geom_segment(aes(
+     -log(lambda), cvm+cvsd,
+     xend=-log(lambda), yend=cvm-cvsd),
+     data=cv_glmnet_one)+
+   geom_point(aes(
+     -log(lambda), cvm, fill=nzero),
+     data=cv_glmnet_one)+
    scale_fill_gradient(low="white", high="red"))
 ```
 
-```{r viz-glmnet-one}
-animint(
-  gg.glmnet+
-    geom_label_aligned(aes(
-      -log(lambda), Inf, label=nzero),
-      alignment="horizontal",
-      vjust=1,
-      data=cv_glmnet_one[seq(1,.N,by=5)]))
+Above we see a ggplot display which is similar to the previous plot.
+Next, we add a label to show the number of active variables at various regularization parameters.
+
+```{r}
+gg.glmnet+
+  geom_text(aes(
+    -log(lambda), Inf, label=nzero),
+    vjust=1,
+    data=cv_glmnet_one[seq(1,.N,by=5)])
 ```
+
+The plot above has text labels at the top which show the number of non-zero weights for several regularization parameters.
+The goal will be to make a similar interactive display.
+We compute a larger data table of results using the code below.
+
+```{r}
+(cv_glmnet_all <- score_glmnet[, with(learner[[1]]$model, data.table(
+  nzero, lambda, cvm, cvsd
+)), by=.(task_id, iteration, task_it)])
+```
+
+The table above contains one row per data set, cross-validation iteration, and regularization parameter.
+Below we display the validation log loss for each iteration as a different line, with each data set as a different panel.
+
+```{r}
+ggplot()+
+  scale_y_continuous("Validation log loss")+
+  geom_line(aes(
+    -log(lambda), cvm, group=iteration),
+    data=cv_glmnet_all)+
+  facet_wrap("task_id", scales="free")
+```
+
+Above we can see that the linear model can overfit if not properly regularized in some data sets (`sonar`, `vowel`, `waveform`), whereas there is evidence of underfitting in other data sets (`spam` and `zip`).
 
 ## Chapter summary and exercises {#ch20-exercises}
 
