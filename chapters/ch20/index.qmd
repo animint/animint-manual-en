@@ -846,145 +846,221 @@ Clicking on `zip` or `waveform`, the data sets with largest test AUC, shows that
 
 ### Torch
 
-```{r}
-(score_torch <- score_dt[
-  grepl("torch",learner_id)
-][
-, best_epoch := sapply(
-  learner, function(L)unlist(L$tuning_result$internal_tuned_values))
-][])
+In this section, we explore early stopping regularization with `torch` learners.
+First, we compute the selected number of epochs.
 
+```{r}
+score_torch <- score_dt[
+  grepl("torch",learner_id)
+][, best_epoch := sapply(
+  learner, function(L)unlist(L$tuning_result$internal_tuned_values)
+)]
+```
+
+Below, we extract the model training history.
+
+```{r}
 (history_torch <- score_torch[, {
   L <- learner[[1]]
   M <- L$archive$learners(1)[[1]]$model
   M$torch_model_classif$model$callbacks$history
 }, by=.(task_id, learner_id, iteration, task_it)])
+```
 
+The table above has one row for each epoch, and columns
+
+* `train.classif.logloss`, logistic (cross-entropy) loss on the set used to compute gradients, which always should decrease, if learning rate and batch size have been chosen appropriately. Note that “train” is a potentially confusing name for this set, so for increased clarity, we rename it to “subtrain” below.
+* `valid.classif.logloss`, logistic (cross-entropy) loss on the held-out set used to regularize (not used to compute gradients), which was minimized to select the best regularization (here, the number of epochs). Similarly, `valid.classif.auc` could have been maximized, if `classif.auc` was the first item in `measure_list`.
+
+Below, we reshape and rename the previous history data.
+
+```{r}
 (history_long <- nc::capture_melt_single(
   history_torch,
   set=nc::alevels(valid="validation", train="subtrain"),
   ".classif.",
-  measure=nc::alevels("logloss", ce="prop_error")))
-
-ggplot()+
-  theme_bw()+
-  geom_vline(aes(
-    xintercept=best_epoch),
-    data=score_torch)+
-  geom_text(aes(
-    best_epoch, Inf, label=paste0(" best epoch=", best_epoch)),
-    vjust=1.5, hjust=0,
-    data=score_torch)+
-  geom_line(aes(
-    epoch, value, color=set),
-    data=history_long[measure=="logloss"])+
-  facet_grid(
-    task_id + learner_id ~ iteration,
-    labeller=label_both, scales="free")+
-  scale_y_log10("logistic loss")+
-  scale_x_continuous("epoch")
+  measure=nc::alevels("logloss", auc="AUC")))
 ```
+
+The table above has new columns `set`, `measure`, and `value`.
+In the code below, we plot these data for one data set and cross-validation iteration.
 
 ```{r}
-ggplot()+
+one_split <- function(DT,it=1)DT[iteration==it & task_id=="sonar"]
+one_split_history <- one_split(history_long)
+(gg.torch.line <- ggplot()+
   theme_bw()+
-  geom_vline(aes(
-    xintercept=best_epoch),
-    data=score_torch)+
-  geom_text(aes(
-    best_epoch, Inf, label=paste0(" best epoch=", best_epoch)),
-    vjust=1.5, hjust=0,
-    data=score_torch)+
+  facet_grid(measure ~ learner_id, labeller=label_both, scales="free")+
   geom_line(aes(
     epoch, value, color=set),
-    data=history_long[measure=="logloss"])+
-  facet_grid(task_id + learner_id ~ iteration, labeller=label_both)+
-  scale_y_log10("logistic loss")+
-  scale_x_continuous("epoch")
+    data=one_split_history))
 ```
+
+The figure above shows learning curves that are typical of early stopping regularization using torch models.
+
+* log loss always decreases, and AUC always increases, for the subtrain set (used to compute gradients).
+* The typical U shape is clearly visible for the validation log loss. Typically we select the number of epochs which minimizes this curve (or maximizes the validation AUC).
+
+Below we add points which emphasize the min log loss, and max AUC, of each curve.
+
+```{r}
+history_best <- history_long[, {
+  mfun <- if(measure=="AUC")max else min
+  .SD[value==mfun(value)]
+}, by=.(task_id, iteration, task_it, learner_id, measure, set)
+][, point := "best"]
+one_split_best <- one_split(history_best)
+(gg.torch.point <- gg.torch.line+
+  geom_point(aes(
+    epoch, value, color=set, fill=point),
+    data=one_split_best)+
+   scale_fill_manual(values=c(best="black")))
+```
+
+Above we can see that
+
+* there is only one min for each log loss curve.
+* there are sometimes more than one max for the AUC curves.
+* the subtrain AUC quickly maxes out at 1, whereas the log loss continues decreasing.
+
+Below we add vertical lines and text to emphasize the number of epochs which was selected during training.
+
+```{r}
+one_split_score <- one_split(score_torch)
+(gg.torch.text <- gg.torch.point+
+  geom_vline(aes(
+    xintercept=best_epoch),
+    data=one_split_score)+
+  geom_text(aes(
+    best_epoch, -Inf, label=paste0(" selected epoch=", best_epoch)),
+    vjust=-0.5, hjust=0,
+    data=one_split_score))
+```
+
+Above we can see that the selected number of epochs is consistent with the min validation log loss, which happens before the max validation AUC.
+
+Next, we propose an overview, which displays the best epochs for each data set, learning algorithm, and cross-validation iteration.
+
+```{r}
+(history_best_wide <- dcast(
+  history_best,
+  learner_id + set + task_id + iteration + task_it ~ measure,
+  list(min, max, mid=function(x)(min(x)+max(x))/2),
+  value.var="epoch"))
+```
+
+The table above has additional columns for min, max, and mid number of epochs which are best (according to validation log loss or AUC).
+We use the mid values as points in the overview plot below.
+
+```{r}
+history_best_valid <- history_best_wide[set=="validation"]
+learner.colors <- c(
+  torch_linear="grey",
+  torch_dense_50="red")
+(gg.best.valid <- ggplot()+
+   theme_bw()+
+   scale_fill_manual(values=learner.colors)+
+   xlab("Epochs with best validation log loss")+
+   ylab("Epochs with best validation AUC")+
+   geom_point(aes(
+     epoch_mid_logloss, epoch_mid_AUC, fill=learner_id),
+     clickSelects="task_it", size=5,
+     color_off="white", color="black",
+     data=history_best_valid)+
+   facet_wrap("task_id"))
+```
+
+The plot above shows that 
+
+* some data sets (`sonar` and `waveform`) have best validation loss and AUC at an intermediate number of epochs. This is evidence of a good fit (neither under- nor over-fitting).
+* in some data sets (`vowel` and `zip`), the best validation log loss occurs at 200 epochs. This is evidence of underfitting (number of epochs could be increased to find better validation loss values).
+
+Below we add a segment to show the range of epochs which attain the best validation AUC.
+
+```{r}
+(gg.best.seg <- gg.best.valid+
+   scale_color_manual(values=learner.colors)+
+   geom_segment(aes(
+     epoch_mid_logloss, epoch_min_AUC,
+     xend=epoch_mid_logloss, yend=epoch_max_AUC,
+     color=learner_id),
+     size=3,
+     clickSelects="task_it",
+     data=history_best_valid))
+```
+
+Above we see that there are some runs in `vowel` and `zip` for which there is a range of epochs that achieve the best validation AUC.
+Next, we prepare a plot of learning curve details, by first computing relative values between 0 and 1 (since values can be very different between data sets).
 
 ```{r}
 norm01 <- function(x)(x-min(x))/(max(x)-min(x))
 history_long[
-, norm := norm01(value)
+, relative_values := norm01(value)
 , by=.(iteration, task_id, learner_id, set, measure)]
-ggplot()+
-  theme_bw()+
-  geom_vline(aes(
-    xintercept=best_epoch),
-    data=score_torch)+
-  geom_text(aes(
-    best_epoch, Inf, label=paste0(" best epoch=", best_epoch)),
-    vjust=1.5, hjust=0,
-    data=score_torch)+
-  geom_line(aes(
-    epoch, norm, color=set),
-    data=history_long[measure=="logloss"])+
-  facet_grid(
-    task_id + learner_id ~ iteration,
-    labeller=label_both, scales="free")+
-  scale_y_log10("normalized log logistic loss")+
-  scale_x_continuous("epoch")
+gg.log.auc <- ggplot()+
+   theme_bw()+
+   facet_grid(measure ~ learner_id, scales="free")+
+   scale_x_continuous(breaks=seq(50,200,by=50))+
+   geom_line(aes(
+     epoch, relative_values, color=set, group=set),
+     showSelected="task_it",
+     data=history_long)
 ```
 
-```{r viz-torch-details}
-animint(
-  testErr=ggplot()+
-    theme_bw()+
-    theme_animint(width=800, height=200, last_in_row=TRUE)+
-    facet_grid(. ~ task_id, labeller=label_both)+
-    geom_point(aes(
-      percent_error, learner_id),
-      clickSelects="task_it",
-      size=5,
-      fill="grey",
-      color="black",
-      color_off="grey",
-      data=score_dt)+
-    scale_x_continuous(
-      breaks=seq(0,100,by=25),
-      limits=c(0,60)),
-  torchDetails=ggplot()+
-    theme_bw()+
-    theme_animint(width=800)+
-    facet_grid(. ~ learner_id, labeller=label_both)+
-    scale_y_log10("normalized logistic loss (log scale)")+
-    geom_line(aes(
-      epoch, norm, color=set, group=set),
-      showSelected="task_it",
-      data=history_long[measure=="logloss"]))
+Finally, we combine the two previous plots into an interactive visualization using the code below.
+
+```{r viz-torch}
+(viz.torch <- animint(
+  overview=gg.best.seg+
+    theme_animint(width=800, colspan=2, last_in_row=TRUE)+
+    ggtitle("Select task and cross-validation iteration"),
+  details=gg.log.auc+
+    ggtitle("Selected learning curves")))
 ```
+
+Above we can see a data visualization with two plots:
+
+* Clicking the top overview plot selects a data set and cross-validation iteration.
+* The bottom plot shows the learning curves for the current selection.
+
+For some data sets, the AUC quickly attains a max near 1, and it is difficult to see how close it is to 1.
+To more easily visualize those details, the code below computes inverse AUC (1-AUC).
+The best value for AUC is 1, whereas it is 0 for inverse AUC.
+So using inverse AUC with a log scale, as in the code below, will show more details of how close it gets to 0.
 
 ```{r}
-get_fold <- function(DT,it=1)DT[iteration==it & task_id=="sonar"]
-history_fold <- get_fold(history_long)
-score_fold <- get_fold(score_torch)
-min_fold <- history_fold[
-, .SD[value==min(value)]
-, by=.(learner_id, measure, set)
-][, point := "min"]
-ggplot()+
-  theme_bw()+
-  geom_vline(aes(
-    xintercept=best_epoch),
-    data=score_fold)+
-  geom_text(aes(
-    best_epoch, Inf, label=paste0(" best epoch=", best_epoch)),
-    vjust=1.5, hjust=0,
-    data=score_fold)+
-  geom_line(aes(
-    epoch, value, color=set),
-    data=history_fold)+
-  geom_point(aes(
-    epoch, value, color=set, fill=point),
-    data=min_fold)+
-  scale_fill_manual(values=c(min="black"))+
-  facet_grid(measure ~ learner_id, labeller=label_both, scales="free")+
-  scale_x_continuous("epoch")+
-  scale_y_log10("")
+history_long[, let(
+  Measure = ifelse(measure=="logloss", "logloss", "invAUC"),
+  Relative_values = ifelse(
+    measure=="logloss", relative_values, 1-relative_values))]
+gg.log.scale <- ggplot()+
+   theme_bw()+
+   facet_grid(Measure ~ learner_id, scales="free")+
+   scale_x_continuous(breaks=seq(50,200,by=50))+
+   scale_y_log10()+
+   geom_line(aes(
+     epoch, Relative_values, color=set, group=set),
+     showSelected="task_it",
+     data=history_long)
 ```
 
+Note in the code above that we use capital `Measure` and `Relative_values`, along with a log-scale Y axis.
+The code below adds this new log-scale plot to the previous data visualization.
+
+```{r viz-torch-log}
+viz.torch.log <- viz.torch
+viz.torch.log$detailsLog <- gg.log.scale+
+  ggtitle("Selected learning curves (log scale)")+
+  theme(legend.position="none")
+viz.torch.log
+```
+
+The visualization above has an additional plot on the bottom right, which shows details for the selected data set and cross-validation iteration.
+For an example of additional details shown using inverse AUC, try selecting one of the cross-validation iterations in the `vowel` data set.
+
 ### glmnet
+
+
 
 ```{r}
 score_glmnet <- score_dt[grep("glmnet",learner_id)]
