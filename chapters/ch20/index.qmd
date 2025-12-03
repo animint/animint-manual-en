@@ -9,6 +9,12 @@ if(FALSE){
 
 In this chapter we will explore several data visualizations related to benchmarking machine learning algorithms using the `mlr3` framework.
 
+* We begin by explaining the advantages of the `mlr3` framework.
+* We use `mlr3` to define and execute a benchmark comparison using several binary classification problems, and several learning algorithms (nearest neighbors, linear model, neural networks).
+* We create various plots of test set error rates and Area Under the ROC curve.
+* We show how to add interactivity to ROC curves, including several levels of detail (data set, cross-validation iteration, FPR threshold).
+* We plot validation set metrics, which are used to check model selection, and we discuss signs of over- and under-fitting.
+
 ## What is `mlr3`? {#what-is-mlr3}
 
 There are many different packages which implement machine learning algorithms that can be used in R. For example,
