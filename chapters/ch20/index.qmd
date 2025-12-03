@@ -316,7 +316,7 @@ score_dt[, task_it := paste(task_id, iteration)]
    theme_bw()+
    facet_grid(task_id ~ ., scales="free")+
    scale_x_continuous(
-     "Area Under the ROC Curve")+
+     "Test set Area Under the ROC Curve")+
    geom_point(aes(
      classif.auc*100, learner_id),
      clickSelects="task_it",
@@ -821,7 +821,7 @@ gg.neighbors <- ggplot()+
     k, classif.auc, color=status),
     showSelected="task_it",
     data=details_dt)+
-  scale_y_continuous("Validation AUC")
+  scale_y_continuous("Validation set AUC")
 gg.neighbors+facet_grid(task_id ~ iteration)
 ```
 
@@ -840,6 +840,9 @@ animint(
     ggtitle("Nearest neighbors model selection")+
     theme_animint(update_axes="y", last_in_row=TRUE))
 ```
+
+Above we can click on the left plot to select a data set and cross-validation fold.
+Clicking on `zip` or `waveform`, the data sets with largest test AUC, shows that max validation AUC occurs for large numbers of neighbors.
 
 ### Torch
 
