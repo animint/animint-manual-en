@@ -1131,7 +1131,7 @@ Above we can see that the linear model can overfit if not properly regularized i
 
 ## Chapter summary and exercises {#ch20-exercises}
 
-We have created several data visualizations related to torch.
+We have created several data visualizations related to `mlr3` benchmarks.
 
 Exercises:
 
