@@ -238,7 +238,6 @@ original Figure.
 library(animint2)
 errorPlotStatic <- ggplot()+
   theme_bw()+
-  theme_animint(width=300, rowspan=1)+
   geom_hline(aes(
     yintercept=error.prop, color=set, linetype=set),
     data=Bayes.error)+
@@ -399,7 +398,11 @@ scatterPlotStatic
 Finally, we combine the two ggplots and render them as an animint.
 
 ```{r ch10-viz-static}
-animint(errorPlotStatic, scatterPlotStatic)
+animint(
+  errorPlotStatic+
+    theme_animint(width=300),
+  scatterPlotStatic+
+    theme_animint(last_in_row=TRUE))
 ```
 
 This data viz does have three interactive legends, but it is static in
@@ -460,7 +463,6 @@ set.colors <- c(
 errorPlot <- ggplot()+
   ggtitle("Select number of neighbors")+
   theme_bw()+
-  theme_animint(width=300)+
   geom_text(aes(
     min.neighbors, error.prop,
     color=set, label="Bayes"),
@@ -569,7 +571,6 @@ variable in the point, path, and text geoms.
 scatterPlot <- ggplot()+
   ggtitle("Mis-classification errors in train set")+
   theme_bw()+
-  theme_animint(width=450, colspan=1)+
   scale_x_continuous(
     "Input feature 1",
     breaks=seq(-2, 4))+
@@ -643,8 +644,10 @@ as a selector variable.
 
 ```{r ch10-viz-neighbors}
 animint(
-  errorPlot,
-  scatterPlot,
+  errorPlot+
+    theme_animint(width=300),
+  scatterPlot+
+    theme_animint(width=450, last_in_row=TRUE),
   first=list(neighbors=7),
   time=list(variable="neighbors", ms=3000))
 ```
@@ -703,7 +706,6 @@ facets <- function(df, facet)data.frame(df, facet=factor(
 errorPlotNew <- ggplot()+
   ggtitle("Select # of folds and neighbors")+
   theme_bw()+
-  theme_animint(width=325)+
   theme(panel.margin=grid::unit(0, "cm"))+
   facet_grid(facet ~ ., scales="free")+
   geom_text(aes(
@@ -769,8 +771,10 @@ curve plot.
 
 ```{r ch10-viz-folds}
 animint(
-  errorPlotNew,
-  scatterPlot,
+  errorPlotNew+
+    theme_animint(width=325),
+  scatterPlot+
+    theme_animint(width=450, last_in_row=TRUE),
   first=list(neighbors=7, n.folds=10))
 ```
 
