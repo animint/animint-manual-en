@@ -46,7 +46,7 @@ support for this, see [the update axes
 test](https://github.com/tdhock/animint2/blob/master/tests/testthat/test-renderer4-update-axes-multiple-ss.R)
 for details.
 
-## Compute statistics for each showSeleted subset {#stats}
+## Compute statistics for each `showSeleted` subset {#stats}
 
 Animints do not support `ggplot2` statistics with `showSelected`. For
 example, consider the facetted ggplot below.
@@ -189,31 +189,6 @@ The workarounds in animint are shown in the right panel above.
 It is possible to implement `vjust` support for `geom_text()` in animint, but we haven't yet had time to work on it. If you would like to implement it, we would be more than happy to accept a Pull Request. We already have an
 [issue explaining how to implement it](https://github.com/tdhock/animint/issues/148).
 
-## Order the plots on the page {#order-plots}
-
-Currently the only way to organize a multi-plot data viz is using the
-order of the ggplots in the animint `viz` list. The plots will appear
-on the web page in the same order as they occur in the animint `viz`
-list. For example, compare the data viz below with the data viz from
-the previous section.
-
-```{r ch07-viz-order}
-animint(
-  first=viz.just$workaround,
-  second=viz.just$vjust)
-```
-
-Note how the order of plots is reversed with respect to the data viz
-from the previous section. The main limitation of this method for plot
-layout is that only the order can be controlled. For example,
-depending on the width of the web page element in which the data viz
-above is rendered, the second plot will appear either below the first
-plot, or to the right of it.
-
-If you have an idea for a better way to define the layout of plots in
-an animint,
-[please tell us](https://github.com/tdhock/animint2/issues)!
-
 ## Avoid line breaks in text labels {#line-breaks}
 
 When rendering a ggplot using regular R graphics devices, using a line
@@ -340,11 +315,10 @@ shiny::runApp(system.file(
 
 ## Interactive computation {#shiny-computation}
 
-Another limitation is that animint can only display data that can be
-computed and stored in a data table before creating the
-visualization. This means that animint is not appropriate when there
-are more subsets of data to plot than you could ever compute. In that
-case, it would be better to use shiny.
+Another limitation is that `animint2` can only display data that can be computed and stored in a data table before creating the visualization.
+This means that `animint2` is not appropriate when there are more subsets of data to plot than you could ever compute (as in all possible selection states of a multiple selection variable).
+One exception is `geom_label_aligned()`, which computes `x` or `y` positions as a function of all the currently displayed elements of the multiple selection set.
+If you would like to compute something more complex based on the current multiple selection set, you may try to use `plotly` and `shiny` instead of `animint2`
 
 ## Chapter summary and exercises {#ch07-exercises}
 
