@@ -24,7 +24,7 @@ There are many different packages which implement machine learning algorithms th
 * `library(torch)` provides neural networks, which were explained in [Chapter 18](/ch18).
 
 When we want to machine learning to create a predictive model for a given data set, we typically want to try a variety of different algorithms, because we do not know in advance which algorithm will be most accurate for a given data set.
-So we would like to run the learning algorithms which are implemented in these different R packages, and standardized the results so they can be analyzed together to determine which algorithm is most accurate.
+So we would like to run the learning algorithms which are implemented in these different R packages, and we would like to standardize the results so they can be analyzed together to determine which algorithm is most accurate.
 Each R package provides a function for model fitting, which has a different name and API in each package (some functions input matrices, others data frames, etc).
 Typically each package provides a `predict()` method, but the output format differs between packages (some packages output class labels, others output probabilities between 0 and 1, others output a real-valued score, etc).
 How can we adapt our data set to each package?
