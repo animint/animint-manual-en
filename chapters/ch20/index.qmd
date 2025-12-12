@@ -286,7 +286,7 @@ The figure above shows three dots per row, one for each train/test split.
 We can see that nearest neighbors has smallest error rate is some data (`vowel`), whereas the `torch_dense_50` neural network is best in others like `spam`.
 The goal in the rest of this chapter will be to make interactive versions of this figure, which show details for each train/test split.
 
-### ROC curves
+### ROC curves {#roc-curves}
 
 In this section, we will compute ROC curves, which are useful for evaluation in binary classification.
 In fact, `$score()` has already computed the Area Under the Curve (AUC), which we plot below.
@@ -431,7 +431,7 @@ animint(
 
 In the visualization above, you can click the test AUC values in the top plot to show the corresponding ROC curve details in the bottom plot.
 
-### Interactive ROC curves
+### Interactive ROC curves {#interactive-roc-curves}
 
 In the previous section, we plotted points on the ROC curves, corresponding to the default thresholds of the algorithms' predicted scores.
 These points occur at different False Positive Rates, between algorithms.
@@ -525,7 +525,7 @@ Try clicking various FPR thresholds in the sonar data set.
 You should see that the algorithm ranking is different for different FPR thresholds.
 For example, `cv_glmnet` is worst for small FPR values, but it is best for larger FPR values.
 
-### Adding a zoom level
+### Adding a zoom level {#adding-a-zoom-level}
 
 The previous data visualizations used facets to display the test AUC of different data sets.
 In this section, we propose a re-design that shows test AUC for only one data set at a time.
@@ -638,7 +638,7 @@ The figure above shows
 * at the bottom, two test AUC plots for the selected data set.
 * in the upper right, ROC curves for the selected data set and iteration.
 
-### P-values
+### P-values for differences between learners {#p-values-learners}
 
 In this section, we compute and display P-values.
 First, we compute mean and standard deviation over test folds.
@@ -850,7 +850,7 @@ animint(
 Above we can click on the left plot to select a data set and cross-validation fold.
 Clicking on `zip` or `waveform`, the data sets with largest test AUC, shows that max validation AUC occurs for large numbers of neighbors.
 
-### Torch
+### Torch {#torch}
 
 In this section, we explore early stopping regularization with `torch` learners.
 First, we compute the selected number of epochs.
@@ -1066,7 +1066,7 @@ viz.torch.log
 The visualization above has an additional plot on the bottom right, which shows details for the selected data set and cross-validation iteration.
 For an example of additional details shown using inverse AUC, try selecting one of the cross-validation iterations in the `vowel` data set.
 
-### glmnet
+### glmnet {#glmnet}
 
 In this section, we explore visualizations of the `glmnet` L1-regularized linear model.
 We begin by using the `plot()` method of the model stored in the learner object.
