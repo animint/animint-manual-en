@@ -28,7 +28,7 @@ So we would like to run the learning algorithms which are implemented in these d
 Each R package provides a function for model fitting, which has a different name and API in each package (some functions input matrices, others data frames, etc).
 Typically each package provides a `predict()` method, but the output format differs between packages (some packages output class labels, others output probabilities between 0 and 1, others output a real-valued score, etc).
 How can we adapt our data set to each package?
-And how can we convert each packages results into a standard format for analysis?
+And how can we convert the predictions from each package into a standard format that allows easy comparison of results?
 The `mlr3` framework provides a useful package for this purpose [@bischl2024applied].
 
 * Each data set is represented as a `Task` which is basically a data table with meta-data about which columns to use for inputs, outputs, etc.
