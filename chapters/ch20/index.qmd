@@ -35,7 +35,7 @@ The `mlr3` framework provides a useful package for this purpose [@bischl2024appl
 * Each machine learning algorithm is represented as a `Learner` class that provides predicted values in a standard format (matrix of predicted probabilities for each class).
 
 This chapter explains how to use `animint2` to create interactive visualizations that explore how well different learning algorithms predict in different data sets.
-Some of the code in this chapter is adapted from [a blog post](https://tdhock.github.io/blog/2025/mlr3torch-conv/) with some static visualizations.
+Some of the code in this chapter is adapted from a tutorial about related static data visualizations [@Hocking2025-mlr3-cluster].
 
 ## Defining and running a benchmark {#running-a-benchmark}
 
@@ -112,7 +112,7 @@ In this section, we define which learning algorithms to run on the previously de
 The code below begins with a list of two learners:
 
 * `cv_glmnet` is a linear model, with degree of L1 regularization automatically selected using 10-fold cross-validation.
-* `featureless` is the standard baselines which ignores all of the input features, and always predicts the most frequent class that was seen in the training data.
+* `featureless` is the standard baseline which ignores all of the input features, and always predicts the most frequent class that was seen in the training data.
 
 ```{r}
 learner.list <- list(
@@ -229,7 +229,8 @@ bench.grid <- mlr3::benchmark_grid(
   kfoldcv)
 ```
 
-The code block below downloads the benchmark from `library(animint2data)`.
+Because our goal in this chapter is to explain data visualization techniques, we have pre-computed the results, which are saved in `library(animint2data)`.
+The code block below downloads these pre-computed results.
 
 ```{r}
 if(TRUE){
@@ -242,10 +243,10 @@ if(TRUE){
 }
 ```
 
-If you want to re-run the benchmark, you could run the line of code above.
+If you want to re-run the benchmark, you could run the line of code above with `benchmark()`.
 This benchmark may take several minutes or hours, depending on the speed of your computer.
 Running `plan("multisession")` enables parallel execution, each task/learner/split on a different CPU of your computer.
-Read [the related blog post](https://tdhock.github.io/blog/2025/mlr3torch-conv/) to see some R code that can be used to parallelize using a compute cluster, which would be even faster.
+To do the computation even faster, a compute cluster can be used for parallelization [@Hocking2025-mlr3-cluster].
 
 ## Test error and accuracy plots {#test-error-and-accuracy-plots}
 
