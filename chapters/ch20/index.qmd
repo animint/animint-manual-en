@@ -313,7 +313,7 @@ ggplot()+
     data=score_dt[learner_id!="featureless"])
 ```
 
-We see in the figure above that `featureless` is no longer present in the figure above.
+We see in the figure above that `featureless` is no longer present.
 The code below implements a slightly more complex version of the previous AUC plot, which will be used for interactive display.
 Note that we create a new `task_it` column which will be useful later as an interactive variable (for selecting `task_id` and `iteration` at the same time).
 
