@@ -518,9 +518,9 @@ Below we combine the previous plots into an interactive display.
 
 The interactive display above shows
 
-* in the top plot, you can click test AUC values to select a data set and cross-validation iteration.
-* in the bottom left plot, you can click a vertical line to select a FPR threshold.
-* in the bottom right plot, you can see the best TPR values for the selected FPR threshold.
+* in the top left plot, you can click test AUC values to select a data set and cross-validation iteration.
+* in the top right plot, you can click a vertical line to select a FPR threshold.
+* in the bottom plot, you can see the best TPR values for the selected FPR threshold.
 
 Try clicking various FPR thresholds in the sonar data set.
 You should see that the algorithm ranking is different for different FPR thresholds.
