@@ -266,7 +266,7 @@ score_dt <- bench.result$score(test_measure_list)
 score_dt[, .(task_id, learner_id, iteration, classif.auc, classif.ce)]
 ```
 
-The output above has one row per combination of task/learner/split, and two evaluation metrics: ROC-AUC and classification error.
+The output above has one row per combination of task/learner/split, and two columns for evaluation metrics: ROC-AUC and classification error.
 The code below visualizes the corresponding test error values.
 Note that we convert the error rate into a percent in order to save space in the X axis tick labels (30 versus 0.3 for example).
 
