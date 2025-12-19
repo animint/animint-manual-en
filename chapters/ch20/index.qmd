@@ -788,7 +788,10 @@ Each machine learning algorithm has a different hyper-parameter that is used to 
 ### Nearest neighbors {#nearest-neighbors-selection}
 
 In this section, we show how to verify is the number of neighbors was selected appropriately, to avoid over- and under-fitting.
-First, we compute a table with one row per train/test split, and columns which contain information on how many neighbors were used for prediction.
+After we divide the data into train and test sets, we then divide the train set into subtrain and validation sets.
+We would like to select the number of neighbors that maximizes the validation AUC, and then use this number of neighbors to compute predictions on the test set.
+For each test set, there could be a different selected number of neighbors.
+To visualize the number of selected neighbors, we compute a table with one row per train/test split, and columns which contain information on how many neighbors were used for prediction.
 
 ```{r}
 (best_dt <- score_dt[grep("knn", learner_id), {
@@ -830,10 +833,15 @@ gg.neighbors <- ggplot()+
 gg.neighbors+facet_grid(task_id ~ iteration)
 ```
 
-Above we see how the AUC was selected for each task and iteration.
+Above we have used
 
-* Some data sets (`sonar`, `spam`, `vowel`) have a clear max at an intermediate number of neighbors, which avoids both over- and under-fitting. For `vowel` iteration 2, max AUC occurs at the extreme value of 1 neighbor, which is unusual, but does not suggest underfitting in this case, because there is no smaller value of neighbors than 1.
-* Some data sets (`waveform`, `zip`) have max AUC at the largest number of neighbors (40), which suggests overfitting. These data suggest that an even larger AUC may be obtained by increasing the number of neighbors past 40, until we see a clear decrease of the AUC values.
+* color to highlight the best numbers of neighbors according to validation AUC values, and
+* vertical lines to highlight the selected number of neighbors.
+
+We can see how the AUC was selected for each task and iteration.
+
+* Three data sets (`sonar`, `spam`, `vowel`) have a clear max at an intermediate number of neighbors, which avoids both over- and under-fitting. For `vowel` iteration 2, max AUC occurs at the extreme value of 1 neighbor, which is the smallest hyper-parameter in our search. Ordinarily this would suggest to enlarging the search space, in hopes that an even smaller hyper-parameter may give even better validation AUC. However, there is no smaller value of neighbors than 1, so there is no possibility of underfitting with the number of neighbors hyper-parameter.
+* Two data sets (`waveform`, `zip`) have max AUC at the largest number of neighbors (40), which suggests overfitting. These data suggest that an even larger AUC may be obtained by increasing the number of neighbors past 40, until we see a clear decrease of the AUC values.
 
 Below we make an interactive version of the same plot.
 
