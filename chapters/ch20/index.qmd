@@ -259,6 +259,12 @@ sapply(test_measure_list, function(M)M$label)
 ```
 
 The output above shows the mapping between measure names and abbreviations.
+
+* `classif.auc` is the area under the ROC curve.
+* `classif.ce` is the classification error rate, which is the number of incorrectly predicted labels (positive or negative), divided by the total number of labels.
+* `classif.tpr` is the true positive rate, which is the number of correctly predicted positive labels, divided by the total number of positive labels.
+* `classif.fpr` is the false positive rate, which is the number of incorrectly predicted negative labels, divided by the total number of negative labels.
+
 Next, we run the `$score()` method of the benchmark result, to compute various evaluation metrics on the test set for each combination of task/learner/split.
 
 ```{r}
