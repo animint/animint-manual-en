@@ -1142,7 +1142,12 @@ ggplot()+
   facet_wrap("task_id", scales="free")
 ```
 
-Above we can see that the linear model can overfit if not properly regularized in some data sets (`sonar`, `vowel`, `waveform`), whereas there is evidence of underfitting in other data sets (`spam` and `zip`).
+Above we can see that the linear model can overfit if not properly regularized in some data sets (`sonar`, `vowel`, `waveform`).
+In the other data sets (`spam` and `zip`), we see a curve that always decreases, which suggests that the linear model underfits, and that better predictions may be possible using non-linear learners.
+Synthesizing the results from previous sections, we can check if that is true.
+
+* In `spam`, the `torch_dense_50` algorithm is more accurate than `cv_glmnet`, which indicates that the linear model is not powerful enough for optimale prediction in these data.
+* In `zip`, all algorithmes yield perfect predictions, which indicates that these data represent a problem which is very easy for all learners (even the linear model).
 
 ## Chapter summary and exercises {#ch20-exercises}
 
