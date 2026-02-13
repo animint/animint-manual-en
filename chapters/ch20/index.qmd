@@ -259,6 +259,12 @@ sapply(test_measure_list, function(M)M$label)
 ```
 
 The output above shows the mapping between measure names and abbreviations.
+
+* `classif.auc` is the area under the ROC curve.
+* `classif.ce` is the classification error rate, which is the number of incorrectly predicted labels (positive or negative), divided by the total number of labels.
+* `classif.tpr` is the true positive rate, which is the number of correctly predicted positive labels, divided by the total number of positive labels.
+* `classif.fpr` is the false positive rate, which is the number of incorrectly predicted negative labels, divided by the total number of negative labels.
+
 Next, we run the `$score()` method of the benchmark result, to compute various evaluation metrics on the test set for each combination of task/learner/split.
 
 ```{r}
@@ -266,7 +272,7 @@ score_dt <- bench.result$score(test_measure_list)
 score_dt[, .(task_id, learner_id, iteration, classif.auc, classif.ce)]
 ```
 
-The output above has one row per combination of task/learner/split, and two evaluation metrics: ROC-AUC and classification error.
+The output above has one row per combination of task/learner/split, and two columns for evaluation metrics: ROC-AUC and classification error.
 The code below visualizes the corresponding test error values.
 Note that we convert the error rate into a percent in order to save space in the X axis tick labels (30 versus 0.3 for example).
 
@@ -313,7 +319,7 @@ ggplot()+
     data=score_dt[learner_id!="featureless"])
 ```
 
-We see in the figure above that `featureless` is no longer present in the figure above.
+We see in the figure above that `featureless` is no longer present.
 The code below implements a slightly more complex version of the previous AUC plot, which will be used for interactive display.
 Note that we create a new `task_it` column which will be useful later as an interactive variable (for selecting `task_id` and `iteration` at the same time).
 
@@ -518,9 +524,9 @@ Below we combine the previous plots into an interactive display.
 
 The interactive display above shows
 
-* in the top plot, you can click test AUC values to select a data set and cross-validation iteration.
-* in the bottom left plot, you can click a vertical line to select a FPR threshold.
-* in the bottom right plot, you can see the best TPR values for the selected FPR threshold.
+* in the top left plot, you can click test AUC values to select a data set and cross-validation iteration.
+* in the top right plot, you can click a vertical line to select a FPR threshold.
+* in the bottom plot, you can see the best TPR values for the selected FPR threshold.
 
 Try clicking various FPR thresholds in the sonar data set.
 You should see that the algorithm ranking is different for different FPR thresholds.
@@ -720,13 +726,13 @@ To test for significant differences, we do a self-join below.
 
 ```{r}
 score_dt_rank <- score_stats[, .(auc.task.rank, learner_id, task_id)][
-  score_dt, on=.(learner_id, task_id), nomatch=0L]
+  score_dt, on=.(learner_id, task_id), nomatch=0L
+][order(task_id, auc.task.rank)]
 (join_dt <- score_dt_rank[, next.rank := auc.task.rank+1][
-  score_dt_rank,
-  .(task_id, iteration,
-    auc.task.rank,
-    lo.auc=classif.auc,
-    hi.auc=i.classif.auc),
+  score_dt_rank, .(
+    task_id, iteration,
+    good.rank=i.auc.task.rank, bad.rank=x.auc.task.rank,
+    good.auc =i.classif.auc,   bad.auc =x.classif.auc),
   on=.(task_id, iteration, auc.task.rank=next.rank),
   nomatch=0L])
 ```
@@ -734,14 +740,12 @@ score_dt_rank <- score_stats[, .(auc.task.rank, learner_id, task_id)][
 Below we compute P-values.
 
 ```{r}
-(pval_dt <- join_dt[, {
+(pval_dt <- join_dt[, .SDcols=c("good.auc","bad.auc"), {
+  mean_dt <- lapply(.SD, mean)
   paired <- t.test(
-    lo.auc, hi.auc, alternative = "l", paired=TRUE)
-  data.table(
-    p.paired=paired$p.value,
-    mean.lo=mean(lo.auc),
-    mean.hi=mean(hi.auc))
-}, by=.(task_id, auc.task.rank)])
+    bad.auc, good.auc, alternative = "l", paired=TRUE)
+  c(mean_dt, p.paired=paired$p.value)
+}, keyby=.(task_id, good.rank, bad.rank)])
 ```
 
 Above we see a table with one row per T-test result.
@@ -750,8 +754,8 @@ We plot the differences between means in red below.
 ```{r}
 gg.rank.seg <- gg.rank+
   geom_segment(aes(
-    mean.lo, auc.task.rank+0.5,
-    xend=mean.hi, yend=auc.task.rank+0.5),
+    bad.auc, good.rank+0.5,
+    xend=good.auc, yend=good.rank+0.5),
     color="red",
     data=pval_dt)
 gg.rank.seg+facet_wrap("task_id", scales="free")
@@ -763,7 +767,7 @@ Below we add text to show P-values.
 ```{r}
 gg.rank.p <- gg.rank.seg+
   geom_text(aes(
-    mean.lo, auc.task.rank+0.5, label=ifelse(
+    bad.auc, good.rank+0.5, label=ifelse(
       p.paired<0.01, "P<0.01",
       sprintf("P=%.2f", p.paired))),
     color="red", hjust=1, size=10,
@@ -790,7 +794,10 @@ Each machine learning algorithm has a different hyper-parameter that is used to 
 ### Nearest neighbors {#nearest-neighbors-selection}
 
 In this section, we show how to verify is the number of neighbors was selected appropriately, to avoid over- and under-fitting.
-First, we compute a table with one row per train/test split, and columns which contain information on how many neighbors were used for prediction.
+After we divide the data into train and test sets, we then divide the train set into subtrain and validation sets.
+We would like to select the number of neighbors that maximizes the validation AUC, and then use this number of neighbors to compute predictions on the test set.
+For each test set, there could be a different selected number of neighbors.
+To visualize the number of selected neighbors, we compute a table with one row per train/test split, and columns which contain information on how many neighbors were used for prediction.
 
 ```{r}
 (best_dt <- score_dt[grep("knn", learner_id), {
@@ -832,10 +839,15 @@ gg.neighbors <- ggplot()+
 gg.neighbors+facet_grid(task_id ~ iteration)
 ```
 
-Above we see how the AUC was selected for each task and iteration.
+Above we have used
 
-* Some data sets (`sonar`, `spam`, `vowel`) have a clear max at an intermediate number of neighbors, which avoids both over- and under-fitting. For `vowel` iteration 2, max AUC occurs at the extreme value of 1 neighbor, which is unusual, but does not suggest underfitting in this case, because there is no smaller value of neighbors than 1.
-* Some data sets (`waveform`, `zip`) have max AUC at the largest number of neighbors (40), which suggests overfitting. These data suggest that an even larger AUC may be obtained by increasing the number of neighbors past 40, until we see a clear decrease of the AUC values.
+* color to highlight the best numbers of neighbors according to validation AUC values, and
+* vertical lines to highlight the selected number of neighbors.
+
+We can see how the AUC was selected for each task and iteration.
+
+* Three data sets (`sonar`, `spam`, `vowel`) have a clear max at an intermediate number of neighbors, which avoids both over- and under-fitting. For `vowel` iteration 2, max AUC occurs at the extreme value of 1 neighbor, which is the smallest hyper-parameter in our search. Ordinarily this would suggest to enlarging the search space, in hopes that an even smaller hyper-parameter may give even better validation AUC. However, there is no smaller value of neighbors than 1, so there is no possibility of underfitting with the number of neighbors hyper-parameter.
+* Two data sets (`waveform`, `zip`) have max AUC at the largest number of neighbors (40), which suggests overfitting. These data suggest that an even larger AUC may be obtained by increasing the number of neighbors past 40, until we see a clear decrease of the AUC values.
 
 Below we make an interactive version of the same plot.
 
@@ -1130,7 +1142,12 @@ ggplot()+
   facet_wrap("task_id", scales="free")
 ```
 
-Above we can see that the linear model can overfit if not properly regularized in some data sets (`sonar`, `vowel`, `waveform`), whereas there is evidence of underfitting in other data sets (`spam` and `zip`).
+Above we can see that the linear model can overfit if not properly regularized in some data sets (`sonar`, `vowel`, `waveform`).
+In the other data sets (`spam` and `zip`), we see a curve that always decreases, which suggests that the linear model underfits, and that better predictions may be possible using non-linear learners.
+Synthesizing the results from previous sections, we can check if that is true.
+
+* In `spam`, the `torch_dense_50` algorithm is more accurate than `cv_glmnet`, which indicates that the linear model is not powerful enough for optimale prediction in these data.
+* In `zip`, all algorithmes yield perfect predictions, which indicates that these data represent a problem which is very easy for all learners (even the linear model).
 
 ## Chapter summary and exercises {#ch20-exercises}
 

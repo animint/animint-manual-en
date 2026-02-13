@@ -349,7 +349,7 @@ Exercises:
   plot with the model selection function for the currently selected
   signal. 
 * Re-design the previous animint so that instead of using a third
-  plot, add a facet to the max margin regression regression plot such
+  plot, add a facet to the max margin regression plot such
   that the log(lambda) axes are aligned. Add another facet that shows
   the number of incorrect labels (`intreg$selection$cost`) for each
   log(lambda) value.
