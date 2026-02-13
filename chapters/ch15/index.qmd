@@ -20,10 +20,10 @@ However, there are some functions which have no explicit expression
 for their roots. For example, the roots of the Poisson loss
 `f(x)=a*x+b*log(x)+c` have no explicit expression in terms of common
 mathematical functions. (actually it has a solution in terms of the
-[Lambert W function](https://www.wolframalpha.com/input/?i=a*x+%2Bb*log%28x%29%2B+c%3D0)
+Lambert W function [@Lambert_W_function]
 but that function is not commonly available) This goal of this chapter
 is to create an interactive data visualization that explains
-[Newton's method](https://en.wikipedia.org/wiki/Newton%27s_method) for
+Newton's method [@Newton's_method] for
 finding the roots of such functions.
 
 Chapter outline:
@@ -304,7 +304,7 @@ Exercises:
 * Create another plot that allows you to select the threshold. Plot
   the number of iterations as a function of threshold.
 * Derive the loss function for
-  [Binomial regression](https://en.wikipedia.org/wiki/Binomial_regression),
+  Binomial regression [@Binomial_regression],
   and visualize the corresponding Newton root finding method.
 * Refactor `gg.it` code to use only one `geom_point`, instead of the four geoms in the current code. Hint: use `rbind()` to create a single table with all of the data.
 

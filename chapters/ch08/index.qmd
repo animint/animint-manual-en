@@ -254,6 +254,6 @@ Exercises:
   Each label should appear only when the country is selected, and should disappear after clicking on the label.
 * Add points on each time series plot, with size proportional to population, as in the scatterplot.
   The points should appear only when the country is selected, and clicking the points should de-select that country.
-* As in [this gallery example](https://tdhock.github.io/2025-01-WorldBank-facets-map/), add world map in the Year/Year facet which is currently empty.
+* As in this gallery example [@WorldBank_data_visualization], add world map in the Year/Year facet which is currently empty.
 
 Next, [Chapter 9](/ch09) explains how to visualize the Montreal bike data set.

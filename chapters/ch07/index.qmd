@@ -25,7 +25,7 @@ chapter, you will understand how to
 
 If you have an idea for improving `animint2` so that it overcomes one of
 these limitations, the `animint2` developers would be more than happy to
-review your [Pull Request](https://github.com/tdhock/animint2/compare).
+review your Pull Request [@Pull_Request].
 
 ## Use normalized variables to work with fixed scales {#normalized-variables}
 
@@ -42,9 +42,7 @@ interactively update. One example is when different `showSelected`
 subsets have very different values for variables that are shown with
 an axis or legend. In this case it would be useful to have interactive
 axes that update and change along with the data. We have experimental
-support for this, see [the update axes
-test](https://github.com/tdhock/animint2/blob/master/tests/testthat/test-renderer4-update-axes-multiple-ss.R)
-for details.
+support for this, see the update axes test for details [@update-axes-multiple-ss].
 
 ## Compute statistics for each `showSeleted` subset {#stats}
 
@@ -187,7 +185,7 @@ The workarounds in animint are shown in the right panel above.
 * Use the new `geom_label_aligned()`, which does support `vjust`. For an example, please read [Chapter 8](/ch08).
 
 It is possible to implement `vjust` support for `geom_text()` in animint, but we haven't yet had time to work on it. If you would like to implement it, we would be more than happy to accept a Pull Request. We already have an
-[issue explaining how to implement it](https://github.com/tdhock/animint/issues/148).
+issue explaining how to implement it [@issue_explaining_how_to_implement_it].
 
 ## Avoid line breaks in text labels {#line-breaks}
 
@@ -211,7 +209,7 @@ animint(gg.return)
 
 It would be nice to support multiple lines in `geom_text()` labels, but
 we have not yet had time to implement that. However, we have
-[an issue](https://github.com/tdhock/animint/issues/149), and would be
+an issue [@an_issue], and would be
 willing to accept a Pull Request which implements that. 
 
 Until then, the workaround is to use one `geom_text()` layer for each
@@ -229,7 +227,7 @@ gg.two.lines
 animint(gg.two.lines)
 ```
 
-Also note in these examples that the text size is not consistent between static and interactive rendering, which [is an issue](https://github.com/animint/animint2/issues/230)
+Also note in these examples that the text size is not consistent between static and interactive rendering, which is an issue [@is_an_issue]
 
 * in interactive plots, we want `size` to be the number of pixels, and
 * in static plots, `size` interpretation is consistent with legacy `ggplot2` interpretation of size (could be changed for consistency with interactive rendering).
@@ -237,7 +235,7 @@ Also note in these examples that the text size is not consistent between static 
 ## Avoid some ggplot theme options {#theme-options}
 
 One goal of animint is to support
-[all of the theme options](http://docs.ggplot2.org/current/theme.html),
+all of the theme options [@all_of_the_theme_options],
 but we have not yet had time to implement them all. If there is a
 theme option that you use and animint does not yet support, then
 please send us a Pull Request. The following list documents all the

@@ -8,8 +8,8 @@ There are two primary ways you can help make the manual even better.
 If you don't understand something in this manual, please let us know!
 Your feedback on what is confusing or hard to understand is valuable.
 
-* For most issues, please [report an issue](https://github.com/animint/animint-manual-en/issues/new) in public to animint developers in this GitHub repo. The link also appears on the right sidebar of each web page.
-* For issues which you would prefer to discuss privately, please [write me an email](mailto:Toby.Hocking@R-Project.org).
+* For most issues, please report an issue [@report_an_issue] in public to animint developers in this GitHub repo. The link also appears on the right sidebar of each web page.
+* For issues which you would prefer to discuss privately, please write me an email, `Toby.Hocking@R-Project.org`.
 
 ## Submitting edits {#submitting-edits}
 

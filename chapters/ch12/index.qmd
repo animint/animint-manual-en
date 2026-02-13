@@ -6,7 +6,7 @@ knitr::opts_chunk$set(fig.path="ch12-figures/")
 
 This goal of this chapter is to create an interactive data
 visualization that explains the
-[Support Vector Machine](https://en.wikipedia.org/wiki/Support_vector_machine),
+Support Vector Machine [@Support_Vector_Machine],
 a machine learning model for binary classification.
 
 Chapter summary:

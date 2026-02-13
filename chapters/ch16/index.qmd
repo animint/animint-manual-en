@@ -327,7 +327,7 @@ the solid red line. It is clear that it intersects each of the black
 target intervals, and maximizes the margin (red vertical dotted
 lines). For more information on the subject of supervised changepoint
 detection, please see
-[my useR 2017 tutorial](https://github.com/tdhock/change-tutorial).
+my useR 2017 tutorial [@my_useR_2017_tutorial].
 
 Now that you know how to visualize each of the seven parts of the
 `intreg` data set, the rest of the chapter is devoted to exercises.
@@ -359,7 +359,7 @@ Exercises:
   for the currently selected signal. Furthermore add a visual
   indication of the selected model to the max margin regression plot.
   The result should look something
-  [like this](https://rcdata.nau.edu/genomic-ml/animint-gallery/2016-01-28-Max-margin-interval-regression-for-supervised-segmentation-model-selection/index.html).
+  like this [@mmir_viz].
 * Make another data viz by starting with the facetted `gg.signals`
   plot in the beginning of this chapter. Add a plot that can be used
   to select the number of segments for each signal. For each signal in
@@ -368,7 +368,7 @@ Exercises:
   signal -- you can use named `clickSelects` and `showSelected` as explained in
   [Chapter 14](/ch14)). The result should look
   something
-  [like this](https://rcdata.nau.edu/genomic-ml/animint-gallery/2016-11-10-Max-margin-supervised-penalty-learning-for-peak-detection-in-ChIP-seq-data/index.html).
+  like this [@mmir_chipseq].
 
 Next, [Chapter 17](/ch17) explains how to
 visualize the K-means clustering algorithm.
