@@ -9,10 +9,10 @@ data visualizations on the web. After reading this chapter, you will
 be able to view animints
 
 * from a local directory on your personal computer.
-* in [R Markdown](http://rmarkdown.rstudio.com/) documents.
+* in R Markdown [@R_Markdown] documents.
 * using any web server, including [Netlify
   Drop](https://app.netlify.com/drop).
-* published using [GitHub pages](https://pages.github.com/), and
+* published using GitHub pages [@GitHub_pages], and
   organized into a group called a gallery.
 
 ## Compile to a local directory {#animint2dir}
@@ -111,7 +111,7 @@ one of the methods described below, which are free for anyone.
 
 ## Publish on Netlify Drop {#netlifydrop}
 
-[Netlify Drop](https://app.netlify.com/drop) is for hosting static web
+Netlify Drop [@Netlify_Drop] is for hosting static web
 sites. To publish your data viz there, simply drag a directory to that
 web page (it can be a directory resulting from `animint2dir`, or from
 `rmarkdown::render` if your animint is inside Rmd, as described
@@ -120,11 +120,11 @@ can be used to view the files in that directory. No registration/login
 is required, but if you do not register an account, your data viz will
 be deleted after one hour. You can register for a free account if you
 want your data viz to be available longer.
-Another limitation is 54,000 files per directory, as mentioned in [the Deploy Overview docs](https://docs.netlify.com/deploy/deploy-overview/).
+Another limitation is 54,000 files per directory, as mentioned in the Deploy Overview docs [@the_Deploy_Overview_docs].
 
 ## Publish on GitHub Pages {#pages}
 
-[GitHub Pages](https://pages.github.com/) is a service that provides
+GitHub Pages [@GitHub_Pages] is a service that provides
 static web site hosting, and can be used to publish animints. To
 publish an animint on GitHub Pages, you need a GitHub account, and the
 packages `gert` (for running git from R), `gh` (for using the GitHub
@@ -214,18 +214,23 @@ the following method:
 
 There is a recommended sequence of actions for creating and publishing animints, which we call the `animint2` GitHub deployment steps, because GitHub is used for publishing and reproducibility.
 
-* Begin by writing some visualization code in `figure-name.R` in a GitHub repository, where `name` is an informative name for your data visualization. For example, the [tdhock/cs499-spring2020](https://github.com/tdhock/cs499-spring2020) GitHub repository contains visualization code in [figure-quadratic-interactive.R](https://github.com/tdhock/cs499-spring2020/blob/master/2020-02-03-capacity/figure-quadratic-interactive.R).
+* Begin by writing some visualization code in `figure-name.R` in a GitHub repository, where `name` is an informative name for your data visualization. For example, the tdhock/cs499-spring2020 [@tdhock/cs499-spring2020] GitHub repository contains visualization code in figure-quadratic-interactive.R [@figure-quadratic-interactive.R].
 * Commit and push the R code file to GitHub, so you can get a public URL that you can add in your R code as the [`source` option](/ch06#source-option), for example `source="https://github.com/tdhock/cs499-spring2020/blob/master/2020-02-03-capacity/figure-quadratic-interactive.R"`.
 * Add a [`title` option](/ch06#title-option) in your R code, for example `title="Overfitting using linear model polynomial degree"`.
 * Use [HTML table layout](/ch06#html-table-layout) to make sure that the ggplots in your visualisation always have the same arrangement (in any size web browser window).
+<<<<<<< Updated upstream
 * Optionally, create a 2-5 minute screencast video with voice narration that explains how to interpret and interact with the visualization. Upload the video to a site like [vimeo](https://vimeo.com) (up to 1GB free hosting without advertisement), then add a [`video` option](/ch06#video-option) in your R code, for example `video="https://vimeo.com/1127992420"`.
 * At this point, using `animint()` or `animint2dir()` to output your visualization to a local directory of files should result in working "source" and "video" links at the bottom.
+=======
+* Optionally, create a 2-5 minute screencast video with voice narration that explains how to interpret and interact with the visualization. Upload the video to a site like vimeo [@vimeo] (up to 1GB free hosting without advertisement), then add a [`video` option](/ch06#video-option) in your R code, for example `video="https://vimeo.com/1127992420"`.
+* At this point, using `animint()` or `animint2dir()` to output your visualization to a local directory of files should result in working `source` and `video` links at the bottom.
+>>>>>>> Stashed changes
 * Before publishing your visualization on GitHub, make sure that you can create an automatic screenshot, which requires `chromote` and `magick` packages, `install.packages(c("chromote","magick"))`.
 * Add `animint2pages(viz, "new_repo", chromote_sleep_seconds=3)` inside an `if(FALSE)` block at the end of your R code (the `if` is useful so you can run the whole script without automatically publishing). Make sure `new_repo` is different from the repo used to host the `source` code.
 * Execute the `animint2pages()` line to publish the visualisation to a GitHub repository. Continuing the example above, my GitHub username is `tdhock` and the `new_repo` name I chose was `2020-02-03-capacity-polynomial-degree`, so the new owner/repo is `tdhock/2020-02-03-capacity-polynomial-degree`, and the GitHub Pages link is <https://tdhock.github.io/2020-02-03-capacity-polynomial-degree>.
 * Add the owner/repo to the `repos.txt` file of a gallery, then run `animint2::update_gallery()` to push the gallery update to GitHub.
 * Now this data visualization is complete! If you want to make small modifications, you can re-run `animint2pages()` using the same repo, to replace/update the existing visualization.
-* If you want to make larger modifications, it is recommended to copy the R code to a new file, for example [figure-several-interactive.R](https://github.com/tdhock/cs499-spring2020/blob/master/2020-02-03-capacity/figure-several-interactive.R) for a new visualization with an additional selector for `pattern`.
+* If you want to make larger modifications, it is recommended to copy the R code to a new file, for example figure-several-interactive.R [@figure-several-interactive.R] for a new visualization with an additional selector for `pattern`.
 * Then repeat the steps in this list for the new file!
 
 The GitHub deployment steps are useful because they result in a data visualization that is reproducible due to various links.
@@ -233,11 +238,11 @@ The GitHub deployment steps are useful because they result in a data visualizati
 * The data visualization has links to the corresponding `source` code and explanatory `video`.
 * The gallery entry has links to the data visualization, along with its `source` code and explanatory `video`.
 * The R code file has a link to the repo that deployed the data visualization, for example:
-  * the R code in [figure-quadratic-interactive.R](https://github.com/tdhock/cs499-spring2020/blob/master/2020-02-03-capacity/figure-quadratic-interactive.R)
+  * the R code in figure-quadratic-interactive.R [@figure-quadratic-interactive.R]
   * has `2020-02-03-capacity-polynomial-degree` at the bottom on the `animint2pages()` line,
   * and has `tdhock` as the owner of the repo,
   * so it can be inferred that the visualization was deployed to <https://github.com/tdhock/2020-02-03-capacity-polynomial-degree>.
-* The data visualization deployment repo has a [README.md](https://github.com/tdhock/2020-02-03-capacity-polynomial-degree/blob/gh-pages/README.md) which has a link to the data visualization, <https://tdhock.github.io/2020-02-03-capacity-polynomial-degree/>.
+* The data visualization deployment repo has a README.md [@README.md] which has a link to the data visualization, <https://tdhock.github.io/2020-02-03-capacity-polynomial-degree/>.
 
 ## Chapter summary and exercises {#ch05-exercises}
 
@@ -254,7 +259,7 @@ Exercises:
   repository. Create a screenshot and save it as `Capture.PNG` in the
   `gh-pages` branch of that repository. Add that repository to the
   main animint gallery
-  [repos.txt](https://github.com/animint/gallery/blob/gh-pages/repos.txt)
+  repos.txt [@repos.txt]
   by submitting a Pull Request on GitHub.
 * Create your own animint gallery repository, and add two or more of
   your own animints to that gallery.

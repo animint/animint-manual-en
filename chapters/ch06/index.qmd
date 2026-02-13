@@ -86,9 +86,9 @@ default by explicitly specifying `aes(tooltip)`.
 ### HTML id attribute using `aes(id)` {#aes-id}
 
 Since everything plotted by `animint2` is rendered as an
-[SVG](http://www.w3schools.com/html/html5_svg.asp) element in a web
+SVG [@SVG] element in a web
 page, you may want to specify a
-[HTML id attribute](http://www.w3schools.com/tags/att_global_id.asp)
+HTML id attribute [@HTML_id_attribute]
 using `aes(id)` as below.
 
 ```{r ch06-viz-id}
@@ -107,7 +107,7 @@ well-defined id must not include spaces. Note also that `paste` is
 used to add a group number, since there may be more than one polygon
 per state/region, and each id must be unique on a web page. The
 `animint2` developers use this feature
-[for testing the animint JavaScript renderer code](https://github.com/tdhock/animint/wiki/Testing).
+for testing the animint JavaScript renderer code [@for_testing_the_animint_JavaScript_renderer_code].
 
 ### Data compression using `aes(group)` {#aes-group}
 
@@ -306,7 +306,7 @@ Both are useful in combination with `clickSelects`, so we also provide helper fu
 * `make_tallrect(data, "x_variable")` creates a rectangle for each unique value of the column with name `x_variable` in `data`.
 * `make_widerect(data, "y_variable")` creates a rectangle for each unique value of the column with name `y_variable` in `data`.
 
-Both of these are capable of showing smooth transitions for the selected rectangle, as in the [WorldBank data visualization with two time series facets](https://tdhock.github.io/2025-01-WorldBank-facets-map/).
+Both of these are capable of showing smooth transitions for the selected rectangle, as in the WorldBank data visualization with two time series facets [@WorldBank_data_visualization].
 
 * a expanded data set with `N^2` rows is computed for `N` unique values to select.
 * there are `N` sets of rows, each with a different `showSelected` value.
@@ -319,7 +319,7 @@ For more discussion about this technique, see [Chapter 11](/ch11).
 
 When using multiple selection, it is often useful to display text labels to indicate the items in the selection set.
 When labels are aligned (with the same X or Y value), then `geom_label_aligned()` can be used to adjust positions, to avoid overlapping labels.
-For example, the [WorldBank data visualization](https://tdhock.github.io/2025-01-WorldBank-facets-map/) shows a text label before the first year of each selected country's time series.
+For example, the WorldBank data visualization [@WorldBank_data_visualization] shows a text label before the first year of each selected country's time series.
 For more discussion about this technique, see [Chapter 8](/ch08).
 
 ## Geom options {#geom-options}
@@ -720,7 +720,7 @@ is generally useful for rendering maps.
 ### HTML table layout {#html-table-layout}
 
 Since summer 2025, `animint2` supports plot layout in an HTML table.
-A typical example is when you want to display three linked plots, with one plot to the right of two other plots, as in [this visualization of cross-validation for change-point model selection](https://tdhock.github.io/figure-binseg-cv-most-frequently-selected-fr/).
+A typical example is when you want to display three linked plots, with one plot to the right of two other plots, as in this visualization of cross-validation for change-point model selection [@this_visualization_of_cross-validation_for_change-point_model_selection].
 To specify the HTML table layout, we use three new arguments in `theme_animint()`:
 
 * `rowspan=2` means the plot takes up two rows in the table (default 1).
@@ -906,7 +906,7 @@ and what interactions are possible.
 The selectize option should be a named list of logical values. Names
 should be selector variables, and values should indicate whether or
 not you would like to render a selection menu via
-[selectize.js](http://selectize.github.io/selectize.js/). By default,
+selectize.js [@selectize.js]. By default,
 `animint2` will render a selection menu for every selection variable,
 with two exceptions:
 
@@ -919,7 +919,7 @@ with two exceptions:
 These defaults should work well for the vast majority of animints. For
 those who are interested to see an example of how the `selectize`
 option works, please see the
-[PredictedPeaks test in the `animint2` source code](https://github.com/tdhock/animint2/blob/master/tests/testthat/test-renderer2-PredictedPeaks.R).
+PredictedPeaks test in the `animint2` source code [@PredictedPeaks_test_in_the_animint2_source_code].
   
 ## Chapter summary and exercises {#ch06-exercises}
 

@@ -179,7 +179,7 @@ visualization. Instead, the data can simply be presented for visual
 inspection in a table.
 
 As a concrete example, consider
-[the famous tea tasting experiment proposed by Ronald Fisher](https://en.wikipedia.org/wiki/Lady_tasting_tea). A
+the famous tea tasting experiment proposed by Ronald Fisher [@the_famous_tea_tasting_experiment_proposed_by_Ronald_Fisher]. A
 Lady claimed that she could taste the difference when milk is added to
 the teacup before or after the tea. Fisher asked the question, can the
 Lady really taste the difference between the two types of tea?
@@ -269,7 +269,7 @@ ggplot()+
 The static data visualization shows that CO2 concentrations increased
 over the second half of the twentieth century. This particular data
 visualization is called a
-[Keeling Curve](https://en.wikipedia.org/wiki/Keeling_Curve). It is
+Keeling Curve [@Keeling_Curve]. It is
 named after Charles David Keeling, the pioneering scientist who
 collected the first frequent regular data on atmospheric CO2. The
 general increasing trend can be explained by considering the chemical

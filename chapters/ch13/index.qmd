@@ -6,7 +6,7 @@ knitr::opts_chunk$set(fig.path="ch13-figures/")
 
 This goal of this chapter is to create an interactive data
 visualization that explains
-[Poisson regression](https://en.wikipedia.org/wiki/Poisson_regression),
+Poisson regression [@Poisson_regression],
 a machine learning model for predicting an integer-valued output from
 inputs that are real-valued vectors. This is a "linear regression"
 model since it learns a linear function from the inputs to the
@@ -350,7 +350,7 @@ Exercises:
   one `geom_point()` with a larger data set (Hint: use
   `data.table::melt` with `measure.vars=c("cum.prob", "probability")`.
 * Create a similar sequence of data visualizations for the
-  [Binomial regression](https://en.wikipedia.org/wiki/Binomial_regression)
+  Binomial regression [@Binomial_regression]
   model.
 
 Next, [Chapter 14](/ch14) explains how to use the
