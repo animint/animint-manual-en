@@ -42,9 +42,7 @@ interactively update. One example is when different `showSelected`
 subsets have very different values for variables that are shown with
 an axis or legend. In this case it would be useful to have interactive
 axes that update and change along with the data. We have experimental
-support for this, see [the update axes
-test](https://github.com/tdhock/animint2/blob/master/tests/testthat/test-renderer4-update-axes-multiple-ss.R)
-for details.
+support for this, see the update axes test for details [@update-axes-multiple-ss].
 
 ## Compute statistics for each `showSeleted` subset {#stats}
 

@@ -10,8 +10,7 @@ be able to view animints
 
 * from a local directory on your personal computer.
 * in R Markdown [@R_Markdown] documents.
-* using any web server, including [Netlify
-  Drop](https://app.netlify.com/drop).
+* using any web server, including Netlify Drop [@Netlify_Drop].
 * published using GitHub pages [@GitHub_pages], and
   organized into a group called a gallery.
 
@@ -64,8 +63,7 @@ will be overwritten. To view the data viz, navigate to
 `ch05-sharing-ten-points/index.html` in a web browser (which should be
 done automatically / by default). If the web page is blank, you may
 need to configure your browser to allow execution of local JavaScript
-code, [as explained on our
-FAQ](https://github.com/tdhock/animint2/wiki/FAQ#web-browser-on-local-indexhtml-file-is-blank).
+code, as explained on our FAQ [@wiki_FAQ].
 
 Internally, R calls the `print.animint` S3 method, which calls
 `animint2dir` to compile it to a new temporary directory on your
@@ -129,10 +127,10 @@ static web site hosting, and can be used to publish animints. To
 publish an animint on GitHub Pages, you need a GitHub account, and the
 packages `gert` (for running git from R), `gh` (for using the GitHub
 API from R), and `gitcreds` (for interacting with the git credential
-store, easy authentication when pushing to GitHub). First, install
-those packages. If you don't have a GitHub account, you can [sign up
-for free](https://github.com/join). Then make sure to tell R what
-name/email to use for git commits:
+store, easy authentication when pushing to GitHub).
+First, install those packages.
+If you don't have a GitHub account, you can sign up for free.
+Then make sure to tell R what name/email to use for git commits:
 
 ```r
 gert::git_config_global_set("user.name", "<your_full_name>")
