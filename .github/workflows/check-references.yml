@@ -6,7 +6,7 @@ on:
     branches:
       - main
 
-name: Check links
+name: Check http
 
 jobs:
   check:
