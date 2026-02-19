@@ -100,11 +100,11 @@ task_list
 
 The code above results in a task list with 5 binary classification tasks:
 
-* `spam` represents email classification into spam or not, based on a bag of words vector.
-* `sonar` represents a problem of discriminating metal and rock, based on a vector of sonar frequency bands [@sonar].
-* `vowel` represents a problem of discriminating vowel sounds, using ten features extracted from audio data.
+* `spam` represents email classification into spam or not, based on a bag of words vector [@spambase].
+* `sonar` represents a problem of discriminating metal and rock, based on a vector of sonar frequency bands [@gorman1988analysis].
+* `vowel` represents a problem of discriminating vowel sounds, using ten features extracted from audio data [@vowel].
 * `waveform` is a simulated binary problem [@Hastie2009].
-* `zip` represents handwritten digit recognition, where features are a vector representing 16x16 pixel intensities.
+* `zip` represents handwritten digit recognition, where features are a vector representing 16x16 pixel intensities [@lecun1990].
 
 ### Learners {#learners}
 
