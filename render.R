@@ -5,9 +5,11 @@ install.packages(missing.pkgs)
 remotes::install_github("animint/animint2", dep=TRUE)
 remotes::install_github("animint/animint2data")
 unlink("chapters/_book", recursive = TRUE)
-quarto::quarto_render("chapters")
+chapters <- "chapters"
+quarto::quarto_render(chapters)
 ## copy data viz to site.
-for(glob in c("chapters/*/animint.js", "chapters/ch*/*/animint.js")){
+gvec <- file.path(chapters, c("*/animint.js", "ch*/*/animint.js"))
+for(glob in gvec){
   animint_js_vec <- Sys.glob(glob)
   from_dir_vec <- dirname(animint_js_vec)
   to_dir_vec <- dirname(sub("/", "/_book/", from_dir_vec))
@@ -19,4 +21,4 @@ for(glob in c("chapters/*/animint.js", "chapters/ch*/*/animint.js")){
   }
 }
 ## preview site.
-if(interactive())servr::httd("chapters/_book")
+if(interactive())servr::httd(file.path(chapters, "_book"))

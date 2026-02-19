@@ -6,7 +6,7 @@ knitr::opts_chunk$set(fig.path="ch11-figures/")
 
 This goal of this chapter is to create an interactive data
 visualization that explains the
-[Lasso](https://en.wikipedia.org/wiki/Lasso_%28statistics%29), a
+Lasso [@Lasso], a
 machine learning model for regularized linear regression.
 
 Chapter outline:

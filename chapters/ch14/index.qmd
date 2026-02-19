@@ -21,7 +21,7 @@ Chapter outline:
 
 ## Download data set {#download}
 
-The example data come from the [PeakSegJoint package](https://github.com/tdhock/PeakSegJoint), which is for peak detection in genomic data sequences.
+The example data come from the PeakSegJoint package [@PeakSegJoint_package], which is for peak detection in genomic data sequences.
 The code below downloads the data set.
 
 ```{r}
@@ -380,7 +380,7 @@ It is clear from the table above that named `clickSelects` and `showSelected` ar
 
 Exercises:
 
-* Use named `clickSelects` and `showSelected` to create a visualization which demonstrates over- and under-fitting, as in [this visualization of linear model and nearest neighbors](https://tdhock.github.io/2023-12-04-degree-neighbors/).
+* Use named `clickSelects` and `showSelected` to create a visualization which demonstrates over- and under-fitting, as in this visualization of linear model and nearest neighbors [@this_visualization_of_linear_model_and_nearest_neighbors].
 * Use named `clickSelects` and `showSelected` to create a visualization of some data from your domain of expertise.
 
 Next, [Chapter 15](/ch15) explains how to visualize root-finding algorithms.
