@@ -106,7 +106,7 @@ library(animint2)
 ## Translating plot sketches into ggplots {#sketching}
 
 This section explains how to translate a plot sketch into R code.
-In this book, we use the word "sketch" to mean "A rough design, plan, or draft," (wiktionary [@wiktionary]).
+In this book, we use the word "sketch" to mean "A rough design, plan, or draft," [@wiktionary-sketch].
 Before writing R code for data visualization, we will discuss a hand-drawn sketch of what we would like to draw.
 Each sketch contains key elements (axes, legends, data sets, interactive keywords, etc) that make it easy to write the corresponding R data visualization code.
 In your own data visualization work with `animint2`, we encourage you to draw your own sketches, either in a notebook, or on a whiteboard.
