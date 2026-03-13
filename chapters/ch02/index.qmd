@@ -247,7 +247,7 @@ expectancy over this period. And there are some countries which showed
 an increased fertility rate.
 
 **Exercise**: try changing the `region` legend to an `income` legend.
-Hint: you need to use the same `aes(color=income)` specification for all geoms, and you will need to use the original `WorldBank` data with all columns (not `world_bank` which has a limited number of columns).
+Hint: you need to use the same `aes(color=income)` specification for all geoms.
 You may want to use `scale_color_manual` with a sequential color palette, see `RColorBrewer::display.brewer.all(type="seq")` and [read the appendix for more details](/ch99#manual-color-legends).
   
 Can we add the names of the countries to the data viz? Below, we add
