@@ -43,9 +43,7 @@ Newer plotting systems based on the grammar of graphics are situated between the
 Wilkinson proposed the grammar of graphics
 in order to describe and create a large class of plots
 [@wilkinson2006grammar].
-Wickham later implemented several ideas from the grammar of graphics in the
-`ggplot2` R package
-[@wickham2009ggplot2].
+Wickham later implemented several ideas from the grammar of graphics in the `ggplot2` R package [@wickham2009ggplot2].
 The `ggplot2` package has several advantages with respect to previous plotting systems.
 
 * Like general plotting systems, and unlike `lattice`, `ggplot2` imposes few limitations on the types of plots that can be created (there are no pre-defined chart types).
@@ -61,23 +59,17 @@ computer screen or on paper. However, the main topic of this manual is
 static graphics, interactive graphics are best viewed on a computer
 with a mouse and keyboard that can be used to interact with the plot.
 
-Since many concepts from static graphics are also useful in
-interactive graphics, the `animint2` package is implemented as an
-extension/fork of `ggplot2`. In this chapter we will introduce the main
-features of `ggplot2` which will also be useful for interactive plot
-design in later chapters.
+Since many concepts from static graphics are also useful in interactive graphics, `animint2` is implemented as a fork of `ggplot2`, with several modifications which make it easy to create interactive data visualizations.
+The advanced interactive features in `animint2` are only possible because the `ggplot2` authors freely shared their code (thanks very much!).
+In this chapter we will introduce the main features of `ggplot2` which will also be useful for interactive plot design in later chapters.
 
-In 2013, we created the `animint` package, which depends on the `ggplot2`
-package. However during 2014-2017, the `ggplot2` package introduced many
-changes that were incompatible with the interactive grammar of
-`animint`. Therefore in 2018 we created the `animint2` package which
-copies/forks the relevant parts of the `ggplot2` package. Now `animint2`
-can be used without having `ggplot2` installed. In fact, it is
-recommended to use `library(animint2)` without attaching 
-`ggplot2`. However it is fine to use `animint2` along with packages that
-import/load `ggplot2`. For an example, see
-[Chapter 16](/ch16), which uses the `penaltyLearning`
-package (which imports `ggplot2`).
+Starting in 2013, Toby Hocking and students created the `animint` package, which depends on the `ggplot2` package.
+However during 2014-2017, the `ggplot2` package introduced many changes that were incompatible with the interactive grammar of `animint`.
+Therefore in 2018 we created the `animint2` package which copies/forks the relevant parts of the `ggplot2` package.
+Now `animint2` can be used without having `ggplot2` installed.
+In fact, it is recommended to use `library(animint2)` without attaching `ggplot2`.
+However it is fine to use `animint2` along with packages that import/load `ggplot2`.
+For an example, see [Chapter 16](/ch16), which uses the `penaltyLearning` package (which imports `ggplot2`).
 
 ## Installing and attaching `animint2` {#installing}
 

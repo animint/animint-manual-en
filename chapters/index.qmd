@@ -16,25 +16,20 @@ Starting in the [Motivation section](#motivation) below, this first chapter give
 It provides motivation and a theoretical foundation for the other chapters, and should be especially useful for readers who are completely new to data analysis.
 It introduces the method of data visualization prototyping using sketches, without introducing R code.
 
-Starting with [chapter 2](ch02), we will show how plot
-sketches can be translated into R code. Chapter 2 explains the basics
-of plotting using ggplots and `animint2`, and should be most useful for
-readers who have never used `ggplot2`. It explains how standard ggplots
-can be rendered on web pages using `animint2`.
+Starting with [chapter 2](ch02), we will show how plot sketches can be translated into R ggplot code.
+Many readers may already be familiar with the `ggplot2` package, which implements static ggplots, in which there are no interactions possible [@wickham2009ggplot2].
+The interactive ggplots of `animint2` are only possible thanks to the generosity of the `ggplot2` authors, whose freely available code was forked to create `animint2`.
+Readers already familiar with `ggplot2` will be able to quickly learn the advanced interactive features of `animint2`, in which direct or indirect manipulation can be used to change the displayed subset of data throughout several linked ggplots.
+Chapter 2 explains the basics of plotting using ggplots and `animint2`, and should be most useful for readers who have never used `ggplot2`.
+It explains how `animint2` ggplots can be rendered on web pages, with interactive legends for categorical variables.
 
-[Chapter 3](ch03) introduces `showSelected`, one of
-the two main keywords that `animint2` introduces for interactive data
-visualization design. Chapter 3 begins by explaining selection
-variables, which provide the mechanism of interaction in
-`animint2`. Chapter 3 then explains how the `showSelected` keyword makes it
-possible to plot data subsets. Chapter 3 also explains how to use
-smooth transitions and animation.
+[Chapter 3](ch03) introduces `showSelected`, one of the two main keywords that `animint2` introduces for interactive data visualization design.
+Chapter 3 begins by explaining selection variables, which provide the mechanism of interaction in `animint2`.
+Chapter 3 then explains how the `showSelected` keyword makes it possible for a geoms such as points or lines to change their subsets of displayed data, based on the interactively-determined value of a selection variable.
+Chapter 3 also explains how to use smooth transitions and animation.
 
-[Chapter 4](ch04) introduces `clickSelects`, the other
-main keyword that `animint2` introduces for interactive data
-visualization design. The `clickSelects` keyword makes it possible for
-the user to change a selection variable by directly clicking on a plot
-element.
+[Chapter 4](ch04) introduces `clickSelects`, the other main keyword that `animint2` introduces for interactive data visualization design.
+The `clickSelects` keyword makes it possible for the user to change a selection variable by direct manipulation (clicking on a plotted data element such as a point or line).
 
 [Chapter 5](ch05) explains several different ways to
 share your interactive data visualizations on the web.
