@@ -23,7 +23,7 @@ mathematical functions. (actually it has a solution in terms of the
 Lambert W function [@Lambert_W_function]
 but that function is not commonly available) This goal of this chapter
 is to create an interactive data visualization that explains
-Newton's method [@Newton's_method] for
+Newton's method [@Newton] for
 finding the roots of such functions.
 
 Chapter outline:

@@ -122,7 +122,7 @@ Another limitation is 54,000 files per directory, as mentioned in the Deploy Ove
 
 ## Publish on GitHub Pages {#pages}
 
-GitHub Pages [@GitHub_Pages] is a service that provides
+GitHub Pages [@GitHub_pages] is a service that provides
 static web site hosting, and can be used to publish animints. To
 publish an animint on GitHub Pages, you need a GitHub account, and the
 packages `gert` (for running git from R), `gh` (for using the GitHub
