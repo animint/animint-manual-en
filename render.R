@@ -6,7 +6,11 @@ remotes::install_github("animint/animint2", dep=TRUE)
 remotes::install_github("animint/animint2data")
 unlink("chapters/_book", recursive = TRUE)
 chapters <- "chapters"
-quarto::quarto_render(chapters)
+out <- capture.output(te <- try(quarto::quarto_render(chapters)))
+print(te)
+cat(out, sep="\n")
+cat(out, sep="\n", file="index_quarto_render.log")
+if(is(te, "try-error"))stop("error in quarto_render")
 ## copy data viz to site.
 gvec <- file.path(chapters, c("*/animint.js", "ch*/*/animint.js"))
 for(glob in gvec){
