@@ -249,7 +249,8 @@ animint_tsv(
 
 Above we see a common chunk data table with columns for `group`, `colour`, and `showSelected2`. This example of compression is the same as the first example above (same constant value for each group/country, across years).
 
-The previous examples demonstrate how compression can be used if each group has a common scalar value across `showSelected` subsets. Another method is when each group has a common vector of values across `showSelected` subsets, which we would need to use if we wanted `x` to be considered common data in the `geom_path()`  example.
+The previous examples demonstrate how compression can be used if each group has a common scalar value across `showSelected` subsets.
+Another method is when each group has a common vector of values across `showSelected` subsets, which we would need to use if we wanted `x` to be considered common data in the `geom_path()`  example.
 We would need to create a new data set,
 
 * with an identical `x=month` vector in each group,
@@ -280,7 +281,8 @@ The output above shows a common chunk data table with columns for `group`, `colo
 * `x` has different values in each row, indicating that it contains the vector of values which is common for each country, across years.
 * `colour` and `showSelected2` have the same value in each row. These are the single values which are common for each country, across years.
 
-Also note above that the `chunk1.tsv` file has columns `row_in_group` and `na_group` which are used to join these data with the common chunk file. These columns are not necessary in the other two chunks, because there are no missing values at the beginning of the data sequence.
+Also note above that the `chunk1.tsv` file has columns `row_in_group` and `na_group` which are used to join these data with the common chunk file.
+These columns are not necessary in the other two chunks, because there are no missing values at the beginning of the data sequence.
 
 The previous examples show that there are various parameters that can be used to control data compression:
 
@@ -288,7 +290,9 @@ The previous examples show that there are various parameters that can be used to
 * `aes(group)` should be set to a grouping variable that has common data across chunks.
 * Explicit missing values (`NA`) can be used if you want a vector of values in the common chunk, or implicit missing values (removing rows) can be used if you want only constant values in the common chunk.
 
-The best choices for each of these parameters will be different for each data set. Typically they are chosen in order to minimize disk usage, and thereby minimize download times.
+The best choices for each of these parameters will be different for each data set.
+Typically they are chosen in order to minimize disk usage, and thereby minimize download times.
+To see more examples with larger data sets, see [gallery-hic](https://tdhock.github.io/gallery-hic/).
 
 ## New geoms {#new-geoms}
 
