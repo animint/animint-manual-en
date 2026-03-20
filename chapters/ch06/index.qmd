@@ -292,7 +292,7 @@ The previous examples show that there are various parameters that can be used to
 
 The best choices for each of these parameters will be different for each data set.
 Typically they are chosen in order to minimize disk usage, and thereby minimize download times.
-To see more examples with larger data sets, see [gallery-hic](https://tdhock.github.io/gallery-hic/).
+To see more examples with larger data sets, see the HiC gallery [@gallery-hic].
 
 ## New geoms {#new-geoms}
 
